@@ -9,7 +9,8 @@
       "PowerShell(Get-ChildItem \"C:\\\\Users\\\\moham\\\\OneDrive - um5.ac.ma\\\\Desktop\\\\Moqawil\\\\moqawil\" -Force | ForEach-Object { $_.Name })",
       "PowerShell(Get-ChildItem \"C:\\\\Users\\\\moham\\\\OneDrive - um5.ac.ma\\\\Desktop\\\\Moqawil\\\\moqawil\\\\apps\\\\web\\\\src\\\\lib\" -Recurse | ForEach-Object { $_.FullName.Replace\\(\"C:\\\\Users\\\\moham\\\\OneDrive - um5.ac.ma\\\\Desktop\\\\Moqawil\\\\moqawil\\\\apps\\\\web\\\\\", \"\"\\) })",
       "Bash(git init *)",
-      "Bash(git remote *)"
+      "Bash(git remote *)",
+      "Bash(git push *)"
     ]
   }
 }

@@ -44,7 +44,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link href="/invoices" className="text-gray-500 hover:text-gray-700">
-            <ArrowLeft size={20} />
+            <ArrowLeft size={20} className="rtl:rotate-180" />
           </Link>
           <div>
             <h1 className="text-2xl font-bold">{invoice.invoiceNumber}</h1>
@@ -92,7 +92,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             {client?.ice && <p className="text-gray-500 text-xs">ICE: {client.ice}</p>}
             {client?.address && <p className="text-gray-500 text-xs">{client.address}</p>}
           </div>
-          <div className="text-right">
+          <div className="text-end">
             <p className="text-gray-500 text-xs mb-1">Dates</p>
             <p>Émission : {invoice.issueDate}</p>
             {invoice.dueDate && <p className="text-gray-500">Échéance : {invoice.dueDate}</p>}
@@ -111,21 +111,21 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b">
             <tr>
-              <th className="text-left px-4 py-2 font-medium text-gray-600">Description</th>
-              <th className="text-right px-4 py-2 font-medium text-gray-600 w-20">Qté</th>
-              <th className="text-right px-4 py-2 font-medium text-gray-600 w-28">Prix unitaire</th>
-              <th className="text-right px-4 py-2 font-medium text-gray-600 w-28">Total</th>
+              <th className="text-start px-4 py-2 font-medium text-gray-600">Description</th>
+              <th className="text-end px-4 py-2 font-medium text-gray-600 w-20">Qté</th>
+              <th className="text-end px-4 py-2 font-medium text-gray-600 w-28">Prix unitaire</th>
+              <th className="text-end px-4 py-2 font-medium text-gray-600 w-28">Total</th>
             </tr>
           </thead>
           <tbody className="divide-y">
             {lines.map((line) => (
               <tr key={line.id}>
                 <td className="px-4 py-2">{line.description}</td>
-                <td className="px-4 py-2 text-right text-gray-700">{fmt(line.quantity)}</td>
-                <td className="px-4 py-2 text-right text-gray-700">
+                <td className="px-4 py-2 text-end text-gray-700">{fmt(line.quantity)}</td>
+                <td className="px-4 py-2 text-end text-gray-700">
                   {fmt(line.unitPriceOriginal)} {invoice.currency}
                 </td>
-                <td className="px-4 py-2 text-right font-medium">
+                <td className="px-4 py-2 text-end font-medium">
                   {fmt(line.lineTotalMad)} DH
                 </td>
               </tr>
@@ -136,7 +136,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
               <td colSpan={3} className="px-4 py-2 text-sm text-gray-500 italic">
                 TVA non applicable — Régime auto-entrepreneur (Loi 114-13)
               </td>
-              <td className="px-4 py-2 text-right font-bold">{fmt(invoice.totalMad)} DH</td>
+              <td className="px-4 py-2 text-end font-bold">{fmt(invoice.totalMad)} DH</td>
             </tr>
           </tfoot>
         </table>

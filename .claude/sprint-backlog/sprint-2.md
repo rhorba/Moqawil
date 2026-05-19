@@ -23,26 +23,26 @@
 ### BATCH 1 — Quarterly Declarations
 | ID | Task | Specialist | Size | Status | Handoff-To |
 |---|---|---|---|---|---|
-| S2-01 | Declaration query helpers (quarterly turnover from paid invoices, auto-upsert) | DBA | M | todo | Backend Dev |
-| S2-02 | Declaration server actions (generate, mark submitted) | Backend Dev | M | todo | Tester |
-| S2-03 | Declarations page UI — Q1-Q4 cards, deadline countdown, status | Frontend Dev | M | todo | Tester |
-| S2-04 | Declaration PDF template (Barid Al-Maghrib form layout, bilingual) | Backend Dev | L | todo | Tester |
+| S2-01 | Declaration query helpers (quarterly turnover from paid invoices, auto-upsert) | DBA | M | done | Backend Dev |
+| S2-02 | Declaration server actions (generate, mark submitted) | Backend Dev | M | done | Tester |
+| S2-03 | Declarations page UI — Q1-Q4 cards, deadline countdown, status | Frontend Dev | M | done | Tester |
+| S2-04 | Declaration PDF template (Barid Al-Maghrib form layout, bilingual) | Backend Dev | L | done | Tester |
 
 ### BATCH 2 — BAM Exchange Rate
 | ID | Task | Specialist | Size | Status | Handoff-To |
 |---|---|---|---|---|---|
-| S2-05 | BAM rate scraper — fetch bkam.ma, cache daily, fallback to manual | Backend Dev | M | todo | Tester |
-| S2-06 | Wire exchange rate into invoice form (auto-fill + manual override) | Frontend Dev | S | todo | Tester |
+| S2-05 | BAM rate scraper — fetch bkam.ma, cache daily, fallback to manual | Backend Dev | M | done | Tester |
+| S2-06 | Wire exchange rate into invoice form (auto-fill + manual override) | Frontend Dev | S | done | Tester |
 
 ### BATCH 3 — RTL + i18n
 | ID | Task | Specialist | Size | Status | Handoff-To |
 |---|---|---|---|---|---|
-| S2-07 | Locale switcher in nav (FR ↔ AR), persisted via cookie | Frontend Dev | S | todo | Tester |
-| S2-08 | RTL audit — verify all pages work in dir=rtl | Frontend Dev | M | todo | Tester |
+| S2-07 | Locale switcher in nav (FR ↔ AR), persisted via cookie | Frontend Dev | S | done | Tester |
+| S2-08 | RTL audit — verify all pages work in dir=rtl | Frontend Dev | M | done | Tester |
 
 ### BATCH 4 — Docker + Quality Gate
 | ID | Task | Specialist | Size | Status | Handoff-To |
 |---|---|---|---|---|---|
-| S2-09 | Docker production build validation (next build + compose up) | DevOps | M | todo | Tester |
-| S2-10 | pnpm build zero-error check + Sprint 2 tests | Tester | M | todo | Project Monitor |
-| S2-11 | Sprint 2 snapshot | Project Monitor | S | todo | USER |
+| S2-09 | Docker production build validation (next build + compose up) | DevOps | M | done | Tester |
+| S2-10 | pnpm build zero-error check + Sprint 2 tests | Tester | M | done | Project Monitor |
+| S2-11 | Sprint 2 snapshot | Project Monitor | S | done | USER |

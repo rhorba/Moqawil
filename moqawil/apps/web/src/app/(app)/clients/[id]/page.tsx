@@ -37,7 +37,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
     <div className="p-6 max-w-2xl space-y-6">
       <div className="flex items-center gap-4">
         <Link href="/clients" className="text-gray-500 hover:text-gray-700">
-          <ArrowLeft size={20} />
+          <ArrowLeft size={20} className="rtl:rotate-180" />
         </Link>
         <h1 className="text-2xl font-bold">{client.name}</h1>
       </div>
@@ -73,7 +73,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
                   <p className="text-sm font-medium">{inv.invoiceNumber}</p>
                   <p className="text-xs text-gray-500">{inv.issueDate}</p>
                 </div>
-                <div className="text-right">
+                <div className="text-end">
                   <p className="text-sm font-medium">
                     {new Intl.NumberFormat('fr-MA', { maximumFractionDigits: 2 }).format(
                       parseFloat(inv.totalMad)

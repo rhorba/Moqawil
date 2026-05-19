@@ -1,5 +1,24 @@
 # Session Log
 
+### 2026-05-19 23:20 SESSION_END
+- **Completed**: Sprint 2 all 11 tasks done. Project pushed to GitHub (rhorba/Moqawil).
+- **Key deliverables**:
+  - S2-08: RTL audit — 6 files fixed (text-start/end, rtl:rotate-180 on arrows, direction-aware nav)
+  - S2-09: Docker build unblocked — `output: standalone` now conditional on `DOCKER_BUILD=1` (Windows symlink fix)
+  - S2-10: 111 tests passing (59 tax-engine + 52 web), 5 skipped (DB integration)
+  - Initial GitHub push: 128 files, rhorba/Moqawil master
+- **Blocked**: None
+- **Next session**: Sprint 3 — Playwright e2e test + Docusaurus docs site (2 remaining DoD items)
+- **Open risks**: BAM scraper not live-tested against production bkam.ma
+---
+
+### 2026-05-19 20:00 SESSION_START
+- **Context**: Resuming after Sprint 1 completion + initial GitHub push (rhorba/Moqawil).
+- **Resuming from**: Sprint 1 all done (88 tests passing). Starting Sprint 2.
+- **Plan**: Execute Sprint 2 — S2-01 through S2-11 (Declarations, BAM rate, RTL, Docker)
+- **Auto-handoff**: ENABLED — 🟡 BALANCED
+---
+
 ### 2026-05-19 19:05 SESSION_END
 - **Completed**: Sprint 1 all 14 tasks (S1-01 through S1-14). App live on port 3005.
 - **Key deliverables**:

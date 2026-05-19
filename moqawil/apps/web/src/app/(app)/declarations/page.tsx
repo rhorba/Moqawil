@@ -30,9 +30,11 @@ export default async function DeclarationsPage({
         <div className="flex items-center gap-2 text-sm">
           <a
             href={`/declarations?year=${prevYear}`}
-            className="px-3 py-1.5 border rounded-lg hover:bg-gray-50 transition-colors"
+            className="px-3 py-1.5 border rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-1"
           >
-            ← {prevYear}
+            <span className="rtl:hidden">←</span>
+            <span className="ltr:hidden">→</span>
+            {prevYear}
           </a>
           <span className="px-3 py-1.5 bg-[var(--color-primary)] text-white rounded-lg font-medium">
             {year}
@@ -40,9 +42,11 @@ export default async function DeclarationsPage({
           {year < currentYear && (
             <a
               href={`/declarations?year=${nextYear}`}
-              className="px-3 py-1.5 border rounded-lg hover:bg-gray-50 transition-colors"
+              className="px-3 py-1.5 border rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-1"
             >
-              {nextYear} →
+              {nextYear}
+              <span className="rtl:hidden">→</span>
+              <span className="ltr:hidden">←</span>
             </a>
           )}
         </div>

@@ -72,7 +72,7 @@ export default async function ClientsPage() {
                       compact
                     />
                   )}
-                  <ChevronRight size={16} className="text-gray-400" />
+                  <ChevronRight size={16} className="text-gray-400 rtl:rotate-180" />
                 </div>
               </Link>
             )

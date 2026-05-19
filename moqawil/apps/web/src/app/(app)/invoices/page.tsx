@@ -52,7 +52,7 @@ export default async function InvoicesPage() {
             <span>N°</span>
             <span>Client</span>
             <span>Date</span>
-            <span className="text-right">Montant</span>
+            <span className="text-end">Montant</span>
             <span className="text-center">Statut</span>
           </div>
           {invoiceList.map(({ invoice, clientName }) => {
@@ -66,7 +66,7 @@ export default async function InvoicesPage() {
                 <span className="text-sm font-mono text-gray-700">{invoice.invoiceNumber}</span>
                 <span className="text-sm text-gray-900 truncate">{clientName}</span>
                 <span className="text-sm text-gray-500">{invoice.issueDate}</span>
-                <span className="text-sm font-medium text-right">
+                <span className="text-sm font-medium text-end">
                   {fmt(invoice.totalMad)} {invoice.currency === 'MAD' ? 'DH' : invoice.currency}
                 </span>
                 <span className="text-center">

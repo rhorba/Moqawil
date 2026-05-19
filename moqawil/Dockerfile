@@ -21,6 +21,7 @@ COPY . .
 RUN pnpm install --frozen-lockfile --ignore-scripts
 
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV DOCKER_BUILD=1
 # Build tax-engine first (web app imports from dist/)
 RUN pnpm --filter @moqawil/tax-engine build
 # Build the Next.js app

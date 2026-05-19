@@ -1,5 +1,19 @@
 # Project Metrics
 
+### 2026-05-19 23:15 SPRINT_SNAPSHOT — Sprint 2
+- **Planned**: 11 tasks
+- **Completed**: 11 tasks (100%)
+- **Blocked**: 0
+- **Carry-over from S1**: S2-01 through S2-07 already implemented in Sprint 1 (7/11)
+- **New work this session**: S2-08 RTL audit (6 files fixed), S2-09 Docker build fix (standalone conditional on DOCKER_BUILD=1), S2-10 tests pass
+- **Test results**: 111 pass (59 tax-engine + 52 web), 5 skipped (DB integration, expected)
+- **Build**: ✅ `pnpm build` zero TypeScript errors, 16 routes generated
+- **RTL fixes**: text-left/right → text-start/end in tables; ArrowLeft rtl:rotate-180; ChevronRight rtl:rotate-180; declaration year nav arrows direction-aware
+- **DoD progress**: 13/15 items complete (missing: e2e Playwright test, docs site)
+- **Velocity**: Sprint 1 + Sprint 2 = 25 tasks done
+- **Open risks**: BAM scraper production test pending (tested in unit tests only)
+---
+
 <!-- Sprint snapshots are logged here at end of each sprint. -->
 <!-- Format: ### [date] SPRINT_SNAPSHOT — Sprint N -->
 
