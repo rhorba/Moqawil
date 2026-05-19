@@ -1,0 +1,44 @@
+# Old/backup claude config folders
+.claude.old1/
+.claude.old2/
+
+# Dependencies
+**/node_modules/
+.pnp
+.pnp.js
+
+# Secrets — NEVER commit
+**/.env
+**/.env.local
+**/.env.*.local
+
+# Next.js build output
+**/.next/
+**/out/
+**/dist/
+**/build/
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+bash.exe.stackdump
+
+# Testing
+**/coverage/
+**/playwright-report/
+**/test-results/
+
+# TypeScript
+*.tsbuildinfo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Drizzle migrations meta
+**/packages/db/drizzle/meta/
+
+# Editor
+.vscode/settings.json
+.idea/

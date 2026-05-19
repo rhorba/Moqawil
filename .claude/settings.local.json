@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\moham\\\\OneDrive - um5.ac.ma\\\\Desktop\\\\Moqawil\" -Force | ForEach-Object { \"$\\($_.Name\\) | Dir:$\\($_.PSIsContainer\\)\" })",
+      "PowerShell(New-Item *)",
+      "PowerShell(docker compose *)",
+      "Bash(fuser -k 3001/tcp)",
+      "Bash(fuser -k 3003/tcp)",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\moham\\\\OneDrive - um5.ac.ma\\\\Desktop\\\\Moqawil\\\\moqawil\" -Force | ForEach-Object { $_.Name })",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\moham\\\\OneDrive - um5.ac.ma\\\\Desktop\\\\Moqawil\\\\moqawil\\\\apps\\\\web\\\\src\\\\lib\" -Recurse | ForEach-Object { $_.FullName.Replace\\(\"C:\\\\Users\\\\moham\\\\OneDrive - um5.ac.ma\\\\Desktop\\\\Moqawil\\\\moqawil\\\\apps\\\\web\\\\\", \"\"\\) })",
+      "Bash(git init *)",
+      "Bash(git remote *)"
+    ]
+  }
+}

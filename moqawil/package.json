@@ -1,0 +1,28 @@
+{
+  "name": "moqawil",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Open-source compliance toolkit for Moroccan auto-entrepreneurs",
+  "license": "AGPL-3.0",
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @moqawil/web dev",
+    "build": "pnpm --filter @moqawil/web build",
+    "test": "pnpm --filter @moqawil/tax-engine test && pnpm --filter @moqawil/web test",
+    "test:e2e": "pnpm --filter @moqawil/web test:e2e",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "db:migrate": "pnpm --filter @moqawil/db migrate",
+    "db:studio": "pnpm --filter @moqawil/db studio"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "typescript": "^5.7.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["@biomejs/biome", "esbuild", "sharp"]
+  }
+}

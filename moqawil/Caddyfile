@@ -1,0 +1,23 @@
+# Caddyfile for self-hosted Moqawil
+# Auto-HTTPS via Let's Encrypt
+# Replace 'your-domain.com' with your actual domain
+
+your-domain.com {
+  reverse_proxy web:3000
+
+  # Security headers
+  header {
+    Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    X-Content-Type-Options "nosniff"
+    X-Frame-Options "DENY"
+    Referrer-Policy "strict-origin-when-cross-origin"
+    -Server
+  }
+
+  encode gzip
+
+  log {
+    output file /var/log/caddy/moqawil.log
+    format json
+  }
+}

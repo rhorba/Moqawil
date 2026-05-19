@@ -1,0 +1,147 @@
+{
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer",
+    "back": "Retour",
+    "loading": "Chargement...",
+    "error": "Une erreur est survenue",
+    "confirm": "Confirmer",
+    "close": "Fermer",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "export": "Exporter",
+    "print": "Imprimer",
+    "generate": "Générer",
+    "submit": "Soumettre"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "invoices": "Factures",
+    "clients": "Clients",
+    "declarations": "Déclarations",
+    "settings": "Paramètres",
+    "signOut": "Déconnexion"
+  },
+  "auth": {
+    "signIn": "Connexion",
+    "signOut": "Déconnexion",
+    "withGoogle": "Continuer avec Google",
+    "withEmail": "Envoyer un lien de connexion",
+    "emailPlaceholder": "votre@email.com",
+    "tagline": "La conformité auto-entrepreneur, sans effort."
+  },
+  "entrepreneur": {
+    "profile": "Profil",
+    "fullName": "Nom complet",
+    "ice": "ICE (Identifiant Commun de l'Entreprise)",
+    "ifNumber": "IF (Identifiant Fiscal)",
+    "activityType": "Type d'activité",
+    "activityTypes": {
+      "commercial": "Commercial",
+      "industrial": "Industriel",
+      "artisanal": "Artisanal",
+      "service": "Services"
+    },
+    "address": "Adresse",
+    "city": "Ville",
+    "phone": "Téléphone",
+    "invoicePrefix": "Préfixe de facture",
+    "registrationDate": "Date d'immatriculation"
+  },
+  "client": {
+    "title": "Clients",
+    "new": "Nouveau client",
+    "name": "Nom / Raison sociale",
+    "type": "Type",
+    "types": {
+      "individual": "Particulier",
+      "company_ma": "Entreprise marocaine",
+      "company_foreign": "Entreprise étrangère"
+    },
+    "ice": "ICE",
+    "email": "Email",
+    "phone": "Téléphone",
+    "address": "Adresse",
+    "country": "Pays",
+    "empty": "Aucun client. Ajoutez votre premier client.",
+    "addFirst": "Ajouter un client"
+  },
+  "invoice": {
+    "title": "Factures",
+    "new": "Nouvelle facture",
+    "number": "Numéro",
+    "date": "Date d'émission",
+    "dueDate": "Date d'échéance",
+    "status": {
+      "draft": "Brouillon",
+      "sent": "Envoyée",
+      "paid": "Payée",
+      "cancelled": "Annulée"
+    },
+    "paymentMethod": {
+      "virement": "Virement bancaire",
+      "cheque": "Chèque",
+      "espece": "Espèces",
+      "effet": "Effet de commerce",
+      "carte": "Carte bancaire",
+      "other": "Autre"
+    },
+    "lines": {
+      "description": "Description",
+      "quantity": "Quantité",
+      "unitPrice": "Prix unitaire (HT)",
+      "total": "Total"
+    },
+    "subtotal": "Sous-total",
+    "total": "Total TTC",
+    "vatNotice": "TVA non applicable — Régime auto-entrepreneur (Loi 114-13)",
+    "empty": "Aucune facture. Créez votre première facture.",
+    "addFirst": "Créer une facture"
+  },
+  "cap": {
+    "label": "Plafond client (80 000 DH/an)",
+    "safe": "Vous avez facturé {amount} à {client} cette année. Limite restante : {remaining}.",
+    "warning": "Attention — {amount} facturés à {client} cette année. Au-delà de 80 000 DH, votre client retiendra 30 % à la source.",
+    "over": "Plafond atteint avec {client}. Toute facturation supplémentaire entraîne 30 % de retenue à la source pour votre client.",
+    "confirmDialog": "Voulez-vous vraiment dépasser le plafond de 80 000 DH avec {client} ? Votre client devra retenir 30 % sur le surplus de {surplus}.",
+    "confirmCta": "Je comprends, créer la facture quand même",
+    "notApplicable": "Plafond non applicable (activité non-services)"
+  },
+  "threshold": {
+    "label": "Seuil annuel",
+    "service": "Seuil services : 200 000 DH/an",
+    "commercial": "Seuil commercial/industriel/artisanal : 500 000 DH/an",
+    "safe": "CA annuel : {amount}. Limite restante : {remaining}.",
+    "warning": "Attention — vous approchez du seuil de régime ({threshold}). Consultez un comptable.",
+    "over": "Seuil dépassé. Si c'est la deuxième année consécutive, vous perdrez le statut auto-entrepreneur."
+  },
+  "declaration": {
+    "title": "Déclarations trimestrielles",
+    "quarter": "Trimestre {q}",
+    "year": "Année {year}",
+    "turnover": "CA déclaré",
+    "taxRate": "Taux",
+    "taxDue": "Impôt dû",
+    "status": {
+      "pending": "En attente",
+      "submitted": "Soumise"
+    },
+    "deadline": "Date limite : {date}",
+    "generate": "Générer la déclaration",
+    "markSubmitted": "Marquer comme soumise",
+    "zeroDeclaration": "Déclaration à zéro (obligatoire même sans CA)",
+    "empty": "Aucune déclaration. Elles apparaîtront automatiquement après vos premières factures."
+  },
+  "legal": {
+    "vatNotice": "TVA non applicable — Régime auto-entrepreneur (Loi 114-13)",
+    "vatNoticeAr": "ضريبة القيمة المضافة غير مطبقة — نظام المقاول الذاتي (قانون 114-13)",
+    "conservation": "Factures à conserver pendant 10 ans (CGI Article 211)",
+    "conservationAr": "يجب حفظ الفواتير لمدة 10 سنوات (المادة 211 من المدونة العامة للضرائب)",
+    "repatriation": "Rapatriement des devises dans un délai de 3 mois (réglementation des changes)",
+    "cashWarning": "Paiement en espèces supérieur à 5 000 DH : le client ne peut pas déduire cette charge (CGI Article 193)",
+    "cashPenalty": "Paiement en espèces supérieur à 20 000 DH : pénalité de 6 % applicable au client (CGI Article 193)"
+  }
+}

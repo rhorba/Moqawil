@@ -1,0 +1,20 @@
+{
+  "name": "@moqawil/db",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "scripts": {
+    "migrate": "drizzle-kit migrate",
+    "studio": "drizzle-kit studio",
+    "generate": "drizzle-kit generate",
+    "check": "drizzle-kit check"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.38.4",
+    "postgres": "^3.4.5"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.30.4",
+    "typescript": "^5.7.3"
+  }
+}

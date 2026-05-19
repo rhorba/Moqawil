@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+@theme {
+  /* Primary: deep teal — professional, trust-inspiring */
+  --color-primary: oklch(0.45 0.15 200);
+  --color-primary-foreground: oklch(0.98 0 0);
+
+  /* Cap / Threshold status colors */
+  --color-safe:    oklch(0.55 0.15 145);
+  --color-warning: oklch(0.65 0.16 75);
+  --color-danger:  oklch(0.55 0.20 25);
+
+  --color-safe-bg:    oklch(0.96 0.03 145);
+  --color-warning-bg: oklch(0.97 0.04 75);
+  --color-danger-bg:  oklch(0.97 0.03 25);
+
+  /* Typography */
+  --font-sans: Inter, "Segoe UI", Arial, sans-serif;
+  --font-arabic: Cairo, Amiri, "Arabic Typesetting", serif;
+}
+
+/* RTL: apply Arabic font for Arabic locale */
+:root:lang(ar) {
+  font-family: var(--font-arabic);
+  direction: rtl;
+}
+
+/* RTL: flip flex rows containing icons + text */
+:root:lang(ar) .flex {
+  /* logical property already handles this, but ensure text direction */
+  text-align: start;
+}
+
+/* RTL: sidebar border switches sides automatically via border-e (logical) */
+/* RTL: ms- / me- classes are already logical in Tailwind v4 */
+
+/* Print styles for quarterly declarations */
+@media print {
+  nav, aside, [data-no-print] { display: none !important; }
+  body { font-size: 11pt; color: #000; }
+  .declaration-form { page-break-inside: avoid; }
+  .bilingual-mention {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+}
+
+/* Arabic number formatting in status badges */
+:root:lang(ar) .tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
