@@ -1,5 +1,18 @@
 # Session Log
 
+### 2026-05-20 00:30 SESSION_END — v0.1 COMPLETE
+- **Completed**: Sprint 3 all 8 tasks done. v0.1 DoD 15/15.
+- **Key deliverables**:
+  - Playwright smoke tests: 4/4 pass (Chromium); playwright.config.ts fixed for pre-existing server
+  - Chromium browser installed for CI/local
+  - Docusaurus docs site: scaffold + 4 FR pages (intro, installation, facturation, déclaration)
+  - README updated: v0.1 badge, correct GitHub URL (rhorba/Moqawil), docs links
+  - 115 total tests passing (111 Vitest + 4 Playwright smoke)
+- **Blocked**: None
+- **Next session**: Launch prep — Show HN post, r/MoroccanDevs announcement, SEO blog posts (per CLAUDE.md §16)
+- **v0.1 DoD**: ✅ COMPLETE
+---
+
 ### 2026-05-19 23:20 SESSION_END
 - **Completed**: Sprint 2 all 11 tasks done. Project pushed to GitHub (rhorba/Moqawil).
 - **Key deliverables**:

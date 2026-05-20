@@ -1,15 +1,19 @@
 # Moqawil — Toolkit de conformité auto-entrepreneur marocain
 
+![Version](https://img.shields.io/badge/version-0.1.0-blue) ![Licence](https://img.shields.io/badge/licence-AGPL--3.0-green) ![Tests](https://img.shields.io/badge/tests-111%20passing-brightgreen)
+
 > Suivi du plafond de 80 000 DH par client, alertes de seuil annuel, déclarations trimestrielles pré-remplies, facturation légale.
 > **AGPL-3.0 · Open source · Auto-hébergeable · Gratuit**
+
+**[Documentation complète](docs/)** · [Guide d'installation](docs/docs/guide-installation.md) · [Facturation](docs/docs/guide-facturation.md) · [Déclarations](docs/docs/guide-declaration.md)
 
 ---
 
 ## Démarrage en 5 commandes
 
 ```bash
-git clone https://github.com/moqawil/moqawil.git
-cd moqawil
+git clone https://github.com/rhorba/Moqawil.git
+cd Moqawil/moqawil
 cp .env.example .env          # Éditez DATABASE_URL + AUTH_SECRET (openssl rand -hex 32)
 docker compose up -d          # Démarre PostgreSQL + l'application + Caddy (HTTPS auto)
 docker compose exec web pnpm db:migrate  # Applique le schéma initial
@@ -65,6 +69,7 @@ pnpm dev                         # Serveur Next.js sur http://localhost:3000
 ```
 moqawil/
 ├── apps/web/              # Application Next.js 15
+├── docs/                  # Site de documentation (Docusaurus, FR primary)
 ├── packages/
 │   ├── tax-engine/        # Règles fiscales marocaines (Apache-2.0)
 │   ├── db/                # Schéma Drizzle + migrations
@@ -73,6 +78,14 @@ moqawil/
 ├── docker-compose.yml
 ├── Dockerfile
 └── .env.example
+```
+
+### Documentation locale
+
+```bash
+cd docs
+pnpm install
+pnpm dev   # Docs sur http://localhost:3001
 ```
 
 ---

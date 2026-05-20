@@ -1,5 +1,17 @@
 # Project Metrics
 
+### 2026-05-20 00:30 SPRINT_SNAPSHOT — Sprint 3 (v0.1 COMPLETE)
+- **Planned**: 8 tasks
+- **Completed**: 8 tasks (100%)
+- **Playwright**: 4/4 smoke tests pass (Chromium), 3 skipped (auth-required, expected)
+- **playwright.config.ts**: fixed — webServer skipped when PLAYWRIGHT_BASE_URL is set
+- **Docusaurus**: scaffold + 4 FR pages (intro, installation, facturation, déclaration)
+- **README**: updated with v0.1 badge, correct GitHub URL, docs links
+- **v0.1 DoD**: ✅ 15/15 COMPLETE
+- **Total tests**: 111 unit (Vitest) + 4 e2e (Playwright smoke) = 115 passing
+- **Velocity**: 3 sprints, 33 tasks total, 0 blockers unresolved
+---
+
 ### 2026-05-19 23:15 SPRINT_SNAPSHOT — Sprint 2
 - **Planned**: 11 tasks
 - **Completed**: 11 tasks (100%)
