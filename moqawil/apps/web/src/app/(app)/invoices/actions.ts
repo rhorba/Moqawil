@@ -25,8 +25,7 @@ const invoiceSchema = z.object({
   exchangeRate: z.coerce.number().optional(),
   notes: z.string().optional(),
   paymentMethod: z
-    .enum(['virement', 'cheque', 'espece', 'effet', 'carte', 'other'])
-    .optional(),
+    .preprocess((v) => (v === '' ? undefined : v), z.enum(['virement', 'cheque', 'espece', 'effet', 'carte', 'other']).optional()),
   capConfirmed: z.coerce.boolean().optional(),
 })
 
@@ -319,8 +318,7 @@ const editInvoiceSchema = z.object({
   exchangeRate: z.coerce.number().optional(),
   notes: z.string().optional(),
   paymentMethod: z
-    .enum(['virement', 'cheque', 'espece', 'effet', 'carte', 'other'])
-    .optional(),
+    .preprocess((v) => (v === '' ? undefined : v), z.enum(['virement', 'cheque', 'espece', 'effet', 'carte', 'other']).optional()),
   capConfirmed: z.coerce.boolean().optional(),
 })
 

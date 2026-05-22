@@ -25,7 +25,7 @@ const config: NextAuthConfig = {
           name: 'Test',
           credentials: { email: {}, secret: {} },
           async authorize(credentials) {
-            if (credentials?.secret !== process.env['E2E_TEST_SECRET']) return null
+            if ((credentials?.secret as string | undefined)?.trim() !== process.env['E2E_TEST_SECRET']?.trim()) return null
             const email = credentials.email as string
             const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1)
             if (user) return { id: user.id, email: user.email, name: user.name }
@@ -37,10 +37,16 @@ const config: NextAuthConfig = {
         })]
       : []),
   ],
+  session: { strategy: 'jwt' },
   callbacks: {
-    session: ({ session, user }) => ({
+    // With JWT strategy, user data lives in the token (no DB lookup per request)
+    jwt: ({ token, user }) => {
+      if (user) token.id = user.id
+      return token
+    },
+    session: ({ session, token }) => ({
       ...session,
-      user: { ...session.user, id: user.id },
+      user: { ...session.user, id: token.id as string },
     }),
   },
   pages: {

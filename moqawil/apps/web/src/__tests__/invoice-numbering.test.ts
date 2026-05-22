@@ -71,6 +71,14 @@ describe.skipIf(SKIP_INTEGRATION)('Invoice numbering — DB integration (advisor
     invoicesTable = mod.invoices
     entrepreneursTable = mod.entrepreneurs
 
+    // Insert the parent user row required by the FK constraint
+    const usersTable = mod.users
+    const clientsTable = mod.clients
+    await db
+      .insert(usersTable)
+      .values({ id: TEST_USER_ID, email: 'seq-test@moqawil.test', name: 'Seq Test User' })
+      .onConflictDoNothing()
+
     // Seed a minimal test entrepreneur row
     await db
       .insert(entrepreneursTable)
@@ -87,13 +95,27 @@ describe.skipIf(SKIP_INTEGRATION)('Invoice numbering — DB integration (advisor
         invoicePrefix: 'TST',
       })
       .onConflictDoNothing()
+
+    // Seed a dummy client row required by invoices FK constraint
+    await db
+      .insert(clientsTable)
+      .values({
+        id: '00000000-0000-0000-0000-000000000099',
+        entrepreneurId: TEST_ENTREPRENEUR_ID,
+        name: 'Test Client Seq',
+        type: 'individual',
+      })
+      .onConflictDoNothing()
   })
 
   afterAll(async () => {
-    // Clean up test data
+    // Clean up test data — delete child rows before parent
     const { eq } = await import('drizzle-orm')
+    const { users: usersTable, clients: clientsTable } = await import('@moqawil/db')
     await db.delete(invoicesTable).where(eq(invoicesTable.entrepreneurId, TEST_ENTREPRENEUR_ID))
+    await db.delete(clientsTable).where(eq(clientsTable.entrepreneurId, TEST_ENTREPRENEUR_ID))
     await db.delete(entrepreneursTable).where(eq(entrepreneursTable.id, TEST_ENTREPRENEUR_ID))
+    await db.delete(usersTable).where(eq(usersTable.id, TEST_USER_ID))
   })
 
   it('assigns sequential numbers starting from 1 for a new year', async () => {

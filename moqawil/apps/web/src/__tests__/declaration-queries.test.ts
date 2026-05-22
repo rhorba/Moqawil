@@ -102,7 +102,9 @@ describe('daysUntilDeadline', () => {
 
 // ── DB integration tests ─────────────────────────────────────────────────────
 
-const DB_AVAILABLE = !!process.env.DATABASE_URL
+// vi.mock('@moqawil/db') above stubs db to {} globally in this file,
+// so real DB queries cannot run here. Integration coverage lives in invoice-numbering.test.ts.
+const DB_AVAILABLE = false
 
 describe.skipIf(!DB_AVAILABLE)('getQuarterlyTurnover (integration)', () => {
   it('returns 0 for a non-existent entrepreneur', async () => {

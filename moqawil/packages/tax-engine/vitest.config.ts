@@ -5,7 +5,7 @@ export default defineConfig({
     globals: true,
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'lcov'],
+      reporter: ['text', 'html', 'lcov'],
       include: ['src/**/*.ts'],
       thresholds: {
         functions: 100,
