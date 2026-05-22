@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@source "../**/*.{ts,tsx}";
 
 @theme {
   /* Primary: deep teal — professional, trust-inspiring */

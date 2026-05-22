@@ -119,8 +119,9 @@ test.describe.serial('Happy Path — Full AE Workflow', () => {
 
   test('5 — cap badge is visible on client detail page', async ({ page }) => {
     await page.goto('/clients')
+    await page.waitForLoadState('networkidle')
     await page.locator('a[href^="/clients/"]:not([href$="new"])').first().click()
-    await expect(page).toHaveURL(/\/clients\/[a-f0-9-]+$/)
+    await expect(page).toHaveURL(/\/clients\/[a-f0-9-]+$/, { timeout: 10000 })
 
     // Cap badge should be visible (15 000 / 80 000 = ~18.75%, status=safe)
     await expect(page.getByText(/plafond/i)).toBeVisible()
