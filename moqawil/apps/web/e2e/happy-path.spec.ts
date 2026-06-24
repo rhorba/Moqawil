@@ -107,8 +107,8 @@ test.describe.serial('Happy Path — Full AE Workflow', () => {
 
     await expect(page).toHaveURL(/\/invoices\/[a-f0-9-]+$/)
 
-    // Mark as paid
-    const paymentDateInput = page.locator('[type="date"]')
+    // Mark as paid — use first() to avoid strict-mode violation when multiple date inputs exist
+    const paymentDateInput = page.locator('[type="date"]').first()
     await paymentDateInput.fill(new Date().toISOString().slice(0, 10))
 
     await page.getByRole('button', { name: /marquer comme payée/i }).click()
