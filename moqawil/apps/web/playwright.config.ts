@@ -1,9 +1,5 @@
 import { defineConfig, devices } from '@playwright/test'
 
-// 127.0.0.1, not localhost: Node's DNS resolution can prefer IPv6 (::1) for "localhost" on
-// Linux, while `next start` binds IPv4 only by default. That mismatch let the server log
-// "Ready" while Playwright's own readiness poll silently never connected — confirmed via
-// piped webServer output showing a clean start with zero request activity afterward.
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://127.0.0.1:3003'
 
 export default defineConfig({
@@ -34,7 +30,12 @@ export default defineConfig({
     : {
         webServer: {
           command: process.env.CI ? 'pnpm exec next start -p 3003' : 'pnpm exec next dev -p 3003',
-          url: 'http://127.0.0.1:3003',
+          // /sign-in, not the bare root: Playwright's webServer readiness check only accepts
+          // 2xx-3xx responses. Root `/` 404s (no page defined there), so Playwright silently
+          // retried for the full 120s timeout even though the server was healthy and reachable
+          // the whole time — confirmed via a manual `next start` + curl diagnostic in CI that
+          // reached /sign-in (200) in 2s while Playwright's own poll of `/` never succeeded.
+          url: 'http://127.0.0.1:3003/sign-in',
           reuseExistingServer: !process.env.CI,
           timeout: 120_000,
           // Explicit — Playwright's webServer stdout is 'ignore' by default (only stderr

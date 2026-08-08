@@ -243,29 +243,6 @@ jobs:
         working-directory: moqawil/apps/web
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: Diagnostic — start server manually, verify reachability with curl (not Playwright's opaque wrapper)
-        working-directory: moqawil/apps/web
-        run: |
-          pnpm exec next start -p 3003 > /tmp/next-start.log 2>&1 &
-          echo $! > /tmp/next.pid
-          for i in $(seq 1 30); do
-            if curl -sf -o /dev/null http://127.0.0.1:3003/sign-in; then
-              echo "Server reachable after ${i}s"
-              exit 0
-            fi
-            sleep 1
-          done
-          echo "=== Server never became reachable. next start log: ==="
-          cat /tmp/next-start.log
-          echo "=== ss -tlnp (listening ports) ==="
-          ss -tlnp || true
-          kill "$(cat /tmp/next.pid)" 2>/dev/null || true
-          exit 1
-
-      - name: Stop manually-started server (Playwright will start its own via webServer)
-        if: always()
-        run: kill "$(cat /tmp/next.pid)" 2>/dev/null || true
-
       - name: Run Playwright e2e tests
         working-directory: moqawil
         run: pnpm test:e2e

@@ -1,5 +1,11 @@
 # Activity Log
 
+### 2026-08-08 15:50 BUGFIX — Actual root cause of the E2E timeout found via the curl diagnostic
+- **Specialist**: DevOps/DevSecOps
+- **Summary**: The diagnostic step's manual `next start` + curl check reached `/sign-in` and got `Server reachable after 2s` — proving the server was healthy and reachable the whole time, in every prior run. The real bug: `webServer.url` in `playwright.config.ts` pointed at the bare root `/`, which returns 404 (no page defined there) — Playwright's readiness poll only accepts 2xx-3xx responses, so it silently retried against a 404 for the full 120s on every single run, regardless of any of the previous fixes (trustHost, 127.0.0.1, stdout piping). None of those were wrong to fix, but none of them were the actual blocker either. Changed `webServer.url` to `/sign-in` (the same path the diagnostic confirmed works). Removed the diagnostic CI steps now that they've done their job — no permanent debug scaffolding.
+- **Status**: resolved, pending CI confirmation — this should finally be the fully green run
+---
+
 ### 2026-08-08 15:35 IN PROGRESS — 127.0.0.1 fix didn't resolve it either; added a direct diagnostic step
 - **Specialist**: DevOps/DevSecOps
 - **Summary**: 8th CI run: identical symptom even after switching to `127.0.0.1` (same "Ready in 457ms" then dead silence for exactly 120s). The IPv4/IPv6 hypothesis was wrong, or incomplete. Ruled out the repeating "role root does not exist" Postgres log lines as a red herring — confirmed identical cadence in passing and failing runs alike, it's just `pg_isready`'s own healthcheck background noise, unrelated. Rather than guess further, added a diagnostic CI step that starts `next start` manually and polls it with `curl` in a plain shell loop (30x 1s) before Playwright ever runs — curl will surface a real error (connection refused, DNS failure, timeout) that Playwright's internal wrapper has been hiding behind its generic "Timed out waiting 120000ms" message. On failure it dumps the raw server log and `ss -tlnp` (actual listening sockets) for ground truth.
