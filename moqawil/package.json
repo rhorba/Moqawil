@@ -13,6 +13,7 @@
     "build": "pnpm --filter @moqawil/web build",
     "test": "pnpm --filter @moqawil/tax-engine test && pnpm --filter @moqawil/web test",
     "test:e2e": "pnpm --filter @moqawil/web test:e2e",
+    "typecheck": "pnpm -r --if-present run typecheck",
     "lint": "biome check .",
     "format": "biome format --write .",
     "db:migrate": "pnpm --filter @moqawil/db migrate",

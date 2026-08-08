@@ -1,0 +1,214 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+env:
+  PNPM_VERSION: "9.15.4"
+  NODE_VERSION: "22"
+
+jobs:
+  lint:
+    name: Lint (Biome)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: moqawil/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: moqawil
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Biome lint
+        working-directory: moqawil
+        run: pnpm lint
+
+  typecheck:
+    name: TypeCheck (all packages)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: moqawil/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: moqawil
+        run: pnpm install --frozen-lockfile
+
+      - name: TypeCheck (all workspaces)
+        working-directory: moqawil
+        env:
+          DATABASE_URL: postgres://moqawil:moqawil@localhost:5432/moqawil_ci
+        run: pnpm typecheck
+
+  test:
+    name: Unit Tests (Vitest, tax-engine + web)
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgres://moqawil:moqawil@localhost:5432/moqawil_ci
+      AUTH_SECRET: ci-test-secret-32-characters-minimum
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      NODE_ENV: test
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: moqawil
+          POSTGRES_PASSWORD: moqawil
+          POSTGRES_DB: moqawil_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: moqawil/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: moqawil
+        run: pnpm install --frozen-lockfile
+
+      - name: Run migrations
+        working-directory: moqawil
+        run: pnpm db:migrate
+
+      - name: Run unit tests with coverage
+        working-directory: moqawil
+        run: |
+          pnpm --filter @moqawil/tax-engine test:coverage
+          pnpm --filter @moqawil/web test -- --coverage
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports
+          path: |
+            moqawil/packages/tax-engine/coverage
+            moqawil/apps/web/coverage
+          retention-days: 7
+
+  build:
+    name: Build (Next.js)
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck, test]
+    env:
+      DATABASE_URL: postgres://moqawil:moqawil@localhost:5432/moqawil_ci
+      AUTH_SECRET: ci-build-secret-32-characters-minimum
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: moqawil/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: moqawil
+        run: pnpm install --frozen-lockfile
+
+      - name: Build tax-engine then web (two-stage, mirrors Dockerfile)
+        working-directory: moqawil
+        run: |
+          pnpm --filter @moqawil/tax-engine build
+          pnpm build
+
+  e2e:
+    name: E2E Tests (Playwright)
+    runs-on: ubuntu-latest
+    needs: [build]
+    env:
+      DATABASE_URL: postgres://moqawil:moqawil@localhost:5432/moqawil_ci
+      AUTH_SECRET: ci-e2e-secret-32-characters-minimum
+      E2E_TEST_SECRET: ci-e2e-test-only-secret
+      NEXT_PUBLIC_APP_URL: http://localhost:3003
+      CI: true
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: moqawil
+          POSTGRES_PASSWORD: moqawil
+          POSTGRES_DB: moqawil_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: moqawil/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: moqawil
+        run: pnpm install --frozen-lockfile
+
+      - name: Run migrations
+        working-directory: moqawil
+        run: pnpm db:migrate
+
+      - name: Install Playwright browsers
+        working-directory: moqawil/apps/web
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run Playwright e2e tests
+        working-directory: moqawil
+        run: pnpm test:e2e
+
+      - name: Upload Playwright report + debug videos on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            moqawil/apps/web/playwright-report
+            moqawil/.recordings/e2e-debug
+          retention-days: 7

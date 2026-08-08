@@ -23,6 +23,20 @@ Only pause for these four reasons:
 
 ---
 
+## Framework Rules (synced from Claude Team Skills — non-negotiable)
+
+These are enforced in addition to the four STOP conditions above. In autonomous mode, apply them without asking — log the outcome, don't ask permission to follow them:
+
+1. **System Designer + Software Architect are always loaded for new projects and large features.** Never skip either for a feature that adds a new `packages/*` module or a new external integration (DGI, Barid eSign, new API) — even for a "quick" pass.
+2. **80% code coverage required before SHIP.** Before marking a sprint complete, run the coverage report (unit + integration combined). Below 80% → add tests, don't ship. Log the % to `.logs/metrics.md`.
+3. **Push at the end of every sprint.** After a sprint's tasks are DONE and tests pass, run `git push origin <branch>`. Log the push to `.logs/activity.md`. No sprint ends without a push.
+4. **Collect all new environment variables upfront.** Before starting a sprint that adds an external integration (e.g. DGI clearance API keys, Barid eSign credentials), identify every env var it needs and add placeholders to `.env.example` before EXECUTE starts. Never hardcode values that belong in env vars.
+5. **Security check before SHIP.** Any sprint touching auth, an external API, or a new data flow triggers Security Engineer review before the sprint is marked complete — not just the Tester.
+6. **Foundation docs for major new features.** Before writing code for a feature big enough to need System Designer + Software Architect (see rule 1), produce a design note in the sprint backlog file itself (`.claude/sprint-backlog/sprint-N.md`, "Design" section, using the structure in `skills/orchestrator/references/document-chain.md`) and commit it before the first line of implementation code. **Note:** `docs/` at project root is the public Docusaurus site (user-facing guides) — foundation/design docs never go there.
+7. **Video recording at version completion.** When a sprint ships user-facing changes (not pure infra), record a Playwright video covering the critical flows touched, saved to `.recordings/v[version]-[date].webm` at the repo root — distinct from the per-test debug videos Playwright already captures during normal e2e runs. Log to `.logs/activity.md`.
+
+---
+
 ## Sprint System
 
 Sprint backlogs live in `.claude/sprint-backlog/`. Format: `sprint-N.md`.
@@ -74,6 +88,8 @@ Constraints: [decisions already made]
 | Orchestrator | `skills/orchestrator/SKILL.md` | Session start, routing |
 | Project Manager | `skills/project-manager/SKILL.md` | Scope, charter, PRD |
 | Scrum Master | `skills/scrum-master/SKILL.md` | Sprint planning, backlog |
+| System Designer | `skills/system-designer/SKILL.md` | Integration topology, NFRs, before any new external system |
+| Software Architect | `skills/software-architect/SKILL.md` | Module boundaries, adapter design, new `packages/*` |
 | Tech Lead | `skills/tech-lead/SKILL.md` | Architecture, ADRs |
 | DBA | `skills/dba/SKILL.md` | Schema, migrations, Drizzle |
 | Backend Dev | `skills/backend-dev/SKILL.md` | Next.js API routes, server actions |

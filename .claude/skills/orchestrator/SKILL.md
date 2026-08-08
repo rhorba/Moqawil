@@ -95,6 +95,9 @@ Task DONE
   ├── Was a DB SCHEMA change made?
   │     YES → Trigger DBA review before proceeding to Backend
   │
+  ├── Does the task involve a NEW EXTERNAL SYSTEM (DGI, Barid eSign, new API)?
+  │     YES → Trigger System Designer (topology/NFRs) → Software Architect (adapter boundary) before Backend
+  │
   ├── Was an API CONTRACT defined?
   │     YES → Frontend Dev can start their tasks in parallel
   │
@@ -122,6 +125,8 @@ Load ONLY the needed specialist's SKILL.md — never load all at once.
 |---|---|---|
 | Project Manager | `project-manager/SKILL.md` | Scope, charter, PRD |
 | Scrum Master | `scrum-master/SKILL.md` | Sprint planning, backlog, new sprint |
+| System Designer | `system-designer/SKILL.md` | Integration topology, NFRs, before any new external system (DGI, Barid eSign, BAM) |
+| Software Architect | `software-architect/SKILL.md` | Module boundaries, adapter design, new `packages/*` |
 | Tech Lead | `tech-lead/SKILL.md` | Architecture, ADR, stack decisions |
 | Security Engineer | `security-engineer/SKILL.md` | Auth, OWASP, secrets, threats |
 | DBA | `dba/SKILL.md` | Drizzle schema, migrations, Postgres |
@@ -204,6 +209,10 @@ Load Tester skill automatically. Do NOT ask user.
             PM (scope, risks)
                │
        Scrum Master (sprint)
+               │
+     System Designer (topology, NFRs) ── new external system?
+               │
+    Software Architect (module boundaries, adapters)
                │
           Tech Lead (arch) ←── Security Engineer
           │    │    │

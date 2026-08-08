@@ -6,8 +6,12 @@ const config: Config = {
   tagline: 'La conformité auto-entrepreneur, sans effort.',
   favicon: 'img/favicon.ico',
 
-  url: 'https://docs.moqawil.ma',
-  baseUrl: '/',
+  // Currently deployed via GitHub Pages (see .github/workflows/docs-deploy.yml) at the
+  // default project-site URL, hence the /Moqawil/ baseUrl. Once docs.moqawil.ma is bought
+  // and pointed at this Pages deployment (custom domain in repo Settings → Pages), switch
+  // url to 'https://docs.moqawil.ma' and baseUrl back to '/'.
+  url: 'https://rhorba.github.io',
+  baseUrl: '/Moqawil/',
 
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',

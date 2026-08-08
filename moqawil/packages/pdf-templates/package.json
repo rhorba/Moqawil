@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "main": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
   "dependencies": {
     "@react-pdf/renderer": "^4.1.6",
     "react": "^19.0.0"
