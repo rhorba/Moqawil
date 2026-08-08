@@ -2,9 +2,14 @@ import { randomUUID } from 'node:crypto'
 import { encode } from '@auth/core/jwt'
 import { type NextRequest, NextResponse } from 'next/server'
 
-// Test-only sign-in endpoint — never active in production
+// Test-only sign-in endpoint — gated solely on E2E_TEST_SECRET being set. Do NOT also gate on
+// NODE_ENV: `next start` (used for CI e2e against a production build, and by self-hosters)
+// always sets NODE_ENV=production internally regardless of intent, which made this route
+// permanently 404 in CI once e2e switched from `next dev` to `next start`. The real, documented
+// security boundary is E2E_TEST_SECRET itself — .env.example says "NEVER set in production",
+// and a real deployment simply won't have it set, closing this route regardless of NODE_ENV.
 export async function POST(request: NextRequest) {
-  if (process.env.NODE_ENV === 'production' || !process.env.E2E_TEST_SECRET) {
+  if (!process.env.E2E_TEST_SECRET) {
     return NextResponse.json({ error: 'Not available' }, { status: 404 })
   }
 

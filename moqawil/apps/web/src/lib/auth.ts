@@ -31,9 +31,9 @@ const config: NextAuthConfig = {
           }),
         ]
       : []),
-    // Test-only credentials provider — enabled only when E2E_TEST_SECRET is set
-    // NEVER enable in production without this env var
-    ...(process.env.E2E_TEST_SECRET && process.env.NODE_ENV !== 'production'
+    // Test-only credentials provider — gated solely on E2E_TEST_SECRET (see the matching
+    // comment in api/e2e/signin/route.ts for why NODE_ENV isn't also part of this check).
+    ...(process.env.E2E_TEST_SECRET
       ? [
           Credentials({
             id: 'test-credentials',

@@ -1,8 +1,9 @@
 import { type NextRequest, NextResponse } from 'next/server'
 
-// Removes all data for the test user so each suite run starts clean
+// Removes all data for the test user so each suite run starts clean.
+// Gated solely on E2E_TEST_SECRET — see api/e2e/signin/route.ts for why NODE_ENV isn't checked.
 export async function POST(request: NextRequest) {
-  if (process.env.NODE_ENV === 'production' || !process.env.E2E_TEST_SECRET) {
+  if (!process.env.E2E_TEST_SECRET) {
     return NextResponse.json({ error: 'Not available' }, { status: 404 })
   }
 

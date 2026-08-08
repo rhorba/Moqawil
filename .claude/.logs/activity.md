@@ -1,5 +1,12 @@
 # Activity Log
 
+### 2026-08-08 16:10 BUGFIX — webServer.url fix confirmed working; new real test-level bug found
+- **Specialist**: DevOps/DevSecOps + Security Engineer
+- **Summary**: 9th CI run: `webServer.url` fix (§ previous entry) confirmed fully working — server ready, 18 tests actually ran (not a timeout), 21 passed including all auth-redirect and smoke tests. Only the happy-path suite's `beforeEach` failed: `POST /api/e2e/signin` returned non-ok. Root cause: both `api/e2e/signin/route.ts` and `api/e2e/cleanup/route.ts` (plus the Credentials provider registration in `auth.ts`) gated on `process.env.NODE_ENV !== 'production'` in addition to `E2E_TEST_SECRET` — but `next start` (switched to for CI e2e, see earlier entries) always sets `NODE_ENV=production` internally regardless of intent, so this safety guard permanently 404'd the route the moment e2e stopped using `next dev`. Removed the `NODE_ENV` condition from all three gates, keeping only `E2E_TEST_SECRET` — which is already the documented, actual security boundary (`.env.example`: "NEVER set in production"; a real deployment simply won't have it set, closing these routes regardless of NODE_ENV). Verified locally under a real `next start` build: the route now returns 500 (DB connection failure, expected — no local Postgres) instead of 404, confirming it passes the gate and reaches real logic.
+- **Status**: resolved, pending CI confirmation
+- **Impact**: high — this, not any infrastructure issue, was the actual remaining blocker to a fully green pipeline
+---
+
 ### 2026-08-08 15:50 BUGFIX — Actual root cause of the E2E timeout found via the curl diagnostic
 - **Specialist**: DevOps/DevSecOps
 - **Summary**: The diagnostic step's manual `next start` + curl check reached `/sign-in` and got `Server reachable after 2s` — proving the server was healthy and reachable the whole time, in every prior run. The real bug: `webServer.url` in `playwright.config.ts` pointed at the bare root `/`, which returns 404 (no page defined there) — Playwright's readiness poll only accepts 2xx-3xx responses, so it silently retried against a 404 for the full 120s on every single run, regardless of any of the previous fixes (trustHost, 127.0.0.1, stdout piping). None of those were wrong to fix, but none of them were the actual blocker either. Changed `webServer.url` to `/sign-in` (the same path the diagnostic confirmed works). Removed the diagnostic CI steps now that they've done their job — no permanent debug scaffolding.
