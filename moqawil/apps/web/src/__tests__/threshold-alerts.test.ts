@@ -33,9 +33,7 @@ const SMTP_ENV = {
 
 function clearSmtp() {
   for (const k of Object.keys(SMTP_ENV)) delete process.env[k]
-  // `process.env.X = undefined` stringifies to "undefined" (Node.js coerces all
-  // process.env assignments to strings) rather than deleting the key — that silently
-  // broke the `SMTP_FROM ?? SMTP_USER` fallback test that runs after this cleanup.
+  // biome-ignore lint/performance/noDelete: intentional — process.env.X = undefined stringifies to "undefined" instead of deleting the key, which is the exact bug this line fixes.
   delete process.env.SMTP_FROM
 }
 

@@ -1,4 +1,12 @@
-# Activity Log
+### 2026-08-08 12:20 BUGFIX BATCH — Closed the honest coverage gap for real, fixed Semgrep pnpm hardening findings, fixed own lint suggestion that would have reintroduced the SMTP bug
+- **Specialist**: Tester + DevOps/DevSecOps
+- **Summary**: Second CI run (after the previous batch's fixes) showed TypeCheck green but 3 more real issues:
+  1. **Security**: Semgrep's `security-audit` ruleset flagged 3 legitimate pnpm supply-chain-hardening gaps in `pnpm-workspace.yaml` (`blockExoticSubdeps`, `minimumReleaseAge`, `trustPolicy` all unset). Added all three — verified pnpm 9.15.4 (the pinned CI version) tolerates the newer config keys as no-ops rather than erroring; they'll take effect once the project upgrades pnpm.
+  2. **Lint**: Biome's own `noDelete` rule suggested reverting `delete process.env.SMTP_FROM` back to `= undefined` — the exact pattern that caused the bug this line fixes. Added a `biome-ignore` with the reasoning, since the general-purpose suggestion is wrong specifically for `process.env`.
+  3. **Coverage (the real one)**: `queries/declaration.ts` sat at 17% line coverage — only its pure helpers were tested, its 3 DB-touching functions (`getQuarterlyTurnover`, `getDeclarationsForYear`, `computeAndUpsertDeclaration`) had zero tests, exactly the gap documented honestly in `vitest.config.ts`'s comment. Wrote `declaration-db-integration.test.ts` (6 real tests against a live Postgres, following the same `describe.skipIf(!DATABASE_URL)` pattern already established in `invoice-numbering.test.ts`) instead of lowering the threshold or fabricating coverage. Verified locally: typechecks clean, lint clean; full DB behavior will be confirmed by CI's Postgres service (no local Docker daemon running to verify directly).
+- **Status**: resolved, pending CI confirmation
+- **Impact**: high
+---
 
 ### 2026-08-08 11:45 BUGFIX BATCH — CI's remaining real failures found and fixed (lint, typecheck, security, tests)
 - **Specialist**: DevOps/DevSecOps + Tester + Test Architect

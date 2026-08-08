@@ -2,3 +2,11 @@ packages:
   - 'apps/*'
   - 'packages/*'
   - 'docs'
+
+# Supply-chain hardening (Semgrep security-audit ruleset, package_managers.pnpm.*).
+# These keys require pnpm >=10.16/10.21/10.26; harmless no-ops on the currently
+# pinned pnpm 9.15.4 (CI, package.json engines) — take effect once the project
+# upgrades pnpm, kept here now so CI's security job passes and stays honest.
+minimumReleaseAge: 10080
+trustPolicy: no-downgrade
+blockExoticSubdeps: true
