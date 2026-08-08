@@ -6,7 +6,12 @@ const sidebars: SidebarsConfig = {
     {
       type: 'category',
       label: 'Guides',
-      items: ['guide-installation', 'guide-facturation', 'guide-declaration'],
+      items: [
+        'guide-installation',
+        'guide-facturation',
+        'guide-declaration',
+        'guide-e-facturation',
+      ],
     },
   ],
 }

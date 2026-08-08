@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth'
 import { getClientAnnualTotal, getClientById } from '@/lib/queries/client'
 import { getEntrepreneur } from '@/lib/queries/entrepreneur'
 import { getInvoiceWithLines } from '@/lib/queries/invoice'
-import { ArrowLeft, Download, Pencil } from 'lucide-react'
+import { ArrowLeft, Download, FileCode2, Pencil } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { InvoiceActions } from '../invoice-actions'
@@ -68,8 +68,29 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             <Download size={15} />
             Télécharger PDF
           </a>
+          {invoice.status !== 'draft' && (
+            <a
+              href={`/api/invoices/${id}/ubl`}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors"
+            >
+              <FileCode2 size={15} />
+              Télécharger XML (UBL 2.1)
+            </a>
+          )}
         </div>
       </div>
+
+      {invoice.status !== 'draft' && (
+        <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
+          <FileCode2 size={13} className="shrink-0" />
+          <span>
+            Format e-facturation prêt (UBL 2.1) — export uniquement, non transmis à la DGI. Ce
+            n&apos;est pas une certification ou une facture électronique cléarée.
+          </span>
+        </div>
+      )}
 
       {isService && cap && client && (
         <CapBadge

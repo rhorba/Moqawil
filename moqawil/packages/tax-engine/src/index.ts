@@ -231,3 +231,12 @@ export function getMandatoryMentions(ctx: InvoiceContext): string[] {
 
   return mentions
 }
+
+// ── E-Invoicing (Sprint 4 — see docs/architecture-sprint4-e-invoicing.md) ──────
+
+export type {
+  UblPartyInput,
+  UblInvoiceLineInput,
+  UblInvoiceInput,
+} from './e-invoicing/ubl-mapper'
+export { mapInvoiceToUbl } from './e-invoicing/ubl-mapper'

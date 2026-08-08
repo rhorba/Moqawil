@@ -44,6 +44,16 @@ export const paymentMethodEnum = pgEnum('payment_method', [
 
 export const declarationStatusEnum = pgEnum('declaration_status', ['pending', 'submitted'])
 
+// v0.1: always 'not_applicable' or 'ready' — 'submitted'/'cleared'/'rejected' are reserved for
+// when a real ClearanceProvider exists (Sprint 5+); NoOpClearanceProvider never sets them.
+export const clearanceStatusEnum = pgEnum('clearance_status', [
+  'not_applicable',
+  'ready',
+  'submitted',
+  'cleared',
+  'rejected',
+])
+
 // ── Users (managed by Auth.js) ───────────────────────────────────────────────
 
 export const users = pgTable('users', {
@@ -164,6 +174,9 @@ export const invoices = pgTable(
     totalMad: numeric('total_mad', { precision: 12, scale: 2 }).notNull(),
     notes: text('notes'),
     pdfPath: text('pdf_path'),
+    // Sprint 4: e-invoicing format readiness (docs/architecture-sprint4-e-invoicing.md)
+    clearanceStatus: clearanceStatusEnum('clearance_status').default('not_applicable').notNull(),
+    ublXmlPath: text('ubl_xml_path'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
