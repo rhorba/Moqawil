@@ -1,5 +1,15 @@
 # Activity Log
 
+### 2026-08-08 14:25 SECURITY FIX — Round 2 of Trivy findings (new CVEs surfaced after prior fixes), plus one genuinely unpatched dependency
+- **Specialist**: Security Engineer
+- **Summary**: 4th CI run: Unit Tests, TypeCheck, Lint, Build all green — confirms the E2E `next start` fix and trustHost fix both worked structurally (only Security + E2E were still failing). Trivy's SCA scan surfaced a fresh batch (fixing the prior 5 CVEs exposed dependency resolutions that had their own separate vulnerable versions): `@auth/core` 0.41.2 (CRITICAL email-normalizer bug + HIGH uncaught-exception bug, GHSA-7rqj-j65f-68wh / GHSA-xmf8-cvqr-rfgj, both fixed at 0.41.3), `drizzle-orm` 0.38.4 (CVE-2026-39356, SQL injection via improperly escaped identifiers, fixed at 0.45.2), `next` 15.5.18 (CVE-2026-64641 DoS + CVE-2026-64645/64649 SSRF, fixed at 15.5.21), and `image-size` 2.0.2 (CVE-2025-71329/71330, DoS — **no patched version exists upstream**, Trivy status "affected" not "fixed").
+- Bumped `@auth/core`, `drizzle-orm` (both `apps/web` and `packages/db`, kept in sync), and `next`. Found `@auth/drizzle-adapter` pulls its own separately-resolved `@auth/core@0.41.2` instance not covered by the direct-dependency pin — added `@auth/core` to `pnpm.overrides` to force every instance in the tree, verified via `pnpm why` that only 0.41.3 remains after a prune.
+- `image-size` has no fix: traced its dependency chain (`pnpm -r why`) — it's pulled in exclusively by `docs/@docusaurus/mdx-loader`, used only at Docusaurus **build time** to size images embedded in maintainer-authored documentation content. Never reachable by the actual Moqawil app or any runtime/attacker-controlled input. Added `moqawil/.trivyignore` with the two CVE IDs and a written justification (not a silent suppression) — Trivy auto-discovers this file at the scan root.
+- Verified locally before pushing: typecheck clean across all 6 packages (confirms the drizzle-orm 0.38→0.45 jump — a real risk given it's used for every DB query in the app — didn't break anything), full production build succeeds, 59/59 tax-engine tests + 68/68 non-DB-dependent web tests pass, lint clean.
+- **Status**: resolved, pending CI confirmation
+- **Impact**: high — SQL injection and SSRF are serious vulnerability classes; both now patched
+---
+
 ### 2026-08-08 13:15 BUGFIX — E2E timeout + a real production-impacting auth bug found while investigating it
 - **Specialist**: DevOps/DevSecOps + Security Engineer
 - **Summary**: E2E job timed out waiting 120s for `next dev`'s webServer to become ready — cold on-demand compilation on a shared CI runner is inherently slow to first-request-ready. Fixed properly rather than just padding the timeout: `playwright.config.ts` now uses `next start` (production build, already built earlier in the same CI job) when `CI` is set, `next dev` for local iteration speed otherwise. Verified locally: `next start` ready in ~1s vs `next dev`'s 120s+ timeout.

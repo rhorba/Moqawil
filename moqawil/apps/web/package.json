@@ -12,7 +12,7 @@
     "lint": "biome check src"
   },
   "dependencies": {
-    "@auth/core": "0.41.2",
+    "@auth/core": "0.41.3",
     "@auth/drizzle-adapter": "^1.7.4",
     "@hookform/resolvers": "^3.9.1",
     "@moqawil/db": "workspace:*",
@@ -24,9 +24,9 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "dinero.js": "^1.9.1",
-    "drizzle-orm": "^0.38.3",
+    "drizzle-orm": "^0.45.2",
     "lucide-react": "^0.468.0",
-    "next": "^15.3.2",
+    "next": "^15.5.21",
     "next-auth": "5.0.0-beta.32",
     "next-intl": "^3.26.3",
     "nodemailer": "^9.0.1",

@@ -11,7 +11,7 @@
     "check": "drizzle-kit check"
   },
   "dependencies": {
-    "drizzle-orm": "^0.38.4",
+    "drizzle-orm": "^0.45.2",
     "postgres": "^3.4.5"
   },
   "devDependencies": {
