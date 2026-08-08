@@ -33,6 +33,11 @@ export default defineConfig({
           url: 'http://localhost:3003',
           reuseExistingServer: !process.env.CI,
           timeout: 120_000,
+          // Explicit — Playwright's webServer stdout is 'ignore' by default (only stderr
+          // surfaces), which is why a genuinely healthy start prints nothing at all while
+          // an error prints plenty. Pipe both so a hung/slow start is actually diagnosable.
+          stdout: 'pipe',
+          stderr: 'pipe',
         },
       }),
 })
