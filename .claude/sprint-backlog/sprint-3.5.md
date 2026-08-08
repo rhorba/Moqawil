@@ -3,7 +3,8 @@
 **Goal**: Close infra gaps found during the CTS framework sync that make Sprint 4's own DoD items (coverage ≥80%, push at sprint close) actually enforceable, and get the existing Docusaurus docs site live instead of source-only.
 **Depends on**: none (pure infra, no product code touched)
 **Auto-handoff**: ENABLED — 🟡 BALANCED
-**Status**: IN PROGRESS
+**Status**: COMPLETE ✅
+**Completed**: 2026-08-08 (10 CI runs to find and fix every real pre-existing gap — see `.logs/activity.md` for the full list)
 
 ---
 
@@ -34,15 +35,15 @@ Does not add new tests to raise coverage on untested files (`queries/{client,ent
 | I-05 | `.github/workflows/ci.yml` — lint, typecheck, unit test (+coverage upload), build, e2e (Postgres service, migrations, Playwright) | DevOps/DevSecOps | L | done |
 | I-06 | `.github/workflows/docs-deploy.yml` — GitHub Pages deploy for Docusaurus on push to `docs/` | DevOps/DevSecOps | M | done |
 | I-07 | Fix `docusaurus.config.ts` baseUrl/url for default GH Pages project-site path (was assuming an unowned custom domain) | Frontend Dev | S | done |
-| I-08 | Enable GitHub Pages (Source: GitHub Actions) on the repo via `gh api` | DevOps/DevSecOps | S | todo |
-| I-09 | Commit + push; confirm CI run triggers and reaches a result (green or a real, fixable failure) | Project Monitor | S | todo |
-| I-10 | Sprint 3.5 snapshot | Project Monitor | S | todo |
+| I-08 | Enable GitHub Pages (Source: GitHub Actions) on the repo via `gh api` | DevOps/DevSecOps | S | done |
+| I-09 | Commit + push; confirm CI run triggers and reaches a result (green or a real, fixable failure) | Project Monitor | S | done — took 10 pushes to work through every real gap found |
+| I-10 | Sprint 3.5 snapshot | Project Monitor | S | done |
 
 ---
 
 ## Definition of Done
-- [ ] `git push origin master` triggers `ci.yml` — lint/typecheck/test/build/e2e all run (pass or fail is informative; the pipeline existing and running is the DoD, not a guaranteed first-try green)
-- [ ] Docs site publishes via GitHub Pages Actions deploy, reachable at `https://rhorba.github.io/Moqawil/`
-- [ ] No debug video artifacts land in the public `docs/` folder going forward
-- [ ] Coverage config no longer silently narrows scope to hit a number — gaps are documented, not hidden
-- [ ] Framework Rule 7 (video recording) is present in `.claude/CLAUDE.md`
+- [x] `git push origin master` triggers `ci.yml` — lint/typecheck/test/build/e2e all run and all pass (as of run `31266792551`)
+- [x] Docs site publishes via GitHub Pages Actions deploy, reachable at `https://rhorba.github.io/Moqawil/`
+- [x] No debug video artifacts land in the public `docs/` folder going forward
+- [x] Coverage config no longer silently narrows scope to hit a number — gaps are documented, not hidden; the real gap (`queries/declaration.ts`'s DB-touching functions) got closed with real DB-integration tests, not just documented
+- [x] Framework Rule 7 (video recording) is present in `.claude/CLAUDE.md`
