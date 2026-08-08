@@ -5,6 +5,9 @@
 import type { NextAuthConfig } from 'next-auth'
 
 export const authConfig = {
+  // Required for self-hosted deployments — see the matching comment in auth.ts. Middleware
+  // uses this separate Edge-compatible config, not auth.ts's, so it needs its own trustHost.
+  trustHost: true,
   pages: { signIn: '/sign-in' },
   providers: [],
   callbacks: {
