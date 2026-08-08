@@ -36,8 +36,6 @@ bash.exe.stackdump
 .DS_Store
 Thumbs.db
 
-# Drizzle migrations meta
-**/packages/db/drizzle/meta/
 
 # Editor
 .vscode/settings.json
