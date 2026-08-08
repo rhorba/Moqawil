@@ -16,9 +16,7 @@ function createTransport() {
   })
 }
 
-export type EmailResult =
-  | { sent: true }
-  | { sent: false; reason: string }
+export type EmailResult = { sent: true } | { sent: false; reason: string }
 
 export async function sendInvoiceEmail(opts: {
   to: string
@@ -28,7 +26,10 @@ export async function sendInvoiceEmail(opts: {
   pdfBuffer: Buffer
 }): Promise<EmailResult> {
   if (!isSmtpConfigured()) {
-    return { sent: false, reason: 'SMTP non configuré — ajoutez SMTP_HOST, SMTP_USER, SMTP_PASS dans .env' }
+    return {
+      sent: false,
+      reason: 'SMTP non configuré — ajoutez SMTP_HOST, SMTP_USER, SMTP_PASS dans .env',
+    }
   }
 
   const from = process.env.SMTP_FROM ?? process.env.SMTP_USER
@@ -40,13 +41,13 @@ export async function sendInvoiceEmail(opts: {
       to: opts.to,
       subject: `Facture ${opts.invoiceNumber}`,
       text: [
-        `Bonjour,`,
-        ``,
+        'Bonjour,',
+        '',
         `Veuillez trouver ci-joint la facture ${opts.invoiceNumber} d'un montant de ${opts.totalMad} DH.`,
-        ``,
-        `TVA non applicable — Régime Auto-Entrepreneur (Loi 114-13).`,
-        ``,
-        `Cordialement,`,
+        '',
+        'TVA non applicable — Régime Auto-Entrepreneur (Loi 114-13).',
+        '',
+        'Cordialement,',
         opts.entrepreneurName,
       ].join('\n'),
       html: `

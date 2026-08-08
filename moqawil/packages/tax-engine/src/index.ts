@@ -20,18 +20,18 @@ export const PER_CLIENT_CAP_MAD = 80_000
 
 // Law 114-13 (Auto-entrepreneur regime) — annual revenue thresholds
 // Exceeding for two consecutive years triggers loss of AE status
-export const REVENUE_THRESHOLD_COMMERCIAL = 500_000  // commercial / industrial / artisanal
-export const REVENUE_THRESHOLD_SERVICE = 200_000      // services
+export const REVENUE_THRESHOLD_COMMERCIAL = 500_000 // commercial / industrial / artisanal
+export const REVENUE_THRESHOLD_SERVICE = 200_000 // services
 
 // Law 114-13 — liberatory tax rates (on turnover, not profit)
-export const TAX_RATE_COMMERCIAL = 0.005  // 0.5% — commercial, industrial, artisanal
-export const TAX_RATE_SERVICE = 0.010     // 1.0% — services
+export const TAX_RATE_COMMERCIAL = 0.005 // 0.5% — commercial, industrial, artisanal
+export const TAX_RATE_SERVICE = 0.01 // 1.0% — services
 
 // CGI Article 73-II-G-8° — withholding rate above the 80K per-client cap
-export const WHT_RATE_OVER_CAP = 0.30    // 30% withheld by client on the surplus
+export const WHT_RATE_OVER_CAP = 0.3 // 30% withheld by client on the surplus
 
 // CGI Article 2 — standard VAT rate (AE are out of scope, but useful constant)
-export const VAT_STANDARD = 0.20
+export const VAT_STANDARD = 0.2
 
 // CGI Article 193 — cash payment limit for professional clients
 // Payments above this require check / virement / effet to allow client deduction
@@ -182,7 +182,7 @@ export interface InvoiceContext {
   sellerIF: string
   clientName: string
   clientAddress: string
-  clientICE?: string      // Required for Moroccan B2B (company_ma)
+  clientICE?: string // Required for Moroccan B2B (company_ma)
   isClientMoroccanB2B: boolean
   totalMad: number
   paymentMethod?: string
@@ -200,9 +200,7 @@ export interface InvoiceContext {
  * PDF templates must include all of these.
  */
 export function getMandatoryMentions(ctx: InvoiceContext): string[] {
-  const mentions: string[] = [
-    'TVA non applicable — Régime auto-entrepreneur (Loi 114-13)',
-  ]
+  const mentions: string[] = ['TVA non applicable — Régime auto-entrepreneur (Loi 114-13)']
 
   if (ctx.isClientMoroccanB2B && ctx.clientICE) {
     mentions.push(`ICE client : ${ctx.clientICE}`)
@@ -219,21 +217,17 @@ export function getMandatoryMentions(ctx: InvoiceContext): string[] {
 
   if (ctx.totalMad > CASH_PAYMENT_LIMIT_MAD && ctx.paymentMethod === 'espece') {
     mentions.push(
-      `Attention : Paiement en espèces supérieur à ${CASH_PAYMENT_LIMIT_MAD} MAD — ` +
-      'le client ne peut pas déduire cette charge (CGI Article 193)'
+      `Attention : Paiement en espèces supérieur à ${CASH_PAYMENT_LIMIT_MAD} MAD — le client ne peut pas déduire cette charge (CGI Article 193)`
     )
   }
 
   if (ctx.totalMad > CASH_PENALTY_THRESHOLD_MAD && ctx.paymentMethod === 'espece') {
     mentions.push(
-      `Attention : Paiement en espèces supérieur à ${CASH_PENALTY_THRESHOLD_MAD} MAD — ` +
-      'pénalité de 6% applicable pour le client (CGI Article 193)'
+      `Attention : Paiement en espèces supérieur à ${CASH_PENALTY_THRESHOLD_MAD} MAD — pénalité de 6% applicable pour le client (CGI Article 193)`
     )
   }
 
-  mentions.push(
-    'Les factures doivent être conservées pendant 10 ans (CGI Article 211)'
-  )
+  mentions.push('Les factures doivent être conservées pendant 10 ans (CGI Article 211)')
 
   return mentions
 }

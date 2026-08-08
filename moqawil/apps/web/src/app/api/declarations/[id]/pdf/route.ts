@@ -1,8 +1,8 @@
 import { auth } from '@/lib/auth'
 import { getEntrepreneur } from '@/lib/queries/entrepreneur'
 import { db, quarterlyDeclarations } from '@moqawil/db'
-import { eq, and } from 'drizzle-orm'
 import { renderDeclarationPdf } from '@moqawil/pdf-templates'
+import { and, eq } from 'drizzle-orm'
 import { NextResponse } from 'next/server'
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -31,9 +31,9 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     declaration: {
       year: decl.year,
       quarter: decl.quarter,
-      totalTurnoverMad: parseFloat(decl.totalTurnoverMad),
-      taxRate: parseFloat(decl.taxRate),
-      taxDueMad: parseFloat(decl.taxDueMad),
+      totalTurnoverMad: Number.parseFloat(decl.totalTurnoverMad),
+      taxRate: Number.parseFloat(decl.taxRate),
+      taxDueMad: Number.parseFloat(decl.taxDueMad),
       status: decl.status,
       submittedAt: decl.submittedAt,
     },

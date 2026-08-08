@@ -1,12 +1,12 @@
 'use server'
 
 import { auth } from '@/lib/auth'
-import { db, clients } from '@moqawil/db'
-import { eq, and } from 'drizzle-orm'
 import { getEntrepreneur } from '@/lib/queries/entrepreneur'
+import { clients, db } from '@moqawil/db'
 import { validateICE } from '@moqawil/tax-engine'
-import { redirect } from 'next/navigation'
+import { and, eq } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import { z } from 'zod'
 
 const clientSchema = z
@@ -27,12 +27,16 @@ const clientSchema = z
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ['ice'],
-          message: "ICE obligatoire pour les entreprises marocaines (CGI Article 145)",
+          message: 'ICE obligatoire pour les entreprises marocaines (CGI Article 145)',
         })
       } else {
         const result = validateICE(data.ice)
         if (!result.valid) {
-          ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['ice'], message: result.reason ?? 'ICE invalide' })
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['ice'],
+            message: result.reason ?? 'ICE invalide',
+          })
         }
       }
     }

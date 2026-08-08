@@ -1,6 +1,6 @@
 import { auth } from '@/lib/auth'
-import { getEntrepreneur } from '@/lib/queries/entrepreneur'
 import { getDeclarationsForYear } from '@/lib/queries/declaration'
+import { getEntrepreneur } from '@/lib/queries/entrepreneur'
 import { DeclarationCard } from './declaration-card'
 
 export default async function DeclarationsPage({
@@ -13,7 +13,7 @@ export default async function DeclarationsPage({
   if (!entrepreneur) return null
 
   const { year: yearParam } = await searchParams
-  const year = yearParam ? parseInt(yearParam) : new Date().getFullYear()
+  const year = yearParam ? Number.parseInt(yearParam) : new Date().getFullYear()
 
   const declarations = await getDeclarationsForYear(entrepreneur.id, year)
 
@@ -53,9 +53,9 @@ export default async function DeclarationsPage({
       </div>
 
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
-        <strong>Comment ça marche :</strong> Cliquez sur "Générer" pour calculer votre CA trimestriel
-        à partir des factures payées. Imprimez le PDF et déposez-le à Al Barid Bank avant la date limite.
-        Même si votre CA est zéro, la déclaration est obligatoire.
+        <strong>Comment ça marche :</strong> Cliquez sur "Générer" pour calculer votre CA
+        trimestriel à partir des factures payées. Imprimez le PDF et déposez-le à Al Barid Bank
+        avant la date limite. Même si votre CA est zéro, la déclaration est obligatoire.
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

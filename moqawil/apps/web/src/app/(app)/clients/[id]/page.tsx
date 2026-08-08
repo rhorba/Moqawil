@@ -1,13 +1,13 @@
-import { auth } from '@/lib/auth'
-import { getEntrepreneur } from '@/lib/queries/entrepreneur'
-import { getClientById, getClientAnnualTotal } from '@/lib/queries/client'
 import { CapBadge } from '@/components/cap-badge'
-import { ClientForm } from '../client-form'
-import { eq, and } from 'drizzle-orm'
+import { auth } from '@/lib/auth'
+import { getClientAnnualTotal, getClientById } from '@/lib/queries/client'
+import { getEntrepreneur } from '@/lib/queries/entrepreneur'
 import { db, invoices } from '@moqawil/db'
-import Link from 'next/link'
+import { and, eq } from 'drizzle-orm'
 import { ArrowLeft } from 'lucide-react'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { ClientForm } from '../client-form'
 
 export default async function ClientDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -26,11 +26,13 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
   const clientInvoices = await db
     .select()
     .from(invoices)
-    .where(and(
-      eq(invoices.clientId, id),
-      eq(invoices.entrepreneurId, entrepreneur.id),
-      eq(invoices.fiscalYear, year)
-    ))
+    .where(
+      and(
+        eq(invoices.clientId, id),
+        eq(invoices.entrepreneurId, entrepreneur.id),
+        eq(invoices.fiscalYear, year)
+      )
+    )
     .orderBy(invoices.sequenceNumber)
 
   return (
@@ -76,7 +78,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
                 <div className="text-end">
                   <p className="text-sm font-medium">
                     {new Intl.NumberFormat('fr-MA', { maximumFractionDigits: 2 }).format(
-                      parseFloat(inv.totalMad)
+                      Number.parseFloat(inv.totalMad)
                     )}{' '}
                     DH
                   </p>

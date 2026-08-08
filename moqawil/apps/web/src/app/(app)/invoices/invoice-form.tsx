@@ -1,12 +1,12 @@
 'use client'
 
-import { useActionState, useState, useEffect } from 'react'
-import { createInvoice, type InvoiceFormState } from './actions'
 import { CapBadge } from '@/components/cap-badge'
 import { CapConfirmDialog } from '@/components/cap-confirm-dialog'
-import { Plus, Trash2 } from 'lucide-react'
-import type { InferSelectModel } from 'drizzle-orm'
 import type { clients } from '@moqawil/db'
+import type { InferSelectModel } from 'drizzle-orm'
+import { Plus, Trash2 } from 'lucide-react'
+import { useActionState, useEffect, useState } from 'react'
+import { type InvoiceFormState, createInvoice } from './actions'
 
 type Client = InferSelectModel<typeof clients>
 type CapTotal = {
@@ -39,7 +39,9 @@ function fmt(n: number) {
 
 export function InvoiceForm({ clients, capTotals, isService }: InvoiceFormProps) {
   const [state, formAction, pending] = useActionState<InvoiceFormState, FormData>(createInvoice, {})
-  const [lines, setLines] = useState<Line[]>([{ id: 0, description: '', quantity: '1', unitPriceOriginal: '' }])
+  const [lines, setLines] = useState<Line[]>([
+    { id: 0, description: '', quantity: '1', unitPriceOriginal: '' },
+  ])
   const [selectedClientId, setSelectedClientId] = useState(clients[0]?.id ?? '')
   const [currency, setCurrency] = useState('MAD')
   const [exchangeRate, setExchangeRate] = useState('1')
@@ -75,14 +77,17 @@ export function InvoiceForm({ clients, capTotals, isService }: InvoiceFormProps)
   const selectedCap = isService ? capTotals[selectedClientId] : undefined
 
   const totalMad = lines.reduce((sum, l) => {
-    const qty = parseFloat(l.quantity) || 0
-    const price = parseFloat(l.unitPriceOriginal) || 0
-    const rate = parseFloat(exchangeRate) || 1
+    const qty = Number.parseFloat(l.quantity) || 0
+    const price = Number.parseFloat(l.unitPriceOriginal) || 0
+    const rate = Number.parseFloat(exchangeRate) || 1
     return sum + qty * price * rate
   }, 0)
 
   function addLine() {
-    setLines((prev) => [...prev, { id: Date.now(), description: '', quantity: '1', unitPriceOriginal: '' }])
+    setLines((prev) => [
+      ...prev,
+      { id: Date.now(), description: '', quantity: '1', unitPriceOriginal: '' },
+    ])
   }
 
   function removeLine(id: number) {
@@ -118,7 +123,10 @@ export function InvoiceForm({ clients, capTotals, isService }: InvoiceFormProps)
         <CapConfirmDialog
           capWarning={state.capWarning}
           onConfirm={handleCapConfirm}
-          onCancel={() => { setShowCapDialog(false); setCapConfirmed(false) }}
+          onCancel={() => {
+            setShowCapDialog(false)
+            setCapConfirmed(false)
+          }}
         />
       )}
 
@@ -133,13 +141,17 @@ export function InvoiceForm({ clients, capTotals, isService }: InvoiceFormProps)
 
         {/* Client select */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="clientId" className="block text-sm font-medium text-gray-700 mb-1">
             Client <span className="text-red-500">*</span>
           </label>
           <select
+            id="clientId"
             name="clientId"
             value={selectedClientId}
-            onChange={(e) => { setSelectedClientId(e.target.value); setCapConfirmed(false) }}
+            onChange={(e) => {
+              setSelectedClientId(e.target.value)
+              setCapConfirmed(false)
+            }}
             className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
           >
             {clients.length === 0 && <option value="">Aucun client — créez-en un d'abord</option>}
@@ -168,10 +180,11 @@ export function InvoiceForm({ clients, capTotals, isService }: InvoiceFormProps)
         {/* Dates */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="issueDate" className="block text-sm font-medium text-gray-700 mb-1">
               Date d&apos;émission <span className="text-red-500">*</span>
             </label>
             <input
+              id="issueDate"
               name="issueDate"
               type="date"
               defaultValue={new Date().toISOString().slice(0, 10)}
@@ -179,37 +192,55 @@ export function InvoiceForm({ clients, capTotals, isService }: InvoiceFormProps)
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700 mb-1">
               Date d&apos;échéance
             </label>
-            <input name="dueDate" type="date" className="w-full border rounded-lg px-3 py-2 text-sm" />
+            <input
+              id="dueDate"
+              name="dueDate"
+              type="date"
+              className="w-full border rounded-lg px-3 py-2 text-sm"
+            />
           </div>
         </div>
 
         {/* Currency */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Devise</label>
+            <label htmlFor="currency" className="block text-sm font-medium text-gray-700 mb-1">
+              Devise
+            </label>
             <select
+              id="currency"
               name="currency"
               value={currency}
               onChange={(e) => {
-            const cur = e.target.value
-            setCurrency(cur)
-            if (cur === 'MAD') { setExchangeRate('1'); setBamRateError(null) }
-            else fetchBamRate(cur)
-          }}
+                const cur = e.target.value
+                setCurrency(cur)
+                if (cur === 'MAD') {
+                  setExchangeRate('1')
+                  setBamRateError(null)
+                } else fetchBamRate(cur)
+              }}
               className="w-full border rounded-lg px-3 py-2 text-sm"
             >
-              {currencies.map((c) => <option key={c} value={c}>{c}</option>)}
+              {currencies.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
             </select>
           </div>
           {currency !== 'MAD' && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="exchangeRate"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Taux BAM (MAD/{currency})
               </label>
               <input
+                id="exchangeRate"
                 name="exchangeRate"
                 type="number"
                 step="0.0001"
@@ -230,7 +261,7 @@ export function InvoiceForm({ clients, capTotals, isService }: InvoiceFormProps)
         {/* Line items */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label className="text-sm font-medium text-gray-700">Lignes de facture</label>
+            <span className="text-sm font-medium text-gray-700">Lignes de facture</span>
             <button
               type="button"
               onClick={addLine}
@@ -309,8 +340,14 @@ export function InvoiceForm({ clients, capTotals, isService }: InvoiceFormProps)
 
         {/* Payment method */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Mode de paiement</label>
-          <select name="paymentMethod" className="w-full border rounded-lg px-3 py-2 text-sm">
+          <label htmlFor="paymentMethod" className="block text-sm font-medium text-gray-700 mb-1">
+            Mode de paiement
+          </label>
+          <select
+            id="paymentMethod"
+            name="paymentMethod"
+            className="w-full border rounded-lg px-3 py-2 text-sm"
+          >
             <option value="">— Non spécifié —</option>
             <option value="virement">Virement bancaire</option>
             <option value="cheque">Chèque</option>
@@ -323,8 +360,11 @@ export function InvoiceForm({ clients, capTotals, isService }: InvoiceFormProps)
 
         {/* Notes */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+          <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
+            Notes
+          </label>
           <textarea
+            id="notes"
             name="notes"
             rows={3}
             className="w-full border rounded-lg px-3 py-2 text-sm resize-none"

@@ -1,20 +1,20 @@
 :root {
   --ifm-color-primary: oklch(0.45 0.15 200);
-  --ifm-color-primary-dark: oklch(0.40 0.15 200);
+  --ifm-color-primary-dark: oklch(0.4 0.15 200);
   --ifm-color-primary-darker: oklch(0.37 0.15 200);
   --ifm-color-primary-darkest: oklch(0.32 0.15 200);
-  --ifm-color-primary-light: oklch(0.50 0.15 200);
+  --ifm-color-primary-light: oklch(0.5 0.15 200);
   --ifm-color-primary-lighter: oklch(0.53 0.15 200);
   --ifm-color-primary-lightest: oklch(0.58 0.15 200);
   --ifm-code-font-size: 95%;
 }
 
-[data-theme='dark'] {
+[data-theme="dark"] {
   --ifm-color-primary: oklch(0.65 0.15 200);
 }
 
 /* RTL support for Arabic docs */
-[dir='rtl'] .navbar__title {
+[dir="rtl"] .navbar__title {
   margin-left: 0;
   margin-right: var(--ifm-navbar-item-padding-horizontal);
 }
@@ -24,5 +24,5 @@
 }
 
 .admonition.danger {
-  border-left-color: oklch(0.55 0.20 25);
+  border-left-color: oklch(0.55 0.2 25);
 }

@@ -1,9 +1,9 @@
 'use client'
 
-import { useActionState } from 'react'
-import { upsertProfile, type ProfileFormState } from './actions'
-import type { InferSelectModel } from 'drizzle-orm'
 import type { entrepreneurs } from '@moqawil/db'
+import type { InferSelectModel } from 'drizzle-orm'
+import { useActionState } from 'react'
+import { type ProfileFormState, upsertProfile } from './actions'
 
 type Entrepreneur = InferSelectModel<typeof entrepreneurs>
 
@@ -36,7 +36,13 @@ export function ProfileForm({
         </div>
       )}
 
-      <Field label="Nom complet" name="fullName" defaultValue={profile?.fullName} error={fieldError('fullName')} required />
+      <Field
+        label="Nom complet"
+        name="fullName"
+        defaultValue={profile?.fullName}
+        error={fieldError('fullName')}
+        required
+      />
 
       <div className="grid grid-cols-2 gap-4">
         <Field
@@ -58,10 +64,11 @@ export function ProfileForm({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="activityType" className="block text-sm font-medium text-gray-700 mb-1">
           Type d&apos;activité <span className="text-red-500">*</span>
         </label>
         <select
+          id="activityType"
           name="activityType"
           defaultValue={profile?.activityType ?? 'service'}
           className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
@@ -89,11 +96,29 @@ export function ProfileForm({
         placeholder="Ex: Développement web et applications mobiles"
       />
 
-      <Field label="Adresse" name="address" defaultValue={profile?.address} error={fieldError('address')} required />
+      <Field
+        label="Adresse"
+        name="address"
+        defaultValue={profile?.address}
+        error={fieldError('address')}
+        required
+      />
 
       <div className="grid grid-cols-2 gap-4">
-        <Field label="Ville" name="city" defaultValue={profile?.city} error={fieldError('city')} required />
-        <Field label="Téléphone" name="phone" defaultValue={profile?.phone ?? ''} error={fieldError('phone')} type="tel" />
+        <Field
+          label="Ville"
+          name="city"
+          defaultValue={profile?.city}
+          error={fieldError('city')}
+          required
+        />
+        <Field
+          label="Téléphone"
+          name="phone"
+          defaultValue={profile?.phone ?? ''}
+          error={fieldError('phone')}
+          type="tel"
+        />
       </div>
 
       <Field
@@ -158,10 +183,11 @@ function Field({
 }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">
+      <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       <input
+        id={name}
         name={name}
         type={type}
         defaultValue={defaultValue}

@@ -1,6 +1,6 @@
 import { auth } from '@/lib/auth'
+import { getAllClientAnnualTotals, getClients } from '@/lib/queries/client'
 import { getEntrepreneur } from '@/lib/queries/entrepreneur'
-import { getClients, getAllClientAnnualTotals } from '@/lib/queries/client'
 import { InvoiceForm } from '../invoice-form'
 
 export default async function NewInvoicePage() {

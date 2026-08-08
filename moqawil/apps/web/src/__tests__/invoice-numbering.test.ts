@@ -6,8 +6,8 @@
  * Run with: DATABASE_URL=postgres://... pnpm test
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import { formatInvoiceNumber } from '@moqawil/tax-engine'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 describe('Invoice sequential numbering — formatInvoiceNumber', () => {
   it('formats FACT prefix correctly', () => {
@@ -43,23 +43,25 @@ describe('Invoice sequential numbering — formatInvoiceNumber', () => {
   it('no gaps — sequence increments by 1', () => {
     const seq = Array.from({ length: 10 }, (_, i) => formatInvoiceNumber('FACT', 2026, i + 1))
     for (let i = 0; i < seq.length - 1; i++) {
-      const curr = parseInt(seq[i].split('-')[2])
-      const next = parseInt(seq[i + 1].split('-')[2])
+      const curr = Number.parseInt(seq[i].split('-')[2])
+      const next = Number.parseInt(seq[i + 1].split('-')[2])
       expect(next - curr).toBe(1)
     }
   })
 })
 
 // Integration tests — real DB required
-const SKIP_INTEGRATION = !process.env['DATABASE_URL']
+const SKIP_INTEGRATION = !process.env.DATABASE_URL
 
 describe.skipIf(SKIP_INTEGRATION)('Invoice numbering — DB integration (advisory lock)', () => {
-  // Dynamic import to avoid failing when DB is unavailable
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // Dynamic import to avoid failing when DB is unavailable (module throws at load time
+  // without DATABASE_URL) — the module isn't statically imported, so TS can't infer its
+  // type before the beforeAll assignment below.
+  // biome-ignore lint/suspicious/noExplicitAny: see comment above.
   let db: any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: see comment above.
   let invoicesTable: any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: see comment above.
   let entrepreneursTable: any
 
   const TEST_USER_ID = 'test-seq-user-001'

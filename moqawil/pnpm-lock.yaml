@@ -17,6 +17,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@auth/core':
+        specifier: 0.41.2
+        version: 0.41.2(nodemailer@7.0.13)
       '@auth/drizzle-adapter':
         specifier: ^1.7.4
         version: 1.11.2(nodemailer@7.0.13)
@@ -145,6 +148,9 @@ importers:
         specifier: ^3.4.5
         version: 3.4.9
     devDependencies:
+      '@types/node':
+        specifier: ^22.10.7
+        version: 22.19.19
       drizzle-kit:
         specifier: ^0.30.4
         version: 0.30.6
@@ -167,6 +173,9 @@ importers:
         specifier: ^19.0.0
         version: 19.2.6
     devDependencies:
+      '@types/node':
+        specifier: ^22.10.7
+        version: 22.19.19
       '@types/react':
         specifier: ^19.0.0
         version: 19.2.14

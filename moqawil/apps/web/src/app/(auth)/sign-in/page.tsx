@@ -8,9 +8,7 @@ export default function SignInPage() {
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-2">
           <h1 className="text-2xl font-bold">Moqawil</h1>
-          <p className="text-sm text-gray-600">
-            La conformité auto-entrepreneur, sans effort.
-          </p>
+          <p className="text-sm text-gray-600">La conformité auto-entrepreneur, sans effort.</p>
         </div>
 
         <div className="space-y-3">

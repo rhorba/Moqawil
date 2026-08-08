@@ -1,7 +1,7 @@
 import { db, invoices, quarterlyDeclarations } from '@moqawil/db'
-import { eq, and, between, sql } from 'drizzle-orm'
 import { getTaxRate } from '@moqawil/tax-engine'
 import type { ActivityType } from '@moqawil/tax-engine'
+import { and, between, eq, sql } from 'drizzle-orm'
 
 /** ISO date range for a given quarter (1-based). */
 export function quarterDateRange(year: number, quarter: number): { start: string; end: string } {
@@ -49,7 +49,7 @@ export async function getQuarterlyTurnover(
       )
     )
 
-  return parseFloat(row?.total ?? '0')
+  return Number.parseFloat(row?.total ?? '0')
 }
 
 /** All 4 declarations for a year (creates missing rows with 0 turnover for display). */
@@ -89,9 +89,9 @@ export async function getDeclarationsForYear(
       id: row?.id ?? null,
       year,
       quarter: q,
-      totalTurnoverMad: row ? parseFloat(row.totalTurnoverMad) : 0,
-      taxRate: row ? parseFloat(row.taxRate) : 0,
-      taxDueMad: row ? parseFloat(row.taxDueMad) : 0,
+      totalTurnoverMad: row ? Number.parseFloat(row.totalTurnoverMad) : 0,
+      taxRate: row ? Number.parseFloat(row.taxRate) : 0,
+      taxDueMad: row ? Number.parseFloat(row.taxDueMad) : 0,
       status: (row?.status ?? 'pending') as 'pending' | 'submitted',
       submittedAt: row?.submittedAt ?? null,
       deadline,

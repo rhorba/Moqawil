@@ -1,8 +1,8 @@
 import { auth } from '@/lib/auth'
 import { getEntrepreneur } from '@/lib/queries/entrepreneur'
 import { getThresholdWidget } from '@/lib/queries/invoice'
-import Link from 'next/link'
 import type { ActivityType } from '@moqawil/tax-engine'
+import Link from 'next/link'
 
 function fmt(n: number) {
   return new Intl.NumberFormat('fr-MA', { maximumFractionDigits: 0 }).format(n)
@@ -82,18 +82,24 @@ export default async function DashboardPage() {
         </div>
 
         <div className="flex justify-between text-xs text-gray-600">
-          <span>CA déclaré : <strong>{fmt(threshold.ytd)} DH</strong></span>
-          <span>Seuil : <strong>{fmt(threshold.remainingMad + threshold.ytd)} DH</strong></span>
+          <span>
+            CA déclaré : <strong>{fmt(threshold.ytd)} DH</strong>
+          </span>
+          <span>
+            Seuil : <strong>{fmt(threshold.remainingMad + threshold.ytd)} DH</strong>
+          </span>
         </div>
 
         {threshold.status === 'warning' && (
           <p className={`text-xs mt-2 ${statusText.warning}`}>
-            Attention — vous approchez du seuil. Consultez un comptable si vous pensez le dépasser deux années consécutives.
+            Attention — vous approchez du seuil. Consultez un comptable si vous pensez le dépasser
+            deux années consécutives.
           </p>
         )}
         {threshold.status === 'over' && (
           <p className={`text-xs mt-2 font-semibold ${statusText.over}`}>
-            Seuil dépassé. Si c&apos;est la 2e année consécutive, vous perdrez le statut auto-entrepreneur.
+            Seuil dépassé. Si c&apos;est la 2e année consécutive, vous perdrez le statut
+            auto-entrepreneur.
           </p>
         )}
       </div>
@@ -131,8 +137,8 @@ export default async function DashboardPage() {
                   isCurrent
                     ? 'bg-[var(--color-primary)] text-white border-transparent'
                     : isPast
-                    ? 'bg-gray-50 border-gray-200'
-                    : 'bg-white'
+                      ? 'bg-gray-50 border-gray-200'
+                      : 'bg-white'
                 }`}
               >
                 <p className={`font-bold text-sm ${isCurrent ? 'text-white' : ''}`}>{label}</p>

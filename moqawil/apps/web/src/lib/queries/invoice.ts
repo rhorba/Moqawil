@@ -1,7 +1,7 @@
-import { db, invoices, invoiceLines, clients } from '@moqawil/db'
-import { eq, and, desc, sql } from 'drizzle-orm'
+import { clients, db, invoiceLines, invoices } from '@moqawil/db'
 import { getThresholdStatus } from '@moqawil/tax-engine'
 import type { ActivityType } from '@moqawil/tax-engine'
+import { and, desc, eq, sql } from 'drizzle-orm'
 
 export async function getInvoices(entrepreneurId: string) {
   return db
@@ -44,7 +44,7 @@ export async function getYtdTurnover(entrepreneurId: string, year: number) {
     .from(invoices)
     .where(and(eq(invoices.entrepreneurId, entrepreneurId), eq(invoices.fiscalYear, year)))
 
-  return parseFloat(row?.totalPaidMad ?? '0')
+  return Number.parseFloat(row?.totalPaidMad ?? '0')
 }
 
 export async function getThresholdWidget(

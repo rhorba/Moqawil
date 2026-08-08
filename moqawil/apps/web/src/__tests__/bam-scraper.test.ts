@@ -3,7 +3,7 @@
  * Uses vi.stubGlobal to mock fetch; no network calls.
  */
 
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 // Minimal HTML mimicking the relevant column from bkam.ma rate table
 function mockHtml(currency: string, courseMoyen: string): string {
@@ -28,11 +28,10 @@ function parseRates(html: string): Record<string, number> {
   // Matches: <td>CURRENCY</td> ... 3 numeric <td> values, 3rd is cours moyen
   const rowRe =
     /<tr[^>]*>[\s\S]*?<td[^>]*>\s*([A-Z]{3})\s*<\/td>[\s\S]*?<td[^>]*>\s*([\d.,]+)\s*<\/td>[\s\S]*?<td[^>]*>\s*([\d.,]+)\s*<\/td>[\s\S]*?<td[^>]*>\s*([\d.,]+)\s*<\/td>/gi
-  let m: RegExpExecArray | null
-  while ((m = rowRe.exec(html)) !== null) {
+  for (let m = rowRe.exec(html); m !== null; m = rowRe.exec(html)) {
     const currency = m[1].toUpperCase()
-    const rate = parseFloat(m[4].replace(',', '.'))
-    if (!isNaN(rate) && rate > 1 && rate < 25) {
+    const rate = Number.parseFloat(m[4].replace(',', '.'))
+    if (!Number.isNaN(rate) && rate > 1 && rate < 25) {
       rates[currency] = rate
     }
   }
@@ -45,31 +44,31 @@ describe('parseRates', () => {
   it('extracts EUR rate correctly', () => {
     const html = mockHtml('EUR', '10.92')
     const rates = parseRates(html)
-    expect(rates['EUR']).toBeCloseTo(10.92)
+    expect(rates.EUR).toBeCloseTo(10.92)
   })
 
   it('extracts USD rate correctly', () => {
     const html = mockHtml('USD', '9.85')
     const rates = parseRates(html)
-    expect(rates['USD']).toBeCloseTo(9.85)
+    expect(rates.USD).toBeCloseTo(9.85)
   })
 
   it('rejects implausibly low rates (< 1)', () => {
     const html = mockHtml('XTS', '0.50')
     const rates = parseRates(html)
-    expect(rates['XTS']).toBeUndefined()
+    expect(rates.XTS).toBeUndefined()
   })
 
   it('rejects implausibly high rates (> 25)', () => {
     const html = mockHtml('JPY', '30.00')
     const rates = parseRates(html)
-    expect(rates['JPY']).toBeUndefined()
+    expect(rates.JPY).toBeUndefined()
   })
 
   it('handles comma as decimal separator', () => {
     const html = mockHtml('GBP', '12,75')
     const rates = parseRates(html)
-    expect(rates['GBP']).toBeCloseTo(12.75)
+    expect(rates.GBP).toBeCloseTo(12.75)
   })
 
   it('returns empty object for empty HTML', () => {
@@ -81,8 +80,8 @@ describe('parseRates', () => {
     const html = mockHtml('EUR', '10.92') + mockHtml('USD', '9.85')
     const rates = parseRates(html)
     expect(Object.keys(rates)).toHaveLength(2)
-    expect(rates['EUR']).toBeCloseTo(10.92)
-    expect(rates['USD']).toBeCloseTo(9.85)
+    expect(rates.EUR).toBeCloseTo(10.92)
+    expect(rates.USD).toBeCloseTo(9.85)
   })
 })
 

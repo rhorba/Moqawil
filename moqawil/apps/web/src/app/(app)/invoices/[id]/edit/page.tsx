@@ -1,11 +1,11 @@
 import { auth } from '@/lib/auth'
+import { getAllClientAnnualTotals, getClients } from '@/lib/queries/client'
 import { getEntrepreneur } from '@/lib/queries/entrepreneur'
 import { getInvoiceWithLines } from '@/lib/queries/invoice'
-import { getClients, getAllClientAnnualTotals } from '@/lib/queries/client'
-import { EditInvoiceForm } from './edit-form'
-import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { EditInvoiceForm } from './edit-form'
 
 export default async function EditInvoicePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -40,9 +40,7 @@ export default async function EditInvoicePage({ params }: { params: Promise<{ id
         <Link href={`/invoices/${id}`} className="text-gray-500 hover:text-gray-700">
           <ArrowLeft size={20} className="rtl:rotate-180" />
         </Link>
-        <h1 className="text-2xl font-bold">
-          Modifier {data.invoice.invoiceNumber}
-        </h1>
+        <h1 className="text-2xl font-bold">Modifier {data.invoice.invoiceNumber}</h1>
       </div>
 
       <EditInvoiceForm

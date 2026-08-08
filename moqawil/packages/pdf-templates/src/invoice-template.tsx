@@ -1,18 +1,4 @@
-/**
- * Invoice PDF template — CGI Article 145 + AE mandatory fields.
- * Bilingual FR (primary) + AR mentions for legal compliance.
- * Rendered server-side via @react-pdf/renderer.
- */
-
-import React from 'react'
-import {
-  Document,
-  Page,
-  Text,
-  View,
-  StyleSheet,
-  Font,
-} from '@react-pdf/renderer'
+import { Document, Font, Page, StyleSheet, Text, View } from '@react-pdf/renderer'
 
 // Register a font that supports Arabic characters for bilingual mentions
 // Falls back to Helvetica for French content
@@ -193,7 +179,7 @@ const styles = StyleSheet.create({
 })
 
 function fmt(n: number | string, currency = 'MAD') {
-  const val = typeof n === 'string' ? parseFloat(n) : n
+  const val = typeof n === 'string' ? Number.parseFloat(n) : n
   return `${new Intl.NumberFormat('fr-MA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val)} ${currency}`
 }
 
@@ -322,7 +308,7 @@ export function InvoiceDocument({ invoice, lines, entrepreneur, client }: Invoic
           <View key={line.position} style={styles.tableRow}>
             <Text style={[styles.value, styles.colDesc]}>{line.description}</Text>
             <Text style={[styles.value, styles.colQty]}>
-              {new Intl.NumberFormat('fr-MA').format(parseFloat(line.quantity))}
+              {new Intl.NumberFormat('fr-MA').format(Number.parseFloat(line.quantity))}
             </Text>
             <Text style={[styles.value, styles.colPrice]}>
               {fmt(line.unitPriceOriginal, invoice.currency)}
@@ -363,9 +349,7 @@ export function InvoiceDocument({ invoice, lines, entrepreneur, client }: Invoic
             <View style={styles.legalAr}>
               <Text>ضريبة القيمة المضافة غير مطبقة — نظام المقاول الذاتي (قانون 114-13)</Text>
               <Text>يجب حفظ الفواتير لمدة 10 سنوات (م. 211 م.ع.ض)</Text>
-              {isForeignCurrency && (
-                <Text>تحويل العملة الأجنبية في أجل 3 أشهر</Text>
-              )}
+              {isForeignCurrency && <Text>تحويل العملة الأجنبية في أجل 3 أشهر</Text>}
             </View>
           </View>
         </View>

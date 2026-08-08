@@ -1,8 +1,8 @@
 import { auth } from '@/lib/auth'
 import { getEntrepreneur } from '@/lib/queries/entrepreneur'
 import { getInvoices } from '@/lib/queries/invoice'
-import Link from 'next/link'
 import { Plus } from 'lucide-react'
+import Link from 'next/link'
 
 const statusConfig: Record<string, { label: string; cls: string }> = {
   draft: { label: 'Brouillon', cls: 'bg-gray-100 text-gray-600' },
@@ -12,7 +12,7 @@ const statusConfig: Record<string, { label: string; cls: string }> = {
 }
 
 function fmt(n: string) {
-  return new Intl.NumberFormat('fr-MA', { maximumFractionDigits: 2 }).format(parseFloat(n))
+  return new Intl.NumberFormat('fr-MA', { maximumFractionDigits: 2 }).format(Number.parseFloat(n))
 }
 
 export default async function InvoicesPage() {

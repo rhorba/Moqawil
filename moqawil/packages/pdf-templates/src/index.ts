@@ -6,21 +6,21 @@
 
 import { renderToBuffer } from '@react-pdf/renderer'
 import React from 'react'
-import { InvoiceDocument, type InvoicePdfProps } from './invoice-template'
 import { DeclarationDocument, type DeclarationPdfProps } from './declaration-template'
+import { InvoiceDocument, type InvoicePdfProps } from './invoice-template'
 
 export type { InvoicePdfProps, DeclarationPdfProps }
 
 export async function renderInvoicePdf(data: InvoicePdfProps): Promise<Buffer> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: react-pdf's Document element type doesn't compose with React.createElement's generic signature.
   const element = React.createElement(InvoiceDocument as any, data)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: renderToBuffer expects react-pdf's own ReactElement<DocumentProps>, which this doesn't satisfy.
   return renderToBuffer(element as any)
 }
 
 export async function renderDeclarationPdf(data: DeclarationPdfProps): Promise<Buffer> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: see renderInvoicePdf above.
   const element = React.createElement(DeclarationDocument as any, data)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // biome-ignore lint/suspicious/noExplicitAny: see renderInvoicePdf above.
   return renderToBuffer(element as any)
 }

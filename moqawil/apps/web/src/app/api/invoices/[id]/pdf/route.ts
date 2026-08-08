@@ -1,7 +1,7 @@
 import { auth } from '@/lib/auth'
+import { getClientById } from '@/lib/queries/client'
 import { getEntrepreneur } from '@/lib/queries/entrepreneur'
 import { getInvoiceWithLines } from '@/lib/queries/invoice'
-import { getClientById } from '@/lib/queries/client'
 import { renderInvoicePdf } from '@moqawil/pdf-templates'
 import { NextResponse } from 'next/server'
 

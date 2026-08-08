@@ -4,13 +4,13 @@
  * using the tax-engine pure functions (no DB dependency).
  */
 
-import { describe, it, expect } from 'vitest'
 import {
-  getCapStatus,
   PER_CLIENT_CAP_MAD,
   WHT_RATE_OVER_CAP,
   computeWithholdingOverCap,
+  getCapStatus,
 } from '@moqawil/tax-engine'
+import { describe, expect, it } from 'vitest'
 
 describe('Cap tracker — 80,000 MAD per-client annual limit', () => {
   describe('getCapStatus boundaries (CGI Article 73-II-G-8°)', () => {

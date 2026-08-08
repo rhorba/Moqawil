@@ -1,12 +1,12 @@
 'use client'
 
-import { useActionState, useState, useEffect } from 'react'
-import { updateInvoice, type EditInvoiceFormState } from '../../actions'
 import { CapBadge } from '@/components/cap-badge'
 import { CapConfirmDialog } from '@/components/cap-confirm-dialog'
-import { Plus, Trash2 } from 'lucide-react'
+import type { clients, invoiceLines, invoices } from '@moqawil/db'
 import type { InferSelectModel } from 'drizzle-orm'
-import type { clients, invoices, invoiceLines } from '@moqawil/db'
+import { Plus, Trash2 } from 'lucide-react'
+import { useActionState, useEffect, useState } from 'react'
+import { type EditInvoiceFormState, updateInvoice } from '../../actions'
 
 type Client = InferSelectModel<typeof clients>
 type Invoice = InferSelectModel<typeof invoices>
@@ -50,7 +50,10 @@ export function EditInvoiceForm({
   isService,
 }: EditInvoiceFormProps) {
   const boundAction = updateInvoice.bind(null, invoiceId)
-  const [state, formAction, pending] = useActionState<EditInvoiceFormState, FormData>(boundAction, {})
+  const [state, formAction, pending] = useActionState<EditInvoiceFormState, FormData>(
+    boundAction,
+    {}
+  )
 
   const [lines, setLines] = useState<Line[]>(
     initialLines.map((l) => ({
@@ -80,22 +83,28 @@ export function EditInvoiceForm({
       const res = await fetch('/api/exchange-rate')
       const data = await res.json()
       const rate = data[cur]
-      if (rate) { setExchangeRate(String(rate)); setBamRateError(null) }
-      else setBamRateError(data.error ?? `Taux ${cur}/MAD non disponible — saisie manuelle requise`)
+      if (rate) {
+        setExchangeRate(String(rate))
+        setBamRateError(null)
+      } else
+        setBamRateError(data.error ?? `Taux ${cur}/MAD non disponible — saisie manuelle requise`)
     } catch {
       setBamRateError('Impossible de récupérer le taux BAM — saisie manuelle requise')
     }
   }
 
   const totalMad = lines.reduce((sum, l) => {
-    const qty = parseFloat(l.quantity) || 0
-    const price = parseFloat(l.unitPriceOriginal) || 0
-    const rate = parseFloat(String(exchangeRate)) || 1
+    const qty = Number.parseFloat(l.quantity) || 0
+    const price = Number.parseFloat(l.unitPriceOriginal) || 0
+    const rate = Number.parseFloat(String(exchangeRate)) || 1
     return sum + qty * price * rate
   }, 0)
 
   function addLine() {
-    setLines((prev) => [...prev, { id: Date.now(), description: '', quantity: '1', unitPriceOriginal: '' }])
+    setLines((prev) => [
+      ...prev,
+      { id: Date.now(), description: '', quantity: '1', unitPriceOriginal: '' },
+    ])
   }
   function removeLine(id: number) {
     setLines((prev) => prev.filter((l) => l.id !== id))
@@ -129,7 +138,10 @@ export function EditInvoiceForm({
         <CapConfirmDialog
           capWarning={state.capWarning}
           onConfirm={handleCapConfirm}
-          onCancel={() => { setShowCapDialog(false); setCapConfirmed(false) }}
+          onCancel={() => {
+            setShowCapDialog(false)
+            setCapConfirmed(false)
+          }}
         />
       )}
 
@@ -163,10 +175,11 @@ export function EditInvoiceForm({
         {/* Dates */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="issueDate" className="block text-sm font-medium text-gray-700 mb-1">
               Date d&apos;émission <span className="text-red-500">*</span>
             </label>
             <input
+              id="issueDate"
               name="issueDate"
               type="date"
               defaultValue={invoice.issueDate}
@@ -174,10 +187,11 @@ export function EditInvoiceForm({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700 mb-1">
               Date d&apos;échéance
             </label>
             <input
+              id="dueDate"
               name="dueDate"
               type="date"
               defaultValue={invoice.dueDate ?? ''}
@@ -189,27 +203,40 @@ export function EditInvoiceForm({
         {/* Currency */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Devise</label>
+            <label htmlFor="currency" className="block text-sm font-medium text-gray-700 mb-1">
+              Devise
+            </label>
             <select
+              id="currency"
               name="currency"
               value={currency}
               onChange={(e) => {
                 const cur = e.target.value
                 setCurrency(cur)
-                if (cur === 'MAD') { setExchangeRate('1'); setBamRateError(null) }
-                else fetchBamRate(cur)
+                if (cur === 'MAD') {
+                  setExchangeRate('1')
+                  setBamRateError(null)
+                } else fetchBamRate(cur)
               }}
               className="w-full border rounded-lg px-3 py-2 text-sm"
             >
-              {currencies.map((c) => <option key={c} value={c}>{c}</option>)}
+              {currencies.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
             </select>
           </div>
           {currency !== 'MAD' && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="exchangeRate"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Taux BAM (MAD/{currency})
               </label>
               <input
+                id="exchangeRate"
                 name="exchangeRate"
                 type="number"
                 step="0.0001"
@@ -227,7 +254,7 @@ export function EditInvoiceForm({
         {/* Line items */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label className="text-sm font-medium text-gray-700">Lignes</label>
+            <span className="text-sm font-medium text-gray-700">Lignes</span>
             <button
               type="button"
               onClick={addLine}
@@ -298,8 +325,11 @@ export function EditInvoiceForm({
 
         {/* Payment method */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Mode de paiement</label>
+          <label htmlFor="paymentMethod" className="block text-sm font-medium text-gray-700 mb-1">
+            Mode de paiement
+          </label>
           <select
+            id="paymentMethod"
             name="paymentMethod"
             defaultValue={invoice.paymentMethod ?? ''}
             className="w-full border rounded-lg px-3 py-2 text-sm"
@@ -316,8 +346,11 @@ export function EditInvoiceForm({
 
         {/* Notes */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+          <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
+            Notes
+          </label>
           <textarea
+            id="notes"
             name="notes"
             rows={3}
             defaultValue={invoice.notes ?? ''}

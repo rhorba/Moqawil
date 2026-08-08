@@ -5,8 +5,13 @@
  * These are unit-level security logic tests. DB-level IDOR tests are integration tests.
  */
 
-import { describe, it, expect } from 'vitest'
-import { getCapStatus, PER_CLIENT_CAP_MAD, formatInvoiceNumber, validateICE } from '@moqawil/tax-engine'
+import {
+  PER_CLIENT_CAP_MAD,
+  formatInvoiceNumber,
+  getCapStatus,
+  validateICE,
+} from '@moqawil/tax-engine'
+import { describe, expect, it } from 'vitest'
 
 describe('Security: cap bypass prevention', () => {
   it('cap check uses invoiced total (not paid) — no bypass via unpaid invoices', () => {

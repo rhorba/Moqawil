@@ -28,7 +28,7 @@ function createTransport() {
 }
 
 function fmtMad(n: number) {
-  return new Intl.NumberFormat('fr-MA', { maximumFractionDigits: 0 }).format(n) + ' DH'
+  return `${new Intl.NumberFormat('fr-MA', { maximumFractionDigits: 0 }).format(n)} DH`
 }
 
 async function sendThresholdAlert(opts: {
@@ -47,8 +47,8 @@ async function sendThresholdAlert(opts: {
     opts.level === 100
       ? '⚠️ URGENT — Plafond annuel atteint'
       : opts.level === 90
-      ? '⚠️ Attention — 90% du plafond annuel'
-      : 'Info — 70% du plafond annuel atteint'
+        ? '⚠️ Attention — 90% du plafond annuel'
+        : 'Info — 70% du plafond annuel atteint'
 
   const body =
     opts.level === 100

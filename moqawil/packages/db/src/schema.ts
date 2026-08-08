@@ -6,19 +6,19 @@
  * Never delete invoices — soft-delete or cancel status only (CGI Article 211: 10-year retention).
  */
 
+import { relations } from 'drizzle-orm'
 import {
-  pgTable,
-  pgEnum,
-  uuid,
-  text,
+  date,
+  index,
   integer,
   numeric,
-  date,
+  pgEnum,
+  pgTable,
+  text,
   timestamp,
   unique,
-  index,
+  uuid,
 } from 'drizzle-orm/pg-core'
-import { relations } from 'drizzle-orm'
 
 // ── Enums ────────────────────────────────────────────────────────────────────
 
@@ -29,18 +29,9 @@ export const activityTypeEnum = pgEnum('activity_type', [
   'service',
 ])
 
-export const clientTypeEnum = pgEnum('client_type', [
-  'individual',
-  'company_ma',
-  'company_foreign',
-])
+export const clientTypeEnum = pgEnum('client_type', ['individual', 'company_ma', 'company_foreign'])
 
-export const invoiceStatusEnum = pgEnum('invoice_status', [
-  'draft',
-  'sent',
-  'paid',
-  'cancelled',
-])
+export const invoiceStatusEnum = pgEnum('invoice_status', ['draft', 'sent', 'paid', 'cancelled'])
 
 export const paymentMethodEnum = pgEnum('payment_method', [
   'virement',
@@ -56,7 +47,7 @@ export const declarationStatusEnum = pgEnum('declaration_status', ['pending', 's
 // ── Users (managed by Auth.js) ───────────────────────────────────────────────
 
 export const users = pgTable('users', {
-  id: text('id').primaryKey(),  // Auth.js uses text IDs
+  id: text('id').primaryKey(), // Auth.js uses text IDs
   name: text('name'),
   email: text('email').unique().notNull(),
   emailVerified: timestamp('email_verified'),
@@ -66,7 +57,9 @@ export const users = pgTable('users', {
 
 // Auth.js adapter tables
 export const accounts = pgTable('accounts', {
-  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
   type: text('type').notNull(),
   provider: text('provider').notNull(),
   providerAccountId: text('provider_account_id').notNull(),
@@ -81,7 +74,9 @@ export const accounts = pgTable('accounts', {
 
 export const sessions = pgTable('sessions', {
   sessionToken: text('session_token').primaryKey(),
-  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
   expires: timestamp('expires').notNull(),
 })
 
@@ -95,7 +90,10 @@ export const verificationTokens = pgTable('verification_tokens', {
 
 export const entrepreneurs = pgTable('entrepreneurs', {
   id: uuid('id').primaryKey().defaultRandom(),
-  userId: text('user_id').unique().notNull().references(() => users.id, { onDelete: 'cascade' }),
+  userId: text('user_id')
+    .unique()
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
   fullName: text('full_name').notNull(),
   // Identifiant Commun de l'Entreprise — 15 digits, mandatory since 2021 (CGI Article 145)
   ice: text('ice').unique().notNull(),
@@ -118,9 +116,11 @@ export const entrepreneurs = pgTable('entrepreneurs', {
 
 export const clients = pgTable('clients', {
   id: uuid('id').primaryKey().defaultRandom(),
-  entrepreneurId: uuid('entrepreneur_id').notNull().references(() => entrepreneurs.id, {
-    onDelete: 'cascade',
-  }),
+  entrepreneurId: uuid('entrepreneur_id')
+    .notNull()
+    .references(() => entrepreneurs.id, {
+      onDelete: 'cascade',
+    }),
   name: text('name').notNull(),
   type: clientTypeEnum('type').notNull(),
   // ICE required for Moroccan B2B (mandatory since Jan 2019, CGI Article 145)
@@ -140,8 +140,12 @@ export const invoices = pgTable(
   'invoices',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    entrepreneurId: uuid('entrepreneur_id').notNull().references(() => entrepreneurs.id),
-    clientId: uuid('client_id').notNull().references(() => clients.id),
+    entrepreneurId: uuid('entrepreneur_id')
+      .notNull()
+      .references(() => entrepreneurs.id),
+    clientId: uuid('client_id')
+      .notNull()
+      .references(() => clients.id),
     // Sequential number — no gaps allowed (CGI Article 145)
     invoiceNumber: text('invoice_number').notNull(),
     fiscalYear: integer('fiscal_year').notNull(),
@@ -178,7 +182,9 @@ export const invoices = pgTable(
 
 export const invoiceLines = pgTable('invoice_lines', {
   id: uuid('id').primaryKey().defaultRandom(),
-  invoiceId: uuid('invoice_id').notNull().references(() => invoices.id, { onDelete: 'cascade' }),
+  invoiceId: uuid('invoice_id')
+    .notNull()
+    .references(() => invoices.id, { onDelete: 'cascade' }),
   position: integer('position').notNull(),
   description: text('description').notNull(),
   quantity: numeric('quantity', { precision: 10, scale: 3 }).notNull(),
@@ -193,9 +199,11 @@ export const quarterlyDeclarations = pgTable(
   'quarterly_declarations',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    entrepreneurId: uuid('entrepreneur_id').notNull().references(() => entrepreneurs.id),
+    entrepreneurId: uuid('entrepreneur_id')
+      .notNull()
+      .references(() => entrepreneurs.id),
     year: integer('year').notNull(),
-    quarter: integer('quarter').notNull(),  // 1-4
+    quarter: integer('quarter').notNull(), // 1-4
     totalTurnoverMad: numeric('total_turnover_mad', { precision: 12, scale: 2 }).notNull(),
     // Tax rate at time of declaration (0.005 or 0.010) — stored for historical accuracy
     taxRate: numeric('tax_rate', { precision: 4, scale: 3 }).notNull(),
@@ -206,9 +214,7 @@ export const quarterlyDeclarations = pgTable(
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
-  (t) => [
-    unique('uq_declaration_quarter').on(t.entrepreneurId, t.year, t.quarter),
-  ]
+  (t) => [unique('uq_declaration_quarter').on(t.entrepreneurId, t.year, t.quarter)]
 )
 
 // ── Relations ─────────────────────────────────────────────────────────────────

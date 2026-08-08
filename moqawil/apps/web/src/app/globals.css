@@ -7,13 +7,13 @@
   --color-primary-foreground: oklch(0.98 0 0);
 
   /* Cap / Threshold status colors */
-  --color-safe:    oklch(0.55 0.15 145);
+  --color-safe: oklch(0.55 0.15 145);
   --color-warning: oklch(0.65 0.16 75);
-  --color-danger:  oklch(0.55 0.20 25);
+  --color-danger: oklch(0.55 0.2 25);
 
-  --color-safe-bg:    oklch(0.96 0.03 145);
+  --color-safe-bg: oklch(0.96 0.03 145);
   --color-warning-bg: oklch(0.97 0.04 75);
-  --color-danger-bg:  oklch(0.97 0.03 25);
+  --color-danger-bg: oklch(0.97 0.03 25);
 
   /* Typography */
   --font-sans: Inter, "Segoe UI", Arial, sans-serif;
@@ -37,9 +37,18 @@
 
 /* Print styles for quarterly declarations */
 @media print {
-  nav, aside, [data-no-print] { display: none !important; }
-  body { font-size: 11pt; color: #000; }
-  .declaration-form { page-break-inside: avoid; }
+  nav,
+  aside,
+  [data-no-print] {
+    display: none !important;
+  }
+  body {
+    font-size: 11pt;
+    color: #000;
+  }
+  .declaration-form {
+    page-break-inside: avoid;
+  }
   .bilingual-mention {
     display: grid;
     grid-template-columns: 1fr 1fr;

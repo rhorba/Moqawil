@@ -1,14 +1,14 @@
 'use server'
 
 import { auth } from '@/lib/auth'
-import { db, invoices, invoiceLines } from '@moqawil/db'
-import { eq, and } from 'drizzle-orm'
-import { sql } from 'drizzle-orm'
+import { getClientAnnualTotal, getClientById } from '@/lib/queries/client'
 import { getEntrepreneur } from '@/lib/queries/entrepreneur'
-import { getClientById, getClientAnnualTotal } from '@/lib/queries/client'
-import { formatInvoiceNumber, PER_CLIENT_CAP_MAD } from '@moqawil/tax-engine'
-import { redirect } from 'next/navigation'
+import { db, invoiceLines, invoices } from '@moqawil/db'
+import { PER_CLIENT_CAP_MAD, formatInvoiceNumber } from '@moqawil/tax-engine'
+import { and, eq } from 'drizzle-orm'
+import { sql } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import { z } from 'zod'
 
 const lineSchema = z.object({
@@ -24,8 +24,10 @@ const invoiceSchema = z.object({
   currency: z.string().default('MAD'),
   exchangeRate: z.coerce.number().optional(),
   notes: z.string().optional(),
-  paymentMethod: z
-    .preprocess((v) => (v === '' ? undefined : v), z.enum(['virement', 'cheque', 'espece', 'effet', 'carte', 'other']).optional()),
+  paymentMethod: z.preprocess(
+    (v) => (v === '' ? undefined : v),
+    z.enum(['virement', 'cheque', 'espece', 'effet', 'carte', 'other']).optional()
+  ),
   capConfirmed: z.coerce.boolean().optional(),
 })
 
@@ -46,8 +48,10 @@ function parseLines(formData: FormData): z.infer<typeof lineSchema>[] {
   while (formData.has(`lines[${i}][description]`)) {
     lines.push({
       description: formData.get(`lines[${i}][description]`) as string,
-      quantity: parseFloat(formData.get(`lines[${i}][quantity]`) as string),
-      unitPriceOriginal: parseFloat(formData.get(`lines[${i}][unitPriceOriginal]`) as string),
+      quantity: Number.parseFloat(formData.get(`lines[${i}][quantity]`) as string),
+      unitPriceOriginal: Number.parseFloat(
+        formData.get(`lines[${i}][unitPriceOriginal]`) as string
+      ),
     })
     i++
   }
@@ -122,9 +126,7 @@ export async function createInvoice(
   const result = await db.transaction(async (tx) => {
     // PostgreSQL advisory lock — keyed on hash of entrepreneurId to prevent concurrent inserts
     // lock key: first 8 chars of UUID as bigint via hashtext
-    await tx.execute(
-      sql`SELECT pg_advisory_xact_lock(hashtext(${entrepreneur.id}))`
-    )
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${entrepreneur.id}))`)
 
     // Get next sequence number within the lock
     const [seqRow] = await tx
@@ -132,12 +134,7 @@ export async function createInvoice(
         maxSeq: sql<number>`COALESCE(MAX(${invoices.sequenceNumber}), 0)`,
       })
       .from(invoices)
-      .where(
-        and(
-          eq(invoices.entrepreneurId, entrepreneur.id),
-          eq(invoices.fiscalYear, fiscalYear)
-        )
-      )
+      .where(and(eq(invoices.entrepreneurId, entrepreneur.id), eq(invoices.fiscalYear, fiscalYear)))
 
     const seqNumber = (seqRow?.maxSeq ?? 0) + 1
     const invoiceNumber = formatInvoiceNumber(entrepreneur.invoicePrefix, fiscalYear, seqNumber)
@@ -200,7 +197,7 @@ export async function sendInvoiceByEmail(
 
   const client = await getClientById(invoice.clientId, entrepreneur.id)
   if (!client?.email) {
-    return { success: false, message: 'Le client n\'a pas d\'adresse e-mail enregistrée' }
+    return { success: false, message: "Le client n'a pas d'adresse e-mail enregistrée" }
   }
 
   const { renderInvoicePdf } = await import('@moqawil/pdf-templates')
@@ -254,7 +251,7 @@ export async function sendInvoiceByEmail(
     entrepreneurName: entrepreneur.fullName,
     invoiceNumber: invoice.invoiceNumber,
     totalMad: new Intl.NumberFormat('fr-MA', { maximumFractionDigits: 2 }).format(
-      parseFloat(invoice.totalMad)
+      Number.parseFloat(invoice.totalMad)
     ),
     pdfBuffer: pdfBuffer as Buffer,
   })
@@ -317,8 +314,10 @@ const editInvoiceSchema = z.object({
   currency: z.string().default('MAD'),
   exchangeRate: z.coerce.number().optional(),
   notes: z.string().optional(),
-  paymentMethod: z
-    .preprocess((v) => (v === '' ? undefined : v), z.enum(['virement', 'cheque', 'espece', 'effet', 'carte', 'other']).optional()),
+  paymentMethod: z.preprocess(
+    (v) => (v === '' ? undefined : v),
+    z.enum(['virement', 'cheque', 'espece', 'effet', 'carte', 'other']).optional()
+  ),
   capConfirmed: z.coerce.boolean().optional(),
 })
 
@@ -366,7 +365,8 @@ export async function updateInvoice(
     .limit(1)
 
   if (!existing) return { message: 'Facture introuvable' }
-  if (existing.status !== 'draft') return { message: 'Seules les factures brouillon peuvent être modifiées' }
+  if (existing.status !== 'draft')
+    return { message: 'Seules les factures brouillon peuvent être modifiées' }
 
   const exchangeRate = data.currency === 'MAD' ? 1 : (data.exchangeRate ?? 1)
   const lines = rawLines.map((l) => ({
@@ -385,7 +385,7 @@ export async function updateInvoice(
     const fiscalYear = new Date(data.issueDate).getFullYear()
     const capData = await getClientAnnualTotal(existing.clientId, fiscalYear)
     // Subtract the old invoice total before projecting the new one
-    const previousTotal = parseFloat(existing.totalMad)
+    const previousTotal = Number.parseFloat(existing.totalMad)
     const projectedTotal = capData.totalInvoicedMad - previousTotal + totalMad
     if (projectedTotal > PER_CLIENT_CAP_MAD && !data.capConfirmed) {
       const client = await getClientById(existing.clientId, entrepreneur.id)

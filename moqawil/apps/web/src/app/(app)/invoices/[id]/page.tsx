@@ -1,16 +1,16 @@
+import { CapBadge } from '@/components/cap-badge'
 import { auth } from '@/lib/auth'
+import { getClientAnnualTotal, getClientById } from '@/lib/queries/client'
 import { getEntrepreneur } from '@/lib/queries/entrepreneur'
 import { getInvoiceWithLines } from '@/lib/queries/invoice'
-import { getClientById, getClientAnnualTotal } from '@/lib/queries/client'
-import { CapBadge } from '@/components/cap-badge'
-import { InvoiceActions } from '../invoice-actions'
-import Link from 'next/link'
 import { ArrowLeft, Download, Pencil } from 'lucide-react'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { InvoiceActions } from '../invoice-actions'
 
 function fmt(n: string | number) {
   return new Intl.NumberFormat('fr-MA', { maximumFractionDigits: 2 }).format(
-    typeof n === 'string' ? parseFloat(n) : n
+    typeof n === 'string' ? Number.parseFloat(n) : n
   )
 }
 
@@ -33,9 +33,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
   const { invoice, lines } = data
   const client = await getClientById(invoice.clientId, entrepreneur.id)
   const isService = entrepreneur.activityType === 'service'
-  const cap = isService && client
-    ? await getClientAnnualTotal(client.id, invoice.fiscalYear)
-    : null
+  const cap = isService && client ? await getClientAnnualTotal(client.id, invoice.fiscalYear) : null
 
   const status = statusConfig[invoice.status] ?? statusConfig.draft
 
@@ -125,9 +123,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
                 <td className="px-4 py-2 text-end text-gray-700">
                   {fmt(line.unitPriceOriginal)} {invoice.currency}
                 </td>
-                <td className="px-4 py-2 text-end font-medium">
-                  {fmt(line.lineTotalMad)} DH
-                </td>
+                <td className="px-4 py-2 text-end font-medium">{fmt(line.lineTotalMad)} DH</td>
               </tr>
             ))}
           </tbody>
@@ -142,7 +138,11 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
         </table>
       </div>
 
-      <InvoiceActions invoiceId={id} currentStatus={invoice.status} clientEmail={client?.email ?? null} />
+      <InvoiceActions
+        invoiceId={id}
+        currentStatus={invoice.status}
+        clientEmail={client?.email ?? null}
+      />
     </div>
   )
 }

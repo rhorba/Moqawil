@@ -8,7 +8,7 @@
  * SMTP env vars are set/cleared around each group.
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // vi.hoisted ensures mockSendMail is defined before the vi.mock factory runs
 const mocks = vi.hoisted(() => ({
@@ -33,7 +33,10 @@ const SMTP_ENV = {
 
 function clearSmtp() {
   for (const k of Object.keys(SMTP_ENV)) delete process.env[k]
-  delete process.env['SMTP_FROM']
+  // `process.env.X = undefined` stringifies to "undefined" (Node.js coerces all
+  // process.env assignments to strings) rather than deleting the key — that silently
+  // broke the `SMTP_FROM ?? SMTP_USER` fallback test that runs after this cleanup.
+  delete process.env.SMTP_FROM
 }
 
 // ── SMTP not configured ──────────────────────────────────────────────────────
@@ -200,7 +203,7 @@ describe('checkAndSendThresholdAlerts — SMTP configured', () => {
   })
 
   it('uses SMTP_FROM env var as sender when set', async () => {
-    process.env['SMTP_FROM'] = 'noreply@moqawil.ma'
+    process.env.SMTP_FROM = 'noreply@moqawil.ma'
     // 130K → 145K: crosses 70% → sends 1 email
     await checkAndSendThresholdAlerts({
       userEmail: 'ae@test.ma',

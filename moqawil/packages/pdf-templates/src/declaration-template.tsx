@@ -1,11 +1,4 @@
-/**
- * Quarterly declaration PDF template — modelled on Barid Al-Maghrib form.
- * Pre-filled with AE data so the user just signs and submits at the bank.
- * Bilingual FR (primary) + AR (mandatory legal text).
- */
-
-import React from 'react'
-import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
+import { Document, Page, StyleSheet, Text, View } from '@react-pdf/renderer'
 
 const styles = StyleSheet.create({
   page: {
@@ -173,8 +166,7 @@ export interface DeclarationPdfProps {
 
 export function DeclarationDocument({ declaration, entrepreneur }: DeclarationPdfProps) {
   const ql = quarterLabels[declaration.quarter]
-  const taxRatePct =
-    entrepreneur.activityType === 'service' ? '1,0 %' : '0,5 %'
+  const taxRatePct = entrepreneur.activityType === 'service' ? '1,0 %' : '0,5 %'
 
   return (
     <Document
@@ -194,7 +186,9 @@ export function DeclarationDocument({ declaration, entrepreneur }: DeclarationPd
           </View>
           <View style={styles.headerAr}>
             <Text style={[styles.title, { textAlign: 'right' }]}>تصريح برقم الأعمال</Text>
-            <Text style={[styles.subtitle, { textAlign: 'right' }]}>نظام المقاول الذاتي — القانون 114-13</Text>
+            <Text style={[styles.subtitle, { textAlign: 'right' }]}>
+              نظام المقاول الذاتي — القانون 114-13
+            </Text>
             <Text style={[styles.subtitle, { textAlign: 'right' }]}>
               {ql.ar} {declaration.year}
             </Text>
@@ -215,7 +209,9 @@ export function DeclarationDocument({ declaration, entrepreneur }: DeclarationPd
         </View>
         <View style={styles.row}>
           <Text style={styles.fieldLabel}>Adresse :</Text>
-          <Text style={styles.fieldValue}>{entrepreneur.address}, {entrepreneur.city}</Text>
+          <Text style={styles.fieldValue}>
+            {entrepreneur.address}, {entrepreneur.city}
+          </Text>
         </View>
         <View style={styles.row}>
           <Text style={styles.fieldLabel}>Téléphone :</Text>
@@ -225,7 +221,9 @@ export function DeclarationDocument({ declaration, entrepreneur }: DeclarationPd
         </View>
         <View style={styles.row}>
           <Text style={styles.fieldLabel}>Activité :</Text>
-          <Text style={styles.fieldValue}>{activityLabels[entrepreneur.activityType] ?? entrepreneur.activityType}</Text>
+          <Text style={styles.fieldValue}>
+            {activityLabels[entrepreneur.activityType] ?? entrepreneur.activityType}
+          </Text>
         </View>
 
         {/* Declaration period */}
@@ -234,11 +232,15 @@ export function DeclarationDocument({ declaration, entrepreneur }: DeclarationPd
           <Text style={styles.fieldLabel}>Exercice fiscal :</Text>
           <Text style={styles.fieldValue}>{declaration.year}</Text>
           <Text style={[styles.fieldLabel, { marginLeft: 16 }]}>Trimestre :</Text>
-          <Text style={styles.fieldValue}>{ql.fr} ({ql.period})</Text>
+          <Text style={styles.fieldValue}>
+            {ql.fr} ({ql.period})
+          </Text>
         </View>
 
         {/* CA breakdown */}
-        <Text style={styles.sectionLabel}>Chiffre d&apos;affaires déclaré / رقم الأعمال المصرح به</Text>
+        <Text style={styles.sectionLabel}>
+          Chiffre d&apos;affaires déclaré / رقم الأعمال المصرح به
+        </Text>
         <View style={styles.tableHeader}>
           <Text style={[styles.headerText, styles.col1]}>Désignation</Text>
           <Text style={[styles.headerText, styles.col2]}>Montant (MAD)</Text>
@@ -265,8 +267,8 @@ export function DeclarationDocument({ declaration, entrepreneur }: DeclarationPd
           <View style={{ marginTop: 8, padding: 6, backgroundColor: '#fff9e6', borderRadius: 3 }}>
             <Text style={{ fontSize: 8, color: '#7d5a00' }}>
               DÉCLARATION NÉANTE — Chiffre d&apos;affaires nul pour la période. La déclaration reste
-              obligatoire (Article 7 de la Loi 114-13). Deux déclarations nulles consécutives
-              (à partir de l&apos;an 2) entraînent la radiation du registre RNAE.
+              obligatoire (Article 7 de la Loi 114-13). Deux déclarations nulles consécutives (à
+              partir de l&apos;an 2) entraînent la radiation du registre RNAE.
             </Text>
           </View>
         )}
@@ -279,7 +281,9 @@ export function DeclarationDocument({ declaration, entrepreneur }: DeclarationPd
             <Text style={{ fontSize: 7, color: '#aaa', marginTop: 16 }}>Date :</Text>
           </View>
           <View style={styles.signatureBox}>
-            <Text style={styles.signatureLabel}>Cachet et signature de la banque (Al Barid Bank)</Text>
+            <Text style={styles.signatureLabel}>
+              Cachet et signature de la banque (Al Barid Bank)
+            </Text>
             <Text style={{ fontSize: 7, color: '#aaa' }}>Date de réception :</Text>
             <Text style={{ fontSize: 7, color: '#aaa', marginTop: 16 }}>Référence paiement :</Text>
           </View>
@@ -288,7 +292,8 @@ export function DeclarationDocument({ declaration, entrepreneur }: DeclarationPd
         {/* Legal footer */}
         <View style={styles.legalBox} fixed>
           <Text style={styles.legalText}>
-            Régime Auto-Entrepreneur — Loi 114-13 · À déposer à Al Barid Bank, Attijariwafa, BMCE ou tout établissement agréé
+            Régime Auto-Entrepreneur — Loi 114-13 · À déposer à Al Barid Bank, Attijariwafa, BMCE ou
+            tout établissement agréé
           </Text>
           <Text style={styles.legalText}>
             نظام المقاول الذاتي — القانون 114-13 · للإيداع لدى بريد بنك أو أي مؤسسة معتمدة

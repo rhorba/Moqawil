@@ -1,6 +1,6 @@
-import { db, clients, invoices } from '@moqawil/db'
-import { eq, and, sql } from 'drizzle-orm'
-import { getCapStatus, PER_CLIENT_CAP_MAD } from '@moqawil/tax-engine'
+import { clients, db, invoices } from '@moqawil/db'
+import { PER_CLIENT_CAP_MAD, getCapStatus } from '@moqawil/tax-engine'
+import { and, eq, sql } from 'drizzle-orm'
 
 export async function getClients(entrepreneurId: string) {
   return db
@@ -37,8 +37,8 @@ export async function getClientAnnualTotal(clientId: string, year: number) {
     .from(invoices)
     .where(and(eq(invoices.clientId, clientId), eq(invoices.fiscalYear, year)))
 
-  const totalInvoicedMad = parseFloat(row?.totalInvoicedMad ?? '0')
-  const totalPaidMad = parseFloat(row?.totalPaidMad ?? '0')
+  const totalInvoicedMad = Number.parseFloat(row?.totalInvoicedMad ?? '0')
+  const totalPaidMad = Number.parseFloat(row?.totalPaidMad ?? '0')
   const capStatus = getCapStatus(totalInvoicedMad)
 
   return {
@@ -68,13 +68,13 @@ export async function getAllClientAnnualTotals(entrepreneurId: string, year: num
 
   return Object.fromEntries(
     rows.map((r) => {
-      const total = parseFloat(r.totalInvoicedMad)
+      const total = Number.parseFloat(r.totalInvoicedMad)
       const cap = getCapStatus(total)
       return [
         r.clientId,
         {
           totalInvoicedMad: total,
-          totalPaidMad: parseFloat(r.totalPaidMad),
+          totalPaidMad: Number.parseFloat(r.totalPaidMad),
           remainingToCapMad: Math.max(0, PER_CLIENT_CAP_MAD - total),
           percentOfCap: cap.percentOfCap,
           status: cap.status,

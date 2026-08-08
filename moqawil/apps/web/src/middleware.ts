@@ -1,5 +1,5 @@
-import NextAuth from 'next-auth'
 import { authConfig } from '@/lib/auth.config'
+import NextAuth from 'next-auth'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 

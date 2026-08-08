@@ -7,7 +7,7 @@
  * stub is in place before module resolution runs.
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // Stub out @moqawil/db so the pure-function helpers can be imported without
 // a live DATABASE_URL (the DB package throws at module-load time if absent).
@@ -17,11 +17,7 @@ vi.mock('@moqawil/db', () => ({
   quarterlyDeclarations: {},
 }))
 
-import {
-  quarterDateRange,
-  declarationDeadline,
-  daysUntilDeadline,
-} from '@/lib/queries/declaration'
+import { daysUntilDeadline, declarationDeadline, quarterDateRange } from '@/lib/queries/declaration'
 
 // ── quarterDateRange ─────────────────────────────────────────────────────────
 

@@ -1,9 +1,9 @@
-import { auth } from '@/lib/auth'
-import { getEntrepreneur } from '@/lib/queries/entrepreneur'
-import { getClients, getAllClientAnnualTotals } from '@/lib/queries/client'
 import { CapBadge } from '@/components/cap-badge'
+import { auth } from '@/lib/auth'
+import { getAllClientAnnualTotals, getClients } from '@/lib/queries/client'
+import { getEntrepreneur } from '@/lib/queries/entrepreneur'
+import { ChevronRight, Plus } from 'lucide-react'
 import Link from 'next/link'
-import { Plus, ChevronRight } from 'lucide-react'
 
 export default async function ClientsPage() {
   const session = await auth()
@@ -57,9 +57,7 @@ export default async function ClientsPage() {
                     <p className="font-medium text-gray-900 truncate">{client.name}</p>
                     <ClientTypeBadge type={client.type} />
                   </div>
-                  {client.email && (
-                    <p className="text-sm text-gray-500 mt-0.5">{client.email}</p>
-                  )}
+                  {client.email && <p className="text-sm text-gray-500 mt-0.5">{client.email}</p>}
                 </div>
 
                 <div className="flex items-center gap-3 ms-4 flex-shrink-0">

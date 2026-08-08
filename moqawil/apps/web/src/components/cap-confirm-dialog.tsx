@@ -27,8 +27,7 @@ export function CapConfirmDialog({ capWarning, onConfirm, onCancel }: CapConfirm
 
         <div className="p-5 space-y-4">
           <p className="text-sm text-gray-700">
-            Cette facture fera dépasser le plafond annuel de{' '}
-            <strong>80 000 DH</strong> avec{' '}
+            Cette facture fera dépasser le plafond annuel de <strong>80 000 DH</strong> avec{' '}
             <strong>{clientName}</strong> (CGI Article 73-II-G-8°, Loi de Finances 2023).
           </p>
 

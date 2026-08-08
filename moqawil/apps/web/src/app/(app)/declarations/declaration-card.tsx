@@ -1,8 +1,8 @@
 'use client'
 
+import { AlertTriangle, CheckCircle, Clock, FileText } from 'lucide-react'
 import { useState, useTransition } from 'react'
 import { generateDeclaration, markDeclarationSubmitted } from './actions'
-import { FileText, CheckCircle, Clock, AlertTriangle } from 'lucide-react'
 
 const quarterLabels: Record<number, string> = {
   1: 'T1 — Janvier · Février · Mars',
@@ -19,7 +19,10 @@ const quarterShort: Record<number, string> = {
 }
 
 function fmt(n: number) {
-  return new Intl.NumberFormat('fr-MA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)
+  return new Intl.NumberFormat('fr-MA', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(n)
 }
 
 interface DeclarationCardProps {
@@ -44,7 +47,11 @@ export function DeclarationCard({ declaration, year, activityType }: Declaration
   const [generated, setGenerated] = useState<{
     turnover: number
     taxDue: number
-  } | null>(declaration.id ? { turnover: declaration.totalTurnoverMad, taxDue: declaration.taxDueMad } : null)
+  } | null>(
+    declaration.id
+      ? { turnover: declaration.totalTurnoverMad, taxDue: declaration.taxDueMad }
+      : null
+  )
   const [declarationId, setDeclarationId] = useState(declaration.id)
   const [status, setStatus] = useState(declaration.status)
 
@@ -62,7 +69,8 @@ export function DeclarationCard({ declaration, year, activityType }: Declaration
   }
 
   function deadlineLabel() {
-    if (status === 'submitted') return `Soumise le ${declaration.submittedAt?.toLocaleDateString('fr-MA') ?? '—'}`
+    if (status === 'submitted')
+      return `Soumise le ${declaration.submittedAt?.toLocaleDateString('fr-MA') ?? '—'}`
     if (isOverdue) return `En retard de ${Math.abs(daysLeft)} j — limite ${deadline}`
     if (isUrgent) return `Urgent — ${daysLeft} j restants (limite ${deadline})`
     if (isFuture) return `Limite : ${deadline}`
@@ -72,8 +80,8 @@ export function DeclarationCard({ declaration, year, activityType }: Declaration
   function handleGenerate() {
     startTransition(async () => {
       const result = await generateDeclaration(year, quarter)
-      if (result.success && result.turnover !== undefined) {
-        setGenerated({ turnover: result.turnover!, taxDue: result.taxDue! })
+      if (result.success && result.turnover !== undefined && result.taxDue !== undefined) {
+        setGenerated({ turnover: result.turnover, taxDue: result.taxDue })
         if (result.id) setDeclarationId(result.id)
       }
     })
@@ -93,14 +101,16 @@ export function DeclarationCard({ declaration, year, activityType }: Declaration
         status === 'submitted'
           ? 'border-[var(--color-safe)] bg-[var(--color-safe-bg)]'
           : isOverdue
-          ? 'border-[var(--color-danger)] bg-[var(--color-danger-bg)]'
-          : 'border-gray-200 bg-white'
+            ? 'border-[var(--color-danger)] bg-[var(--color-danger-bg)]'
+            : 'border-gray-200 bg-white'
       }`}
     >
       {/* Card header */}
       <div className="flex items-center justify-between px-4 pt-4 pb-2">
         <div>
-          <span className="text-lg font-bold">{quarterShort[quarter]} {year}</span>
+          <span className="text-lg font-bold">
+            {quarterShort[quarter]} {year}
+          </span>
           <p className="text-xs text-gray-500 mt-0.5">{quarterLabels[quarter]}</p>
         </div>
         <div className="flex items-center gap-1.5">
@@ -143,8 +153,8 @@ export function DeclarationCard({ declaration, year, activityType }: Declaration
           </div>
           {generated.turnover === 0 && (
             <p className="text-xs text-[var(--color-warning)] mt-1">
-              CA nul — déclaration à zéro obligatoire. Deux déclarations nulles consécutives
-              dès l&apos;an 2 entraînent la perte du statut AE.
+              CA nul — déclaration à zéro obligatoire. Deux déclarations nulles consécutives dès
+              l&apos;an 2 entraînent la perte du statut AE.
             </p>
           )}
         </div>

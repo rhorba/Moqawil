@@ -28,13 +28,6 @@
     }
   },
   "files": {
-    "ignore": [
-      "node_modules",
-      ".next",
-      "dist",
-      "build",
-      "*.generated.ts",
-      "drizzle"
-    ]
+    "ignore": ["node_modules", ".next", "dist", "build", "*.generated.ts", "drizzle"]
   }
 }

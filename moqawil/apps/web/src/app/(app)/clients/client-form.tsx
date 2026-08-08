@@ -1,9 +1,9 @@
 'use client'
 
-import { useActionState } from 'react'
-import { createClient, updateClient, type ClientFormState } from './actions'
-import type { InferSelectModel } from 'drizzle-orm'
 import type { clients } from '@moqawil/db'
+import type { InferSelectModel } from 'drizzle-orm'
+import { useActionState } from 'react'
+import { type ClientFormState, createClient, updateClient } from './actions'
 
 type Client = InferSelectModel<typeof clients>
 
@@ -31,13 +31,20 @@ export function ClientForm({ client }: { client?: Client }) {
         </p>
       )}
 
-      <Field label="Nom / Raison sociale" name="name" defaultValue={client?.name} error={err('name')} required />
+      <Field
+        label="Nom / Raison sociale"
+        name="name"
+        defaultValue={client?.name}
+        error={err('name')}
+        required
+      />
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">
           Type <span className="text-red-500">*</span>
         </label>
         <select
+          id="type"
           name="type"
           defaultValue={client?.type ?? 'individual'}
           className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
@@ -60,16 +67,41 @@ export function ClientForm({ client }: { client?: Client }) {
           placeholder="000000000000000"
           hint="Obligatoire pour les entreprises marocaines"
         />
-        <Field label="IF" name="ifNumber" defaultValue={client?.ifNumber ?? ''} error={err('ifNumber')} />
+        <Field
+          label="IF"
+          name="ifNumber"
+          defaultValue={client?.ifNumber ?? ''}
+          error={err('ifNumber')}
+        />
       </div>
 
-      <Field label="Email" name="email" type="email" defaultValue={client?.email ?? ''} error={err('email')} />
-      <Field label="Téléphone" name="phone" type="tel" defaultValue={client?.phone ?? ''} error={err('phone')} />
-      <Field label="Adresse" name="address" defaultValue={client?.address ?? ''} error={err('address')} />
+      <Field
+        label="Email"
+        name="email"
+        type="email"
+        defaultValue={client?.email ?? ''}
+        error={err('email')}
+      />
+      <Field
+        label="Téléphone"
+        name="phone"
+        type="tel"
+        defaultValue={client?.phone ?? ''}
+        error={err('phone')}
+      />
+      <Field
+        label="Adresse"
+        name="address"
+        defaultValue={client?.address ?? ''}
+        error={err('address')}
+      />
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Pays</label>
+        <label htmlFor="countryCode" className="block text-sm font-medium text-gray-700 mb-1">
+          Pays
+        </label>
         <select
+          id="countryCode"
           name="countryCode"
           defaultValue={client?.countryCode ?? 'MA'}
           className="w-full border rounded-lg px-3 py-2 text-sm"
@@ -119,10 +151,11 @@ function Field({
 }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">
+      <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       <input
+        id={name}
         name={name}
         type={type}
         defaultValue={defaultValue}

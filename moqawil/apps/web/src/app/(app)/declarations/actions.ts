@@ -1,14 +1,17 @@
 'use server'
 
 import { auth } from '@/lib/auth'
-import { db, quarterlyDeclarations } from '@moqawil/db'
-import { eq, and } from 'drizzle-orm'
-import { getEntrepreneur } from '@/lib/queries/entrepreneur'
 import { computeAndUpsertDeclaration } from '@/lib/queries/declaration'
-import { revalidatePath } from 'next/cache'
+import { getEntrepreneur } from '@/lib/queries/entrepreneur'
+import { db, quarterlyDeclarations } from '@moqawil/db'
 import type { ActivityType } from '@moqawil/tax-engine'
+import { and, eq } from 'drizzle-orm'
+import { revalidatePath } from 'next/cache'
 
-export async function generateDeclaration(year: number, quarter: number): Promise<{
+export async function generateDeclaration(
+  year: number,
+  quarter: number
+): Promise<{
   success: boolean
   message?: string
   id?: string

@@ -1,11 +1,11 @@
 'use client'
 
+import { setLocale } from '@/app/actions/locale'
+import { ClipboardList, FileText, LayoutDashboard, LogOut, Settings, Users } from 'lucide-react'
+import { signOut } from 'next-auth/react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { signOut } from 'next-auth/react'
 import { useTransition } from 'react'
-import { LayoutDashboard, FileText, Users, ClipboardList, Settings, LogOut } from 'lucide-react'
-import { setLocale } from '@/app/actions/locale'
 
 const navItems = [
   { href: '/dashboard', label: 'Tableau de bord', labelAr: 'لوحة القيادة', icon: LayoutDashboard },
@@ -48,9 +48,7 @@ export function AppNav({ currentLocale = 'fr' }: AppNavProps) {
               key={href}
               href={href}
               className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-                active
-                  ? 'bg-[var(--color-primary)] text-white'
-                  : 'text-gray-700 hover:bg-gray-100'
+                active ? 'bg-[var(--color-primary)] text-white' : 'text-gray-700 hover:bg-gray-100'
               }`}
             >
               <Icon size={16} />

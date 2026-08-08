@@ -1,5 +1,7 @@
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import {
+  CASH_PAYMENT_LIMIT_MAD,
+  CASH_PENALTY_THRESHOLD_MAD,
   // Constants
   PER_CLIENT_CAP_MAD,
   REVENUE_THRESHOLD_COMMERCIAL,
@@ -7,20 +9,17 @@ import {
   TAX_RATE_COMMERCIAL,
   TAX_RATE_SERVICE,
   WHT_RATE_OVER_CAP,
-  CASH_PAYMENT_LIMIT_MAD,
-  CASH_PENALTY_THRESHOLD_MAD,
-  // Functions
-  getCapStatus,
-  getThresholdStatus,
-  getRevenueThreshold,
-  getTaxRate,
   computeTax,
   computeWithholdingOverCap,
+  formatInvoiceNumber,
+  // Functions
+  getCapStatus,
+  getMandatoryMentions,
+  getRevenueThreshold,
+  getTaxRate,
+  getThresholdStatus,
   validateICE,
   validateIF,
-  formatInvoiceNumber,
-  getMandatoryMentions,
-  type ActivityType,
 } from '../src/index'
 
 // ── Constants ────────────────────────────────────────────────────────────────
@@ -39,10 +38,10 @@ describe('Constants', () => {
     expect(TAX_RATE_COMMERCIAL).toBe(0.005)
   })
   it('TAX_RATE_SERVICE is 1%', () => {
-    expect(TAX_RATE_SERVICE).toBe(0.010)
+    expect(TAX_RATE_SERVICE).toBe(0.01)
   })
   it('WHT_RATE_OVER_CAP is 30%', () => {
-    expect(WHT_RATE_OVER_CAP).toBe(0.30)
+    expect(WHT_RATE_OVER_CAP).toBe(0.3)
   })
   it('CASH_PAYMENT_LIMIT_MAD is 5,000', () => {
     expect(CASH_PAYMENT_LIMIT_MAD).toBe(5_000)
@@ -92,7 +91,7 @@ describe('getCapStatus — CGI Article 73-II-G-8°', () => {
     const result = getCapStatus(100_000)
     expect(result.status).toBe('over')
     expect(result.percentOfCap).toBe(125)
-    expect(result.remainingMad).toBe(0)  // clamped at 0, not negative
+    expect(result.remainingMad).toBe(0) // clamped at 0, not negative
   })
 
   it('remaining is never negative when over cap', () => {
@@ -162,7 +161,7 @@ describe('getRevenueThreshold', () => {
 
 describe('getTaxRate', () => {
   it('service → 1%', () => {
-    expect(getTaxRate('service')).toBe(0.010)
+    expect(getTaxRate('service')).toBe(0.01)
   })
   it('commercial → 0.5%', () => {
     expect(getTaxRate('commercial')).toBe(0.005)
@@ -202,7 +201,7 @@ describe('computeWithholdingOverCap', () => {
     expect(computeWithholdingOverCap(0)).toBe(0)
   })
   it('30% of 1 MAD → 0.30 MAD', () => {
-    expect(computeWithholdingOverCap(1)).toBeCloseTo(0.30)
+    expect(computeWithholdingOverCap(1)).toBeCloseTo(0.3)
   })
 })
 
@@ -307,7 +306,9 @@ describe('getMandatoryMentions — CGI Article 145 + Law 114-13', () => {
     }
     const mentions = getMandatoryMentions(ctx)
     expect(mentions.some((m) => m.includes('EUR'))).toBe(true)
-    expect(mentions.some((m) => m.includes('rapatriement') || m.includes('Rapatriement'))).toBe(true)
+    expect(mentions.some((m) => m.includes('rapatriement') || m.includes('Rapatriement'))).toBe(
+      true
+    )
   })
 
   it('warns about cash payment above 5,000 MAD for B2B', () => {

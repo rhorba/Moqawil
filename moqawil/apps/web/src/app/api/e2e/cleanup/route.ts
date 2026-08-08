@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 
 // Removes all data for the test user so each suite run starts clean
 export async function POST(request: NextRequest) {
@@ -20,10 +20,15 @@ export async function POST(request: NextRequest) {
 
   const email = body.email ?? 'e2e-test@moqawil.test'
 
-  const { db, users, entrepreneurs, clients, invoices, invoiceLines, quarterlyDeclarations } = await import('@moqawil/db')
+  const { db, users, entrepreneurs, clients, invoices, invoiceLines, quarterlyDeclarations } =
+    await import('@moqawil/db')
   const { eq } = await import('drizzle-orm')
 
-  const [user] = await db.select({ id: users.id }).from(users).where(eq(users.email, email)).limit(1)
+  const [user] = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.email, email))
+    .limit(1)
   if (!user) return NextResponse.json({ ok: true, deleted: 'no user found' })
 
   const [entrepreneur] = await db
@@ -50,7 +55,9 @@ export async function POST(request: NextRequest) {
       await db.delete(invoices).where(eq(invoices.clientId, id))
     }
 
-    await db.delete(quarterlyDeclarations).where(eq(quarterlyDeclarations.entrepreneurId, entrepreneur.id))
+    await db
+      .delete(quarterlyDeclarations)
+      .where(eq(quarterlyDeclarations.entrepreneurId, entrepreneur.id))
     await db.delete(clients).where(eq(clients.entrepreneurId, entrepreneur.id))
     await db.delete(entrepreneurs).where(eq(entrepreneurs.id, entrepreneur.id))
   }

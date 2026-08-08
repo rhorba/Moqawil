@@ -1,5 +1,5 @@
-import type { Config } from '@docusaurus/types'
 import type * as Preset from '@docusaurus/preset-classic'
+import type { Config } from '@docusaurus/types'
 
 const config: Config = {
   title: 'Moqawil — Documentation',
@@ -67,11 +67,15 @@ const config: Config = {
           title: 'Projet',
           items: [
             { label: 'GitHub', href: 'https://github.com/rhorba/Moqawil' },
-            { label: 'AGPL-3.0', href: 'https://github.com/rhorba/Moqawil/blob/master/moqawil/LICENSE' },
+            {
+              label: 'AGPL-3.0',
+              href: 'https://github.com/rhorba/Moqawil/blob/master/moqawil/LICENSE',
+            },
           ],
         },
       ],
-      copyright: `Moqawil — Open source, AGPL-3.0. Construit pour les ~400 000 auto-entrepreneurs marocains.`,
+      copyright:
+        'Moqawil — Open source, AGPL-3.0. Construit pour les ~400 000 auto-entrepreneurs marocains.',
     },
   } satisfies Preset.ThemeConfig,
 }

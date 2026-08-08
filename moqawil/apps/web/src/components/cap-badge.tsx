@@ -62,10 +62,7 @@ export function CapBadge({ status, percentOfCap, remainingMad, compact }: CapBad
         <span className={`text-xs font-bold ${cfg.text}`}>{percentOfCap.toFixed(0)}%</span>
       </div>
       <div className="w-full bg-white/60 rounded-full h-1.5 mb-2">
-        <div
-          className={`h-1.5 rounded-full ${cfg.dot}`}
-          style={{ width: `${pct}%` }}
-        />
+        <div className={`h-1.5 rounded-full ${cfg.dot}`} style={{ width: `${pct}%` }} />
       </div>
       <p className={`text-xs ${cfg.text}`}>
         {status === 'over'

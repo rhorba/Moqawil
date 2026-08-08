@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { randomUUID } from 'node:crypto'
 import { encode } from '@auth/core/jwt'
-import { randomUUID } from 'crypto'
+import { type NextRequest, NextResponse } from 'next/server'
 
 // Test-only sign-in endpoint — never active in production
 export async function POST(request: NextRequest) {
@@ -37,7 +37,10 @@ export async function POST(request: NextRequest) {
   }
 
   // Encode an Auth.js v5 session JWT
-  const secret = process.env.AUTH_SECRET!
+  const secret = process.env.AUTH_SECRET
+  if (!secret) {
+    return NextResponse.json({ error: 'AUTH_SECRET not configured' }, { status: 500 })
+  }
   const token = await encode({
     token: { sub: user.id, id: user.id, name: user.name, email: user.email },
     secret,
@@ -47,9 +50,7 @@ export async function POST(request: NextRequest) {
   const response = NextResponse.json({ ok: true, userId: user.id })
   // Auth.js uses __Secure- prefix on HTTPS; in dev (HTTP) it's bare
   const cookieName =
-    request.nextUrl.protocol === 'https:'
-      ? '__Secure-authjs.session-token'
-      : 'authjs.session-token'
+    request.nextUrl.protocol === 'https:' ? '__Secure-authjs.session-token' : 'authjs.session-token'
 
   response.cookies.set(cookieName, token, {
     httpOnly: true,
