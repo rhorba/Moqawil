@@ -1,5 +1,13 @@
 # Activity Log
 
+### 2026-08-08 11:10 MILESTONE — Full document-chain written; CI's second real bug caught and fixed
+- **Specialist**: PM + System Designer + Software Architect + DBA + Security Engineer + UX/UI Designer + Test Architect + DevOps/DevSecOps
+- **Summary**: Owner asked for the docs/ folder filled out comprehensively, matching tabib-ma's full artifact chain instead of just the Sprint 4 pair. Wrote 10 product-level docs at repo root: prd-moqawil.md, system-design-moqawil.md, architecture-moqawil.md (3 ADRs), database-moqawil.md, security-moqawil.md, ux-moqawil.md, ui-moqawil.md, test-strategy-moqawil.md, devops-moqawil.md, stories-moqawil.md (8 epics, retroactive for Sprints 0-3 + forward for Sprint 4). Content is grounded in the actual codebase and CLAUDE.md, not fabricated — pulled from real schema, real sprint history, real known gaps (documented, not hidden).
+- While verifying CI locally before re-pushing, found a third real pre-existing bug (after the lockfile and migration-journal ones): `@moqawil/tax-engine`'s `package.json` `main` field points to `dist/index.js`, so every other workspace package needs it built first — the `test`, `typecheck`, and `e2e` CI jobs never did this (only `build` did). Confirmed locally (68/73 web tests pass once tax-engine is built first; the 1 remaining local failure is `ECONNREFUSED`, expected without a local Postgres — CI's service container covers this). Added the missing build step to all three jobs.
+- **Status**: resolved (docs written and pushed; CI fix pushed, awaiting confirmation run)
+- **Impact**: high
+---
+
 ### 2026-08-08 10:45 BUGFIX — CI's first real run caught a pre-existing migration bug
 - **Specialist**: DBA
 - **Summary**: `.gitignore` had `packages/db/drizzle/meta/` excluded under a comment claiming it was just "generated snapshots" — it also excluded `_journal.json`, which `drizzle-kit migrate` requires to know what migrations exist and in what order. Every prior `db:migrate` on this project "worked" only because whoever ran it locally still had a stale local `meta/` folder on disk; a genuinely fresh checkout (exactly what CI's `test`/`e2e` jobs are) had none and failed immediately. Regenerated `meta/_journal.json` + `meta/0000_snapshot.json` via `drizzle-kit generate`, renamed the new migration tag back to the original filename (`0000_glossy_lady_ursula`, content byte-identical — confirmed no schema drift) so history stays consistent, deleted the gitignore rule.

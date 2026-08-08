@@ -84,6 +84,10 @@ jobs:
         working-directory: moqawil
         run: pnpm install --frozen-lockfile
 
+      - name: Build tax-engine (other packages resolve it via dist/, see package.json "main")
+        working-directory: moqawil
+        run: pnpm --filter @moqawil/tax-engine build
+
       - name: TypeCheck (all workspaces)
         working-directory: moqawil
         env:
@@ -132,6 +136,10 @@ jobs:
       - name: Run migrations
         working-directory: moqawil
         run: pnpm db:migrate
+
+      - name: Build tax-engine (web's tests import it via dist/, see package.json "main")
+        working-directory: moqawil
+        run: pnpm --filter @moqawil/tax-engine build
 
       - name: Run unit tests with coverage
         working-directory: moqawil
@@ -223,6 +231,10 @@ jobs:
       - name: Run migrations
         working-directory: moqawil
         run: pnpm db:migrate
+
+      - name: Build tax-engine (dev server resolves it via dist/, see package.json "main")
+        working-directory: moqawil
+        run: pnpm --filter @moqawil/tax-engine build
 
       - name: Install Playwright browsers
         working-directory: moqawil/apps/web
