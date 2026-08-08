@@ -1,5 +1,12 @@
 # Activity Log
 
+### 2026-08-08 15:10 BUGFIX — Found the actual E2E cause: localhost resolving to IPv6 while next start only binds IPv4
+- **Specialist**: DevOps/DevSecOps
+- **Summary**: 6th and 7th CI runs (the second a manual rerun to rule out flakiness — it wasn't) still timed out on E2E with zero visible output. Root-caused by explicitly piping `webServer.stdout`/`stderr` in `playwright.config.ts` (Playwright's default is `stdout: 'ignore'` — a genuinely healthy, quiet server start looks identical in the log to a hung one; the earlier UntrustedHost noise was stderr, which pipes by default, misleading the earlier diagnosis). The piped output showed the real story: `next start` logs "✓ Ready in 579ms" successfully, then **nothing at all** for the remaining ~119s until timeout — the server starts fine but Playwright's own readiness poll to `http://localhost:3003` never gets a response. Classic Linux/Node gotcha: `localhost` DNS resolution can prefer IPv6 (`::1`) while `next start` binds IPv4 only by default — server and health-checker end up trying different interfaces. Fixed by using `127.0.0.1` explicitly in both `playwright.config.ts`'s `baseURL` and `webServer.url`. Confirmed no e2e spec files hardcode `localhost` elsewhere. Kept the explicit stdout/stderr piping — it's what made this diagnosable and should stay for any future startup issue.
+- **Status**: resolved, pending CI confirmation
+- **Impact**: high — this was the last blocker keeping CI fully red
+---
+
 ### 2026-08-08 14:45 BUGFIX — .trivyignore wasn't wired up, new shell-quote CVE, and the REAL cause of UntrustedHost found
 - **Specialist**: Security Engineer + DevOps/DevSecOps
 - **Summary**: 5th CI run: Security still failed for two reasons — (1) `.trivyignore` was never actually applied; `trivy-action` requires an explicit `trivyignores` input pointing at the file, it doesn't auto-discover it relative to `scan-ref`. Added `trivyignores: moqawil/.trivyignore` to `ci.yml`. (2) A fresh CVE: `shell-quote` 1.8.3 (CRITICAL command injection CVE-2026-9277 + HIGH DoS CVE-2026-13311), pulled in transitively via `drizzle-orm@0.45.2`'s `gel` (EdgeDB) driver peer dependency — Moqawil only uses Postgres, but the resolution still occurs. Added to `pnpm.overrides` (>=1.9.0, fixes both).

@@ -1,6 +1,10 @@
 import { defineConfig, devices } from '@playwright/test'
 
-const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3003'
+// 127.0.0.1, not localhost: Node's DNS resolution can prefer IPv6 (::1) for "localhost" on
+// Linux, while `next start` binds IPv4 only by default. That mismatch let the server log
+// "Ready" while Playwright's own readiness poll silently never connected — confirmed via
+// piped webServer output showing a clean start with zero request activity afterward.
+const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://127.0.0.1:3003'
 
 export default defineConfig({
   testDir: './e2e',
@@ -30,7 +34,7 @@ export default defineConfig({
     : {
         webServer: {
           command: process.env.CI ? 'pnpm exec next start -p 3003' : 'pnpm exec next dev -p 3003',
-          url: 'http://localhost:3003',
+          url: 'http://127.0.0.1:3003',
           reuseExistingServer: !process.env.CI,
           timeout: 120_000,
           // Explicit — Playwright's webServer stdout is 'ignore' by default (only stderr
