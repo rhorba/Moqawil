@@ -7,6 +7,10 @@ import Google from 'next-auth/providers/google'
 import Resend from 'next-auth/providers/resend'
 
 const config: NextAuthConfig = {
+  // Required for self-hosted deployments (Docker Compose behind Caddy, not Vercel) — Auth.js
+  // otherwise rejects every request with UntrustedHost. Safe here: single-operator,
+  // single-tenant self-host, not a multi-tenant host-header-spoofing risk.
+  trustHost: true,
   adapter: DrizzleAdapter(db),
   providers: [
     // Google OAuth — only enabled when both credentials are configured

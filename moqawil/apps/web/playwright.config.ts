@@ -22,11 +22,14 @@ export default defineConfig({
     },
   ],
   // Skip webServer management when PLAYWRIGHT_BASE_URL is set (server is already running)
+  // In CI, use the production build (next start) — it's already built by this point (see
+  // ci.yml's e2e job) and starts near-instantly, unlike `next dev`'s on-demand per-route
+  // compile, which was timing out cold on shared CI runners even at 120s.
   ...(process.env.PLAYWRIGHT_BASE_URL
     ? {}
     : {
         webServer: {
-          command: 'pnpm exec next dev -p 3003',
+          command: process.env.CI ? 'pnpm exec next start -p 3003' : 'pnpm exec next dev -p 3003',
           url: 'http://localhost:3003',
           reuseExistingServer: !process.env.CI,
           timeout: 120_000,

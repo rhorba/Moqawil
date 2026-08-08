@@ -1,3 +1,20 @@
+# Activity Log
+
+### 2026-08-08 13:15 BUGFIX — E2E timeout + a real production-impacting auth bug found while investigating it
+- **Specialist**: DevOps/DevSecOps + Security Engineer
+- **Summary**: E2E job timed out waiting 120s for `next dev`'s webServer to become ready — cold on-demand compilation on a shared CI runner is inherently slow to first-request-ready. Fixed properly rather than just padding the timeout: `playwright.config.ts` now uses `next start` (production build, already built earlier in the same CI job) when `CI` is set, `next dev` for local iteration speed otherwise. Verified locally: `next start` ready in ~1s vs `next dev`'s 120s+ timeout.
+- While verifying the fix locally, hit a **separate, real bug**: `next start` returned `UntrustedHost` from Auth.js on every request. `trustHost` was never configured anywhere in `auth.ts`, and Auth.js v5 requires it explicitly for any deployment not on Vercel — meaning **every self-hosted Moqawil install (the entire premise of the product, Docker Compose behind Caddy) would hit this in production**, not just CI. Added `trustHost: true` to the NextAuth config, safe here since this is single-operator single-tenant self-host, not a multi-tenant host-spoofing risk. Verified: `/api/auth/session` now returns a valid (empty) session instead of the error page.
+- **Status**: resolved, pending CI confirmation
+- **Impact**: critical — this would have blocked sign-in on every real self-hosted deployment, not just an internal CI/test issue
+---
+
+### 2026-08-08 12:50 SECURITY FIX — 5 real dependency CVEs found by Trivy, patched where possible
+- **Specialist**: Security Engineer + DevOps/DevSecOps
+- **Summary**: Third CI run: Unit Tests, TypeCheck, Lint, Build all green (confirms the coverage-gap fix and earlier round worked). Only Security (Trivy SCA) and E2E remained. Trivy flagged 5 real HIGH-severity CVEs: next-auth 5.0.0-beta.31 (GHSA-xmf8-cvqr-rfgj), nodemailer 7.0.13 (GHSA-p6gq-j5cr-w38f — arbitrary file read via `raw` option bypass), postcss 8.4.31 (CVE-2026-45623 + path traversal GHSA-r28c-9q8g-f849), serialize-javascript 6.0.2 (GHSA-5c6j-r48x-rmvq, RCE), sharp 0.34.5 (inherited libvips CVEs). Fixed: next-auth → 5.0.0-beta.32 (direct dep, patched). nodemailer → ^9.0.1 (direct dep, patched) — the vulnerable range is `<= 9.0.0`, no fix exists inside `@auth/core`'s declared peer range (`^7.0.7 || ^8.0.5`), so this leaves a peer-dependency warning; verified it's safe: the app's own `email.ts` never uses the vulnerable `raw` sendMail option, and `@auth/core`'s nodemailer peer is for its legacy SMTP magic-link provider, which this app doesn't use (uses Resend's API instead, per CLAUDE.md). postcss/serialize-javascript/sharp are transitive (pulled in by Next.js/Tailwind/Docusaurus tooling, not declared directly) — added `pnpm.overrides` in root `package.json` to force patched versions across the tree. Verified locally: typecheck clean, lint clean, 68/68 non-DB-dependent tests still pass (2 files fail locally only on ECONNREFUSED — no local Postgres, expected, same as every prior round).
+- **Status**: resolved, pending CI confirmation
+- **Impact**: high
+---
+
 ### 2026-08-08 12:20 BUGFIX BATCH — Closed the honest coverage gap for real, fixed Semgrep pnpm hardening findings, fixed own lint suggestion that would have reintroduced the SMTP bug
 - **Specialist**: Tester + DevOps/DevSecOps
 - **Summary**: Second CI run (after the previous batch's fixes) showed TypeCheck green but 3 more real issues:

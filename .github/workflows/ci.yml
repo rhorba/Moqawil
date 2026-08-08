@@ -232,9 +232,11 @@ jobs:
         working-directory: moqawil
         run: pnpm db:migrate
 
-      - name: Build tax-engine (dev server resolves it via dist/, see package.json "main")
+      - name: Build tax-engine then web (playwright.config.ts uses `next start` in CI, not dev)
         working-directory: moqawil
-        run: pnpm --filter @moqawil/tax-engine build
+        run: |
+          pnpm --filter @moqawil/tax-engine build
+          pnpm build
 
       - name: Install Playwright browsers
         working-directory: moqawil/apps/web
