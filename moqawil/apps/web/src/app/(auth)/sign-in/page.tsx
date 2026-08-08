@@ -1,4 +1,5 @@
 import { signIn } from '@/lib/auth'
+import { TestCredentialsForm } from './test-credentials-form'
 
 export default function SignInPage() {
   const hasTestSecret = !!process.env.E2E_TEST_SECRET
@@ -52,41 +53,7 @@ export default function SignInPage() {
           </form>
 
           {/* Test credentials — dev/e2e only, never shown in production */}
-          {hasTestSecret && (
-            <form
-              data-testid="test-credentials-form"
-              action={async (formData: FormData) => {
-                'use server'
-                const email = formData.get('test-email') as string
-                const secret = formData.get('test-secret') as string
-                await signIn('test-credentials', { email, secret, redirectTo: '/dashboard' })
-              }}
-              className="space-y-2 border-t pt-4 mt-2"
-            >
-              <p className="text-xs text-gray-400 text-center">Test credentials (dev only)</p>
-              <input
-                name="test-email"
-                type="email"
-                placeholder="test@example.com"
-                required
-                className="w-full py-2 px-3 border rounded-lg text-sm"
-              />
-              <input
-                name="test-secret"
-                type="password"
-                placeholder="E2E secret"
-                required
-                className="w-full py-2 px-3 border rounded-lg text-sm"
-              />
-              <button
-                type="submit"
-                data-testid="test-credentials-submit"
-                className="w-full py-2 px-4 border border-dashed rounded-lg text-sm hover:bg-gray-50 transition-colors"
-              >
-                Test Sign In
-              </button>
-            </form>
-          )}
+          {hasTestSecret && <TestCredentialsForm />}
         </div>
 
         <p className="text-xs text-center text-gray-500">

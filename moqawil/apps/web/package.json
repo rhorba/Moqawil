@@ -8,6 +8,7 @@
     "start": "next start",
     "test": "vitest run",
     "test:e2e": "playwright test",
+    "walkthrough": "node scripts/run-walkthrough.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "biome check src"
   },
