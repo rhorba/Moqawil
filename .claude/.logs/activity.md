@@ -1,5 +1,19 @@
 # Activity Log
 
+### 2026-08-10 CLEANUP — Removed stray duplicate `.claude` folder under `moqawil/`
+- **Specialist**: Orchestrator
+- **Summary**: `moqawil/.claude/sprint-backlog/{sprint-2,sprint-3}.md` and `moqawil/.claude/.logs/{activity,sessions}.md` were tracked-in-git leftovers from early scaffolding, sitting one level inside the app folder rather than at the repo root where the real `.claude/` framework lives. Content had drifted from the canonical files (different task descriptions, both falsely showing simple "COMPLETE ✅" with no detail vs. the real per-task backlogs at repo-root `.claude/sprint-backlog/`) — flagged as an open item since 2026-08-08 (see Sprint 4 planning entry below), left unresolved until now. Owner chose deletion. Removed via `git rm -r moqawil/.claude`; no unique content lost, everything of value already exists in the canonical repo-root `.claude/`.
+- **Status**: resolved
+- **Impact**: low — cosmetic/hygiene, prevents future confusion about which sprint-backlog is authoritative
+---
+
+### 2026-08-08 22:12 BUGFIX + MILESTONE — Sign-in RSC redirect bug fixed, walkthrough recording tooling added, pitch materials added (retroactive log — work done previous session, not logged at the time)
+- **Specialist**: Frontend Dev + DevOps/DevSecOps
+- **Summary**: Found and fixed a real bug: the test-credentials sign-in form was a Server Action whose `signIn()` redirect chained into `(app)/layout.tsx`'s own onboarding redirect within one RSC transition, rendering a blank shell until a manual refresh. Converted it to a client component using `next-auth/react`'s `signIn` with a hard navigation, matching how the Google/Resend flows already work. Added a slow, human-paced Playwright walkthrough (`apps/web/walkthrough-e2e`, run via `pnpm walkthrough`) covering every major app path — 22 screenshots + a screen-recorded video, using external ffmpeg screen recording instead of Playwright's own `recordVideo` (Chromium's CDP screencast reproducibly stalled after ~1s on this machine across three configurations, while screenshots kept working). Also added a trilingual (FR/Darija/EN) pitch deck and memo under `pitch/`, built from the project's own competitive-landscape and tax-rule data, illustrated with the walkthrough's real screenshots.
+- **Status**: resolved — CI run `31278744178` green (3m44s) on this commit (`ce4005e`)
+- **Impact**: high — the sign-in bug would have affected every test-credentials sign-in; walkthrough tooling and pitch materials support the launch-prep phase (CLAUDE.md §16)
+---
+
 ### 2026-08-08 18:05 MILESTONE — Sprint 4 complete: UBL 2.1 e-invoicing format readiness
 - **Specialist**: Orchestrator (full team rotation: Software Architect, DBA, Backend Dev, Tester, Security Engineer, Frontend Dev, Project Monitor)
 - **Summary**: Executed the full Sprint 4 backlog (S4-01 through S4-10) in one session:

@@ -1,5 +1,17 @@
 # Session Log
 
+### 2026-08-10 SESSION_START — resuming, catching up unlogged prior-session work
+- **Context**: Resumed via "continue". Verified real repo/CI state rather than trusting stale logs: working tree clean, `master` up to date with `origin/master`, last 5 CI runs on GitHub Actions all green (most recent: `ce4005e`, run `31278744178`, 3m44s).
+- **Found**: The most recent commit (`ce4005e` — sign-in RSC redirect bugfix, walkthrough recording tooling, trilingual pitch deck/memo) was never logged to `.logs/activity.md` or `.logs/sessions.md` in a prior session. Backfilled to `activity.md`.
+- **Resuming from**: Sprint 4 (e-invoicing format readiness) is COMPLETE and CI-confirmed. No Sprint 5 backlog exists yet. `sprint-3.md`'s own checkboxes are stale/inconsistent with reality (shows "IN PROGRESS" though v0.1 DoD was confirmed 15/15 complete per the 2026-05-20 session log) — cosmetic only, not blocking.
+- **Open items carried forward, all owner-decision, not autonomously actionable**:
+  1. Legal scope citation (chartered accountant / OEC) on whether AE status falls under the Jan 2027 DGI e-invoicing wave — required before any marketing claim beyond "format-ready" (CLAUDE.md §13).
+  2. DGI/xHub sandbox registration — needed before a real `DgiXhubClearanceProvider` can be built.
+  3. Barid eSign account — needed before real QES/AES signing.
+  4. Stale duplicate `moqawil/.claude/sprint-backlog/` (sprint-2.md, sprint-3.md, showing false "COMPLETE" status) — flagged since 2026-08-08, still not resolved; needs owner decision to delete or keep.
+- **Plan**: Present state to user, ask what to work on next (no auto-continuable sprint task exists).
+---
+
 ### 2026-05-20 00:30 SESSION_END — v0.1 COMPLETE
 - **Completed**: Sprint 3 all 8 tasks done. v0.1 DoD 15/15.
 - **Key deliverables**:
