@@ -1,5 +1,19 @@
 # Session Log
 
+### 2026-08-10 SESSION_END — Sprint 7 (i18n Retrofit) COMPLETE, CI confirmed green
+- **Completed**: Sprint 7 all 12 tasks (S7-01 through S7-12) across 4 batches, plus one unplanned bugfix.
+- **Key deliverables**:
+  - Every `(app)`/`(auth)` page, all shared components, and ~26 server-action messages converted from hardcoded French to real `useTranslations`/`getTranslations` — the AR locale now genuinely translates page content, not just the nav sidebar and RTL layout direction (the gap found at the end of Sprint 6)
+  - `app-nav.tsx` simplified from its own parallel i18n system to the standard mechanism, with one deliberate documented exception (locale names shown in their own script)
+  - Found and fixed a real pre-existing bug: email-send result banner color was picked by string-matching the French success message instead of using the action's own `success` boolean
+  - Verified live (not just typecheck): curl against a real running server confirmed zero i18n errors + genuine Arabic headings on 9 pages × 2 locales; new Playwright test clicks the real locale toggle and asserts genuine Arabic content + `dir="rtl"`
+  - Documented remaining gap: Zod validation-schema messages still French-only (module-scope schemas can't easily be made per-request)
+  - CI run `31391975644`: all 6 jobs green
+- **Blocked**: None
+- **Next session**: No Sprint 8 backlog exists yet. Remaining options from earlier scoping: accountant multi-client dashboard, launch-prep/distribution content. Also open: Zod validation-message translation (documented gap), local pnpm-version supply-chain-hardening quirk (Sprint 5)
+- **Open risks**: none new this sprint (the i18n gap risk from Sprint 6 is now closed)
+---
+
 ### 2026-08-10 SESSION_END — Sprint 6 (Devis/Quote Management) COMPLETE, CI confirmed green
 - **Completed**: Sprint 6 all 13 tasks (S6-01 through S6-13) across 4 batches, plus one unplanned fix.
 - **Key deliverables**:

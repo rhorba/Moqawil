@@ -11,7 +11,7 @@
 - **Test totals**: Vitest 103 passing/3 skipped (unchanged — this sprint touched presentation only), Playwright 18/18 passing (17 existing + 1 new i18n test).
 - **New dependency**: none.
 - **Velocity**: 7 sprints (+ 3.5) completed. Sprint 7 = 12 tasks + 1 unplanned fix in one session.
-- **Pushed**: pending — see next `.logs/activity.md`/session entry for commit hash once pushed.
+- **Pushed**: `git push origin master` at sprint close (Framework Rule 3) — commit `e6c1fba`. CI run `31391975644`: all 6 jobs green (Lint, TypeCheck, Unit Tests, Security, Build, E2E) — the new i18n Playwright test confirmed passing in CI's real `workers: 1` environment.
 ---
 
 ### 2026-08-10 SPRINT_SNAPSHOT — Sprint 6 (Devis / Quote Management, v0.2)
