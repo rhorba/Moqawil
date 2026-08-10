@@ -14,28 +14,38 @@ import { z } from 'zod'
 
 const QUOTE_PREFIX = 'DEVIS'
 
-const lineSchema = z.object({
-  description: z.string().min(1, 'Description requise'),
-  quantity: z.coerce.number().positive('Quantité positive requise'),
-  unitPriceOriginal: z.coerce.number().positive('Prix unitaire requis'),
-})
+type Translator = Awaited<ReturnType<typeof getTranslations>>
 
-const quoteSchema = z.object({
-  clientId: z.string().uuid('Client requis'),
-  issueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date invalide'),
-  validUntilDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date de validité invalide'),
-  currency: z.string().default('MAD'),
-  exchangeRate: z.coerce.number().optional(),
-  notes: z.string().optional(),
-})
+// Schemas are built per-request (not module scope) so validation messages can
+// use getTranslations(), which is async and needs a request-scoped locale.
+function getLineSchema(t: Translator) {
+  return z.object({
+    description: z.string().min(1, t('lineDescriptionRequired')),
+    quantity: z.coerce.number().positive(t('lineQuantityPositive')),
+    unitPriceOriginal: z.coerce.number().positive(t('lineUnitPriceRequired')),
+  })
+}
+
+function getQuoteSchema(t: Translator) {
+  return z.object({
+    clientId: z.string().uuid(t('clientRequired')),
+    issueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t('dateInvalid')),
+    validUntilDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t('validUntilDateInvalid')),
+    currency: z.string().default('MAD'),
+    exchangeRate: z.coerce.number().optional(),
+    notes: z.string().optional(),
+  })
+}
 
 export type QuoteFormState = {
   errors?: Partial<Record<string, string[]>>
   message?: string
 }
 
-function parseLines(formData: FormData): z.infer<typeof lineSchema>[] {
-  const lines: z.infer<typeof lineSchema>[] = []
+type LineInput = z.infer<ReturnType<typeof getLineSchema>>
+
+function parseLines(formData: FormData): LineInput[] {
+  const lines: LineInput[] = []
   let i = 0
   while (formData.has(`lines[${i}][description]`)) {
     lines.push({
@@ -50,7 +60,7 @@ function parseLines(formData: FormData): z.infer<typeof lineSchema>[] {
   return lines
 }
 
-function computeTotals(rawLines: z.infer<typeof lineSchema>[], exchangeRate: number) {
+function computeTotals(rawLines: LineInput[], exchangeRate: number) {
   const lines = rawLines.map((l) => ({
     description: l.description,
     quantity: l.quantity,
@@ -75,13 +85,14 @@ export async function createQuote(
   if (!entrepreneur) return { message: t('profileNotFound') }
 
   const raw = Object.fromEntries(formData.entries())
-  const parsed = quoteSchema.safeParse(raw)
+  const parsed = getQuoteSchema(tQuote).safeParse(raw)
   if (!parsed.success) return { errors: parsed.error.flatten().fieldErrors }
 
   const data = parsed.data
   const rawLines = parseLines(formData)
   if (rawLines.length === 0) return { errors: { lines: [tQuote('linesRequired')] } }
 
+  const lineSchema = getLineSchema(tQuote)
   const lineValidations = rawLines.map((l) => lineSchema.safeParse(l))
   const invalidLine = lineValidations.find((r) => !r.success)
   if (invalidLine && !invalidLine.success) {
@@ -148,13 +159,15 @@ export async function createQuote(
   redirect(`/quotes/${result.id}`)
 }
 
-const editQuoteSchema = z.object({
-  issueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date invalide'),
-  validUntilDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date de validité invalide'),
-  currency: z.string().default('MAD'),
-  exchangeRate: z.coerce.number().optional(),
-  notes: z.string().optional(),
-})
+function getEditQuoteSchema(t: Translator) {
+  return z.object({
+    issueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t('dateInvalid')),
+    validUntilDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t('validUntilDateInvalid')),
+    currency: z.string().default('MAD'),
+    exchangeRate: z.coerce.number().optional(),
+    notes: z.string().optional(),
+  })
+}
 
 export async function updateQuote(
   quoteId: string,
@@ -169,13 +182,14 @@ export async function updateQuote(
   if (!entrepreneur) return { message: t('profileNotFound') }
 
   const raw = Object.fromEntries(formData.entries())
-  const parsed = editQuoteSchema.safeParse(raw)
+  const parsed = getEditQuoteSchema(tQuote).safeParse(raw)
   if (!parsed.success) return { errors: parsed.error.flatten().fieldErrors }
 
   const data = parsed.data
   const rawLines = parseLines(formData)
   if (rawLines.length === 0) return { errors: { lines: [tQuote('linesRequired')] } }
 
+  const lineSchema = getLineSchema(tQuote)
   const lineValidations = rawLines.map((l) => lineSchema.safeParse(l))
   const invalidLine = lineValidations.find((r) => !r.success)
   if (invalidLine && !invalidLine.success) {

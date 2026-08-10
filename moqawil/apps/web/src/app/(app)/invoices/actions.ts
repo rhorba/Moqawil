@@ -12,25 +12,33 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 
-const lineSchema = z.object({
-  description: z.string().min(1, 'Description requise'),
-  quantity: z.coerce.number().positive('Quantité positive requise'),
-  unitPriceOriginal: z.coerce.number().positive('Prix unitaire requis'),
-})
+type Translator = Awaited<ReturnType<typeof getTranslations>>
 
-const invoiceSchema = z.object({
-  clientId: z.string().uuid('Client requis'),
-  issueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date invalide'),
-  dueDate: z.string().optional(),
-  currency: z.string().default('MAD'),
-  exchangeRate: z.coerce.number().optional(),
-  notes: z.string().optional(),
-  paymentMethod: z.preprocess(
-    (v) => (v === '' ? undefined : v),
-    z.enum(['virement', 'cheque', 'espece', 'effet', 'carte', 'other']).optional()
-  ),
-  capConfirmed: z.coerce.boolean().optional(),
-})
+// Schemas are built per-request (not module scope) so validation messages can
+// use getTranslations(), which is async and needs a request-scoped locale.
+function getLineSchema(t: Translator) {
+  return z.object({
+    description: z.string().min(1, t('lineDescriptionRequired')),
+    quantity: z.coerce.number().positive(t('lineQuantityPositive')),
+    unitPriceOriginal: z.coerce.number().positive(t('lineUnitPriceRequired')),
+  })
+}
+
+function getInvoiceSchema(t: Translator) {
+  return z.object({
+    clientId: z.string().uuid(t('clientRequired')),
+    issueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t('dateInvalid')),
+    dueDate: z.string().optional(),
+    currency: z.string().default('MAD'),
+    exchangeRate: z.coerce.number().optional(),
+    notes: z.string().optional(),
+    paymentMethod: z.preprocess(
+      (v) => (v === '' ? undefined : v),
+      z.enum(['virement', 'cheque', 'espece', 'effet', 'carte', 'other']).optional()
+    ),
+    capConfirmed: z.coerce.boolean().optional(),
+  })
+}
 
 export type InvoiceFormState = {
   errors?: Partial<Record<string, string[]>>
@@ -43,8 +51,10 @@ export type InvoiceFormState = {
   }
 }
 
-function parseLines(formData: FormData): z.infer<typeof lineSchema>[] {
-  const lines: z.infer<typeof lineSchema>[] = []
+type LineInput = z.infer<ReturnType<typeof getLineSchema>>
+
+function parseLines(formData: FormData): LineInput[] {
+  const lines: LineInput[] = []
   let i = 0
   while (formData.has(`lines[${i}][description]`)) {
     lines.push({
@@ -71,7 +81,7 @@ export async function createInvoice(
   if (!entrepreneur) return { message: t('profileNotFound') }
 
   const raw = Object.fromEntries(formData.entries())
-  const parsed = invoiceSchema.safeParse(raw)
+  const parsed = getInvoiceSchema(tInvoice).safeParse(raw)
   if (!parsed.success) return { errors: parsed.error.flatten().fieldErrors }
 
   const data = parsed.data
@@ -81,6 +91,7 @@ export async function createInvoice(
     return { errors: { lines: [tInvoice('linesRequired')] } }
   }
 
+  const lineSchema = getLineSchema(tInvoice)
   const lineValidations = rawLines.map((l) => lineSchema.safeParse(l))
   const invalidLine = lineValidations.find((r) => !r.success)
   if (invalidLine && !invalidLine.success) {
@@ -278,18 +289,20 @@ export async function markInvoicePaid(invoiceId: string, paymentDate: string): P
   revalidatePath('/dashboard')
 }
 
-const editInvoiceSchema = z.object({
-  issueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date invalide'),
-  dueDate: z.string().optional(),
-  currency: z.string().default('MAD'),
-  exchangeRate: z.coerce.number().optional(),
-  notes: z.string().optional(),
-  paymentMethod: z.preprocess(
-    (v) => (v === '' ? undefined : v),
-    z.enum(['virement', 'cheque', 'espece', 'effet', 'carte', 'other']).optional()
-  ),
-  capConfirmed: z.coerce.boolean().optional(),
-})
+function getEditInvoiceSchema(t: Translator) {
+  return z.object({
+    issueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t('dateInvalid')),
+    dueDate: z.string().optional(),
+    currency: z.string().default('MAD'),
+    exchangeRate: z.coerce.number().optional(),
+    notes: z.string().optional(),
+    paymentMethod: z.preprocess(
+      (v) => (v === '' ? undefined : v),
+      z.enum(['virement', 'cheque', 'espece', 'effet', 'carte', 'other']).optional()
+    ),
+    capConfirmed: z.coerce.boolean().optional(),
+  })
+}
 
 export type EditInvoiceFormState = {
   errors?: Partial<Record<string, string[]>>
@@ -318,13 +331,14 @@ export async function updateInvoice(
   if (!entrepreneur) return { message: tCommon('profileNotFound') }
 
   const raw = Object.fromEntries(formData.entries())
-  const parsed = editInvoiceSchema.safeParse(raw)
+  const parsed = getEditInvoiceSchema(tInvoice).safeParse(raw)
   if (!parsed.success) return { errors: parsed.error.flatten().fieldErrors }
 
   const data = parsed.data
   const rawLines = parseLines(formData)
   if (rawLines.length === 0) return { errors: { lines: [tInvoice('linesRequired')] } }
 
+  const lineSchema = getLineSchema(tInvoice)
   const lineValidations = rawLines.map((l) => lineSchema.safeParse(l))
   const invalidLine = lineValidations.find((r) => !r.success)
   if (invalidLine && !invalidLine.success) {

@@ -10,38 +10,44 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 
-const clientSchema = z
-  .object({
-    name: z.string().min(2, 'Nom requis'),
-    type: z.enum(['individual', 'company_ma', 'company_foreign']),
-    ice: z.string().optional(),
-    ifNumber: z.string().optional(),
-    email: z.string().email('Email invalide').optional().or(z.literal('')),
-    phone: z.string().optional(),
-    address: z.string().optional(),
-    countryCode: z.string().length(2).default('MA'),
-  })
-  .superRefine((data, ctx) => {
-    // ICE mandatory for Moroccan companies (CGI Article 145, mandatory since Jan 2019)
-    if (data.type === 'company_ma') {
-      if (!data.ice || data.ice.trim() === '') {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['ice'],
-          message: 'ICE obligatoire pour les entreprises marocaines (CGI Article 145)',
-        })
-      } else {
-        const result = validateICE(data.ice)
-        if (!result.valid) {
+type Translator = Awaited<ReturnType<typeof getTranslations>>
+
+// Schema is built per-request (not module scope) so validation messages can
+// use getTranslations(), which is async and needs a request-scoped locale.
+function getClientSchema(t: Translator) {
+  return z
+    .object({
+      name: z.string().min(2, t('nameRequired')),
+      type: z.enum(['individual', 'company_ma', 'company_foreign']),
+      ice: z.string().optional(),
+      ifNumber: z.string().optional(),
+      email: z.string().email(t('emailInvalid')).optional().or(z.literal('')),
+      phone: z.string().optional(),
+      address: z.string().optional(),
+      countryCode: z.string().length(2).default('MA'),
+    })
+    .superRefine((data, ctx) => {
+      // ICE mandatory for Moroccan companies (CGI Article 145, mandatory since Jan 2019)
+      if (data.type === 'company_ma') {
+        if (!data.ice || data.ice.trim() === '') {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             path: ['ice'],
-            message: result.reason ?? 'ICE invalide',
+            message: t('iceRequiredMa'),
           })
+        } else {
+          const result = validateICE(data.ice)
+          if (!result.valid) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              path: ['ice'],
+              message: result.reason ?? t('iceInvalidFallback'),
+            })
+          }
         }
       }
-    }
-  })
+    })
+}
 
 export type ClientFormState = {
   errors?: Partial<Record<string, string[]>>
@@ -58,11 +64,15 @@ export async function createClient(
   _prev: ClientFormState,
   formData: FormData
 ): Promise<ClientFormState> {
+  const [tCommon, tClient] = await Promise.all([
+    getTranslations('common'),
+    getTranslations('client'),
+  ])
   const entrepreneur = await getAuthenticatedEntrepreneur()
-  if (!entrepreneur) return { message: (await getTranslations('common'))('notAuthenticated') }
+  if (!entrepreneur) return { message: tCommon('notAuthenticated') }
 
   const raw = Object.fromEntries(formData.entries())
-  const parsed = clientSchema.safeParse(raw)
+  const parsed = getClientSchema(tClient).safeParse(raw)
   if (!parsed.success) return { errors: parsed.error.flatten().fieldErrors }
 
   const data = parsed.data
@@ -86,11 +96,15 @@ export async function updateClient(
   _prev: ClientFormState,
   formData: FormData
 ): Promise<ClientFormState> {
+  const [tCommon, tClient] = await Promise.all([
+    getTranslations('common'),
+    getTranslations('client'),
+  ])
   const entrepreneur = await getAuthenticatedEntrepreneur()
-  if (!entrepreneur) return { message: (await getTranslations('common'))('notAuthenticated') }
+  if (!entrepreneur) return { message: tCommon('notAuthenticated') }
 
   const raw = Object.fromEntries(formData.entries())
-  const parsed = clientSchema.safeParse(raw)
+  const parsed = getClientSchema(tClient).safeParse(raw)
   if (!parsed.success) return { errors: parsed.error.flatten().fieldErrors }
 
   const data = parsed.data

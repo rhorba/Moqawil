@@ -1,5 +1,18 @@
 # Project Metrics
 
+### 2026-08-10 SPRINT_SNAPSHOT — Sprint 8 (Close Remaining Small Gaps)
+- **Planned**: 8 tasks (S8-01 through S8-08), 4 batches
+- **Completed**: 8/8 (100%)
+- **Blocked**: 0
+- **Scope grew honestly**: scoping found ~10 hardcoded Zod messages; execution found 14 (registrationDate's distinct date-format message, and ICE/IF refine-fallback messages in both `client` and `settings` namespaces were missed by the original grep). All converted to per-request schema builders.
+- **Real environment issue found and fixed during verification**: local Postgres volume had leftover e2e-test rows whose ICE values collided with two Vitest fixtures' hardcoded test data, silently defeating `onConflictDoNothing()` and causing FK failures — traced, confirmed as pre-existing local-only data hygiene (not a code regression, not reproducible in CI's fresh-per-run database), and cleaned up.
+- **Test totals**: Vitest 103 passing/3 skipped, coverage 100% stmts/funcs/lines / 89.02% branches on gated files (clears Framework Rule 2). Playwright 18/18 passing/3 skipped, run with `--workers=1` against a real `next start` server (CI-matching).
+- **New dependency**: none.
+- **Infra**: `packageManager` field now pins pnpm to `9.15.4`, matching CI exactly — closes the local/CI pnpm-version divergence flagged in Sprint 5.
+- **Velocity**: 8 sprints (+ 3.5) completed.
+- **Pushed**: `git push origin master` at sprint close (Framework Rule 3) — see `.logs/activity.md` for commit details.
+---
+
 ### 2026-08-10 SPRINT_SNAPSHOT — Sprint 7 (i18n Retrofit — real next-intl usage)
 - **Planned**: 12 tasks (S7-01 through S7-12), 4 batches
 - **Completed**: 12/12 (100%), plus one unplanned bugfix (email-result color logic)

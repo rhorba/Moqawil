@@ -30,6 +30,7 @@
 - **Specialist**: Security Engineer
 - **Summary**: Tax engine constants (80K cap, 0.5%/1% rates) must have CGI/Finance Law citations in code comments.
 - **Probability**: certain | **Mitigation**: Add citation comments when writing tax-engine package.
-- **Status**: open
+- **Status**: CLOSED (2026-08-10, Sprint 8 S8-06) — mitigation had already happened, just never marked closed
 - **Impact**: high
+- **Resolution evidence**: Confirmed via grep of `packages/tax-engine/src/index.ts` — every rate/threshold/cap constant carries a citation: `PER_CLIENT_CAP_MAD`/`WHT_RATE_OVER_CAP` → CGI Article 73-II-G-8° (Finance Law 2023); `REVENUE_THRESHOLD_*` → Law 114-13; `TAX_RATE_*` → Law 114-13 (liberatory rates on turnover); `CASH_PAYMENT_LIMIT_MAD`/`CASH_PENALTY_THRESHOLD_MAD` → CGI Article 193; mandatory-mentions output → CGI Article 145 + Article 211 + Loi 114-13. No uncited constant found.
 ---

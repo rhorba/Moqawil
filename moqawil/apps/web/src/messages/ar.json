@@ -72,7 +72,14 @@
     "onboardingHint": "ستظهر هذه المعلومات في فواتيرك. يجب أن تطابق سجلك في السجل الوطني للمقاول الذاتي.",
     "save": "حفظ",
     "saving": "جارٍ الحفظ…",
-    "finishOnboarding": "إنهاء الإعداد"
+    "finishOnboarding": "إنهاء الإعداد",
+    "nameRequired": "الاسم مطلوب",
+    "addressRequired": "العنوان مطلوب",
+    "cityRequired": "المدينة مطلوبة",
+    "dateInvalidFormat": "تاريخ غير صالح (سنة-شهر-يوم)",
+    "invoicePrefixFormat": "البادئة: أحرف كبيرة وأرقام وشرطات فقط",
+    "iceInvalidFallback": "ICE غير صالح",
+    "ifInvalidFallback": "IF غير صالح"
   },
   "client": {
     "title": "العملاء",
@@ -100,6 +107,8 @@
     "nameRequired": "الاسم مطلوب",
     "iceHint": "إلزامي للشركات المغربية",
     "iceRequiredMa": "ICE إلزامي للشركات المغربية (المادة 145 من المدونة العامة للضرائب)",
+    "emailInvalid": "البريد الإلكتروني غير صالح",
+    "iceInvalidFallback": "ICE غير صالح",
     "update": "تحديث",
     "create": "إنشاء العميل",
     "countries": {
@@ -184,7 +193,11 @@
     "save": "حفظ التعديلات",
     "invoiceNotFound": "الفاتورة غير موجودة",
     "noEmailOnFile": "لا يتوفر العميل على بريد إلكتروني مسجل",
-    "sentTo": "أُرسلت الفاتورة إلى {email}"
+    "sentTo": "أُرسلت الفاتورة إلى {email}",
+    "lineDescriptionRequired": "الوصف مطلوب",
+    "lineQuantityPositive": "الكمية يجب أن تكون موجبة",
+    "lineUnitPriceRequired": "سعر الوحدة مطلوب",
+    "dateInvalid": "تاريخ غير صالح"
   },
   "quote": {
     "title": "عروض الأسعار",
@@ -247,7 +260,13 @@
     "estimateOnly": "تقدير — بدون قيمة محاسبية أو ضريبية",
     "quoteNotFound": "العرض غير موجود",
     "alreadyConverted": "تم بالفعل تحويل هذا العرض إلى فاتورة",
-    "cannotConvertRejectedExpired": "لا يمكن تحويل عرض مرفوض أو منتهي الصلاحية إلى فاتورة"
+    "cannotConvertRejectedExpired": "لا يمكن تحويل عرض مرفوض أو منتهي الصلاحية إلى فاتورة",
+    "lineDescriptionRequired": "الوصف مطلوب",
+    "lineQuantityPositive": "الكمية يجب أن تكون موجبة",
+    "lineUnitPriceRequired": "سعر الوحدة مطلوب",
+    "clientRequired": "العميل مطلوب",
+    "dateInvalid": "تاريخ غير صالح",
+    "validUntilDateInvalid": "تاريخ الصلاحية غير صالح"
   },
   "cap": {
     "label": "حد العميل (80,000 درهم/السنة)",

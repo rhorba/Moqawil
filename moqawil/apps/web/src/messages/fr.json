@@ -72,7 +72,14 @@
     "onboardingHint": "Ces informations apparaîtront sur vos factures. Elles doivent correspondre à votre registre RNAE.",
     "save": "Enregistrer",
     "saving": "Enregistrement…",
-    "finishOnboarding": "Terminer la configuration"
+    "finishOnboarding": "Terminer la configuration",
+    "nameRequired": "Nom requis",
+    "addressRequired": "Adresse requise",
+    "cityRequired": "Ville requise",
+    "dateInvalidFormat": "Date invalide (AAAA-MM-JJ)",
+    "invoicePrefixFormat": "Préfixe: lettres majuscules, chiffres et tirets uniquement",
+    "iceInvalidFallback": "ICE invalide",
+    "ifInvalidFallback": "IF invalide"
   },
   "client": {
     "title": "Clients",
@@ -100,6 +107,8 @@
     "nameRequired": "Nom requis",
     "iceHint": "Obligatoire pour les entreprises marocaines",
     "iceRequiredMa": "ICE obligatoire pour les entreprises marocaines (CGI Article 145)",
+    "emailInvalid": "Email invalide",
+    "iceInvalidFallback": "ICE invalide",
     "update": "Mettre à jour",
     "create": "Créer le client",
     "countries": {
@@ -184,7 +193,11 @@
     "save": "Enregistrer les modifications",
     "invoiceNotFound": "Facture introuvable",
     "noEmailOnFile": "Le client n'a pas d'adresse e-mail enregistrée",
-    "sentTo": "Facture envoyée à {email}"
+    "sentTo": "Facture envoyée à {email}",
+    "lineDescriptionRequired": "Description requise",
+    "lineQuantityPositive": "Quantité positive requise",
+    "lineUnitPriceRequired": "Prix unitaire requis",
+    "dateInvalid": "Date invalide"
   },
   "quote": {
     "title": "Devis",
@@ -247,7 +260,13 @@
     "estimateOnly": "Estimation — sans valeur comptable ni fiscale",
     "quoteNotFound": "Devis introuvable",
     "alreadyConverted": "Ce devis a déjà été converti en facture",
-    "cannotConvertRejectedExpired": "Un devis refusé ou expiré ne peut pas être converti en facture"
+    "cannotConvertRejectedExpired": "Un devis refusé ou expiré ne peut pas être converti en facture",
+    "lineDescriptionRequired": "Description requise",
+    "lineQuantityPositive": "Quantité positive requise",
+    "lineUnitPriceRequired": "Prix unitaire requis",
+    "clientRequired": "Client requis",
+    "dateInvalid": "Date invalide",
+    "validUntilDateInvalid": "Date de validité invalide"
   },
   "cap": {
     "label": "Plafond client (80 000 DH/an)",

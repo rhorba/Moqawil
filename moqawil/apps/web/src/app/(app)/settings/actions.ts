@@ -8,32 +8,38 @@ import { getTranslations } from 'next-intl/server'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 
-const profileSchema = z.object({
-  fullName: z.string().min(2, 'Nom requis'),
-  ice: z.string().refine(
-    (v) => validateICE(v).valid,
-    (v) => ({ message: validateICE(v).reason ?? 'ICE invalide' })
-  ),
-  ifNumber: z.string().refine(
-    (v) => validateIF(v).valid,
-    (v) => ({ message: validateIF(v).reason ?? 'IF invalide' })
-  ),
-  activityType: z.enum(['commercial', 'industrial', 'artisanal', 'service']),
-  activityDescription: z.string().optional(),
-  address: z.string().min(5, 'Adresse requise'),
-  city: z.string().min(2, 'Ville requise'),
-  phone: z.string().optional(),
-  bankIban: z.string().optional(),
-  registrationDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date invalide (AAAA-MM-JJ)'),
-  invoicePrefix: z
-    .string()
-    .min(2)
-    .max(10)
-    .regex(/^[A-Z0-9-]+$/, 'Préfixe: lettres majuscules, chiffres et tirets uniquement'),
-})
+type Translator = Awaited<ReturnType<typeof getTranslations>>
+
+// Schema is built per-request (not module scope) so validation messages can
+// use getTranslations(), which is async and needs a request-scoped locale.
+function getProfileSchema(t: Translator) {
+  return z.object({
+    fullName: z.string().min(2, t('nameRequired')),
+    ice: z.string().refine(
+      (v) => validateICE(v).valid,
+      (v) => ({ message: validateICE(v).reason ?? t('iceInvalidFallback') })
+    ),
+    ifNumber: z.string().refine(
+      (v) => validateIF(v).valid,
+      (v) => ({ message: validateIF(v).reason ?? t('ifInvalidFallback') })
+    ),
+    activityType: z.enum(['commercial', 'industrial', 'artisanal', 'service']),
+    activityDescription: z.string().optional(),
+    address: z.string().min(5, t('addressRequired')),
+    city: z.string().min(2, t('cityRequired')),
+    phone: z.string().optional(),
+    bankIban: z.string().optional(),
+    registrationDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t('dateInvalidFormat')),
+    invoicePrefix: z
+      .string()
+      .min(2)
+      .max(10)
+      .regex(/^[A-Z0-9-]+$/, t('invoicePrefixFormat')),
+  })
+}
 
 export type ProfileFormState = {
-  errors?: Partial<Record<keyof z.infer<typeof profileSchema>, string[]>>
+  errors?: Partial<Record<keyof z.infer<ReturnType<typeof getProfileSchema>>, string[]>>
   message?: string
   success?: boolean
 }
@@ -43,12 +49,16 @@ export async function upsertProfile(
   formData: FormData
 ): Promise<ProfileFormState> {
   const session = await auth()
+  const [tCommon, tSettings] = await Promise.all([
+    getTranslations('common'),
+    getTranslations('settings'),
+  ])
   if (!session?.user?.id) {
-    return { message: (await getTranslations('common'))('notAuthenticated') }
+    return { message: tCommon('notAuthenticated') }
   }
 
   const raw = Object.fromEntries(formData.entries())
-  const parsed = profileSchema.safeParse(raw)
+  const parsed = getProfileSchema(tSettings).safeParse(raw)
 
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors }

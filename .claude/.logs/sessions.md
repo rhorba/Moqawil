@@ -1,5 +1,18 @@
 # Session Log
 
+### 2026-08-10 SESSION_END — Sprint 8 (Close Remaining Small Gaps) COMPLETE
+- **Completed**: Sprint 8 all 8 tasks (S8-01 through S8-08) across 4 batches.
+- **Key deliverables**:
+  - Every module-scope Zod schema in `invoices/`, `quotes/`, `clients/`, `settings/actions.ts` converted to a per-request schema builder using `getTranslations()` — validation messages now genuinely render in the active locale (14 new keys across `invoice`/`quote`/`client`/`settings` namespaces in both `fr.json`/`ar.json`)
+  - `packageManager: "pnpm@9.15.4"` pinned in root `package.json`, matching CI exactly — closes the Sprint 5 local/CI pnpm-version divergence
+  - Stale "tax rate citations" risk (open since Sprint 0) closed with grep evidence — the citations were already there
+  - Found and cleaned up genuine stale local Postgres test data (two leftover e2e entrepreneur rows colliding with Vitest fixture ICE values) while running full verification — root-caused and documented as local-only, not a CI/code issue
+  - Full verification, not just typecheck: `pnpm build` green, Vitest 103/103 passing (3 skipped) at 100% stmts/funcs/lines + 89% branch coverage, Playwright 18/18 passing (3 skipped) run with `--workers=1` against a real `next start` server
+- **Blocked**: None (Docker Desktop wasn't running at session start — started it directly rather than treating it as a hard blocker, since this project's own `docker-compose.yml` is the documented dev-DB path)
+- **Next session**: No Sprint 9 backlog exists yet. Owner has already confirmed the next sprint is the accountant multi-client dashboard (the last big v0.2 feature) — per `sprint-8.md`'s own Design section.
+- **Open risks**: none new this sprint
+---
+
 ### 2026-08-10 SESSION_END — Sprint 7 (i18n Retrofit) COMPLETE, CI confirmed green
 - **Completed**: Sprint 7 all 12 tasks (S7-01 through S7-12) across 4 batches, plus one unplanned bugfix.
 - **Key deliverables**:
