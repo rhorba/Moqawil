@@ -1,5 +1,20 @@
 # Session Log
 
+### 2026-08-10 SESSION_END — Sprint 6 (Devis/Quote Management) COMPLETE, CI confirmed green
+- **Completed**: Sprint 6 all 13 tasks (S6-01 through S6-13) across 4 batches, plus one unplanned fix.
+- **Key deliverables**:
+  - `quotes`/`quote_lines` schema with their own numbering sequence and lock namespace, separate from invoices
+  - Extracted invoice numbering's advisory-lock transaction into a shared `createInvoiceInTransaction` helper — quote-to-invoice conversion reuses it exactly, no second implementation of the "no gaps, ever" guarantee
+  - Full quote lifecycle: create/edit(draft-only)/delete(draft-only)/send/accept/reject, convert-to-invoice re-running the same 80K cap check direct invoice creation does
+  - Quote PDF (visually distinct, explicit "not an invoice" disclaimer), full UI (list/create/detail/edit), nav entry, i18n namespace
+  - 15 new tests (real DB integration, including the explicit "quotes never affect cap/threshold" invariant and a 5-way numbering concurrency test); full Playwright e2e suite run locally AND confirmed in CI (17/17 pass) including a new devis→invoice conversion flow test
+  - Discovered and documented (not fixed) a pre-existing gap: next-intl configured but never used for page-content translation anywhere in the app, since Sprint 1
+  - CI run `31385872973`: all 6 jobs green
+- **Blocked**: None
+- **Next session**: No Sprint 7 backlog exists yet. Remaining options from earlier scoping: accountant multi-client dashboard, launch-prep/distribution content. Also open: the next-intl gap (would need a dedicated i18n-retrofit sprint), and the local-pnpm-version supply-chain-hardening-enforcement quirk noted in Sprint 5
+- **Open risks**: next-intl i18n gap (new, documented), local pnpm 10.28.1 enforces settings CI's pinned 9.15.4 doesn't (documented in Sprint 5)
+---
+
 ### 2026-08-10 SESSION_END — Sprint 5 (Close Known Gaps) COMPLETE, CI confirmed green
 - **Completed**: Sprint 5 all 13 tasks (S5-01 through S5-13) across 4 batches.
 - **Key deliverables**:

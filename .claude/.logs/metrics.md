@@ -12,7 +12,7 @@
 - **Real gap found and documented** (not fixed this sprint — flagged in `.logs/risks.md`): next-intl is configured but never actually used for page-content translation anywhere in the app, pre-existing since Sprint 1. Followed the established (hardcoded-FR) pattern for consistency; added the `quote` i18n keys to both message files regardless, ready for a future i18n-retrofit sprint.
 - **New dependency**: none.
 - **Velocity**: 6 sprints (+ 3.5) completed. Sprint 6 = 13 tasks + 1 unplanned fix in one session.
-- **Pushed**: pending — see next `.logs/activity.md` entry for commit hashes once pushed.
+- **Pushed**: `git push origin master` at sprint close (Framework Rule 3) — commits `15050ef`, `650a548`. CI run `31385872973`: all 6 jobs green (Lint, TypeCheck, Unit Tests, Security, Build, E2E) — the new devis→invoice e2e flow confirmed working in CI, not just locally.
 ---
 
 ### 2026-08-10 SPRINT_SNAPSHOT — Sprint 5 (Close Known Gaps — hardening, no new features)
