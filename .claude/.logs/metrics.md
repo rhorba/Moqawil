@@ -11,7 +11,7 @@
 - **Coverage**: new Sprint 9 files pass the 80% gate comfortably in isolation — `queries/accountant.ts` 92.85% stmts/90.9% branch/83.33% funcs, `invite-token.ts` 100% across the board (added to `vitest.config.ts`'s coverage-include list per this repo's established convention). Full-suite local coverage run blocked by 3 pre-existing, already-flagged-this-session local Postgres fixture collisions (real manual-testing data reusing tax-engine's placeholder ICE values, declined to delete — see mid-session exchange) — unrelated to Sprint 9 (all 3 files pre-date this sprint, none touched), confirmed by Sprint 9's own suite passing 9/9 cleanly every run. CI's fresh-DB run is the authoritative full-suite+coverage signal, per this project's established closing pattern.
 - **New dependency**: none.
 - **Velocity**: 9 sprints (+ 3.5) completed.
-- **Pushed**: pending — see next log entry.
+- **Pushed**: `git push origin master` at sprint close (Framework Rule 3) — commit `4b06918`. CI run `31425107581`: all 6 jobs green (Unit Tests, TypeCheck, Security, Lint, Build, E2E) — confirms the coverage gate genuinely passes against CI's fresh-per-run database, validating this session's local-DB-pollution diagnosis (unrelated pre-existing fixture collisions, not reproducible in CI).
 ---
 
 ### 2026-08-10 SPRINT_SNAPSHOT — Sprint 8 (Close Remaining Small Gaps)

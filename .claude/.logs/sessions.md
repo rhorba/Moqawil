@@ -1,5 +1,21 @@
 # Session Log
 
+### 2026-08-10 SESSION_END — Sprint 9 (Accountant Multi-Client Dashboard, v0.2) COMPLETE, CI confirmed green
+- **Completed**: Sprint 9 all 17 tasks (S9-01 through S9-17) across 6 batches.
+- **Key deliverables**:
+  - Foundation docs first (Framework Rule 6): `docs/system-design-accountant-dashboard.md` + `docs/architecture-accountant-dashboard.md`, committed before any implementation code
+  - `accountant_links` table (entrepreneur-initiated invite, capability-based access, no `role` column on `users`), authorization boundary (`getAccessibleEntrepreneurs`/`assertAccountantAccess`) joined into every accountant-route query, bespoke race-safe invite-token flow deliberately separate from Auth.js's `verificationTokens`
+  - Entrepreneur-side Settings UI (invite/list/revoke) + accountant-side route group (list + per-entrepreneur drill-down reusing existing tax-engine threshold/cap functions), nav gating, FR/AR i18n
+  - Mandatory Security Engineer review (Framework Rule 5): IDOR/token/revocation-latency all CONFIRMED OK with evidence; invite-spam logged as an accepted risk with reasoning; 2 low-severity issues found and fixed same session (fail-closed email check, narrowed entrepreneur SELECTs)
+  - Two real bugs found and fixed during verification, not deferred: accountant drill-down's wrong empty-state copy; a pre-existing bug in the test-only `/api/e2e/cleanup` route (never deleted `quotes`, blocking a converted invoice's deletion in later runs)
+  - New two-actor Playwright test using isolated browser contexts (not same-browser tabs, which share cookies) to genuinely verify cross-user invite/accept/revoke/immediate-access-loss
+  - CI run `31425107581`: all 6 jobs green (Unit Tests w/ coverage, TypeCheck, Security, Lint, Build, E2E)
+- **Blocked**: None (Docker Desktop hung on its first startup this session — force-restarted, resolved; not a code issue)
+- **Local-environment note, not a Sprint 9 defect**: this session's local Postgres dev volume has accumulated real manual-testing data (an entrepreneur profile literally named after the CLAUDE.md persona) that collides with three pre-existing test files' hardcoded fixture ICE values, causing local full-suite runs to show 3 failing suites unrelated to this sprint's own code. Flagged to the user mid-session; declined a full volume wipe and declined deleting the specific colliding row (looked like real data, not disposable debris). Sprint 9's own new test suite passed 9/9 in isolation every run; CI's fresh-per-run database confirmed the full suite (including coverage) is genuinely green — this local pollution is worth a dedicated cleanup pass in a future session but does not block anything.
+- **Next session**: No Sprint 10 backlog exists yet. Sprint 9 was the last big v0.2 feature area explicitly named in prior session logs (accountant multi-client dashboard). Open items to raise with the owner: (1) local dev-DB cleanup (see above), (2) what's next for v0.2/launch-prep now that the major planned features are done — options from earlier scoping still open: launch-prep/distribution content (CLAUDE.md §16), or further hardening.
+- **Open risks**: invite-spam/email-enumeration on the new accountant-invite flow (accepted risk, logged in `.logs/risks.md`, revisit if a multi-tenant cloud tier ships)
+---
+
 ### 2026-08-10 SESSION_END — Sprint 8 (Close Remaining Small Gaps) COMPLETE, CI confirmed green
 - **Completed**: Sprint 8 all 8 tasks (S8-01 through S8-08) across 4 batches.
 - **Key deliverables**:
