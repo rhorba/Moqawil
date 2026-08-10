@@ -1,13 +1,24 @@
-import { unstable_cache } from 'next/cache'
 /**
  * BAM Exchange Rate API
- * Scrapes daily reference rates from Bank Al-Maghrib (bkam.ma).
+ * Scrapes daily reference rates ("Cours de référence") from Bank Al-Maghrib (bkam.ma).
  * Falls back gracefully if scrape fails — returns null rates + error flag.
  * Cached 24h via Next.js unstable_cache.
  *
  * Known limitation (CLAUDE.md §15): bkam.ma has no public API.
- * We scrape the HTML rates table and extract "cours moyen" (MAD per foreign unit).
+ * We scrape the HTML rates table and extract the most recent "Moyen" column
+ * (MAD per foreign unit) for each tracked currency. Parsing lives in
+ * `src/lib/bam-parser.ts` rather than here because a Next.js route file may
+ * only export route handlers (GET/POST/...) — anything else fails the build.
+ *
+ * Sprint 5 (S5-01): the URL and parser were live-verified against the real
+ * page on 2026-08-10 — the previous URL (`/Marches/Cours-des-devises`) had
+ * been a live 404 since this route was first written, so the scraper had
+ * silently fallen back to manual entry on every single request in
+ * production. See `__tests__/fixtures/bkam-cours-reference.sample.html` for
+ * the real markup shape.
  */
+import { BAM_RATES_URL, parseRates } from '@/lib/bam-parser'
+import { unstable_cache } from 'next/cache'
 import { NextResponse } from 'next/server'
 
 export const revalidate = 86400
@@ -23,30 +34,12 @@ interface BamRates {
   error?: string
 }
 
-/** Extract "cours moyen" from bkam.ma HTML rates table. */
-function parseRates(html: string): Record<string, number> {
-  const rates: Record<string, number> = {}
-  for (const currency of ['EUR', 'USD', 'GBP', 'CHF', 'CAD']) {
-    // Match currency code + 3 numeric columns: achat | vente | cours moyen
-    const regex = new RegExp(
-      `${currency}[^\\d]*([\\d]+[,.]?[\\d]*)[^\\d]*([\\d]+[,.]?[\\d]*)[^\\d]*([\\d]+[,.]?[\\d]*)`,
-      'i'
-    )
-    const match = html.match(regex)
-    if (match) {
-      const rate = Number.parseFloat(match[3].replace(',', '.'))
-      if (!Number.isNaN(rate) && rate > 1 && rate < 25) rates[currency] = rate
-    }
-  }
-  return rates
-}
-
 const fetchBamRates = unstable_cache(
   async (): Promise<BamRates> => {
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), 8000)
     try {
-      const res = await fetch('https://www.bkam.ma/Marches/Cours-des-devises', {
+      const res = await fetch(BAM_RATES_URL, {
         signal: controller.signal,
         headers: { 'User-Agent': 'Mozilla/5.0 (compatible; Moqawil/1.0)', Accept: 'text/html' },
       })

@@ -1,74 +1,64 @@
 /**
  * Sprint 2 — BAM exchange rate scraper tests.
- * Uses vi.stubGlobal to mock fetch; no network calls.
+ * Sprint 5 (S5-01/S5-02): rewritten to import the real `parseRates` from
+ * `src/lib/bam-parser.ts` (the route's own parser can't be imported directly
+ * since Next.js route files may only export route handlers) and test it
+ * against a real, live-captured bkam.ma HTML excerpt instead of a
+ * hand-invented structure. The previous version tested a *reimplementation*
+ * that mirrored an assumed table shape (currency code + 3 numeric columns:
+ * achat/vente/cours moyen) which turned out not to match bkam.ma's real
+ * markup at all (currency identified via an anchor's `title="... (EUR)"`,
+ * values in `<span class="number">`) — the divergence let a real bug
+ * (wrong URL, wrong parser) ship undetected. See risks.md and
+ * .logs/activity.md for the full story.
  */
 
+import fs from 'node:fs'
+import path from 'node:path'
+import { BAM_RATES_URL, parseRates } from '@/lib/bam-parser'
 import { describe, expect, it } from 'vitest'
 
-// Minimal HTML mimicking the relevant column from bkam.ma rate table
-function mockHtml(currency: string, courseMoyen: string): string {
-  return `
-    <html><body><table>
-      <tr>
-        <td>${currency}</td>
-        <td>Dirham marocain</td>
-        <td>9.00</td>
-        <td>11.00</td>
-        <td>${courseMoyen}</td>
-      </tr>
-    </table></body></html>
-  `
-}
+const realFixtureHtml = fs.readFileSync(
+  path.join(__dirname, 'fixtures/bkam-cours-reference.sample.html'),
+  'utf-8'
+)
 
-// Test the parsing logic directly without relying on the cached route handler
-// We extract the parse helper via a regex that mirrors the production implementation
+// ── parseRates against the real bkam.ma markup shape ──────────────────────
 
-function parseRates(html: string): Record<string, number> {
-  const rates: Record<string, number> = {}
-  // Matches: <td>CURRENCY</td> ... 3 numeric <td> values, 3rd is cours moyen
-  const rowRe =
-    /<tr[^>]*>[\s\S]*?<td[^>]*>\s*([A-Z]{3})\s*<\/td>[\s\S]*?<td[^>]*>\s*([\d.,]+)\s*<\/td>[\s\S]*?<td[^>]*>\s*([\d.,]+)\s*<\/td>[\s\S]*?<td[^>]*>\s*([\d.,]+)\s*<\/td>/gi
-  for (let m = rowRe.exec(html); m !== null; m = rowRe.exec(html)) {
-    const currency = m[1].toUpperCase()
-    const rate = Number.parseFloat(m[4].replace(',', '.'))
-    if (!Number.isNaN(rate) && rate > 1 && rate < 25) {
-      rates[currency] = rate
-    }
-  }
-  return rates
-}
-
-// ── parseRates ───────────────────────────────────────────────────────────────
-
-describe('parseRates', () => {
-  it('extracts EUR rate correctly', () => {
-    const html = mockHtml('EUR', '10.92')
-    const rates = parseRates(html)
-    expect(rates.EUR).toBeCloseTo(10.92)
+describe('parseRates — real bkam.ma "Cours de référence" markup', () => {
+  it('extracts all 5 tracked currencies from the real fixture', () => {
+    const rates = parseRates(realFixtureHtml)
+    expect(Object.keys(rates).sort()).toEqual(['CAD', 'CHF', 'EUR', 'GBP', 'USD'])
   })
 
-  it('extracts USD rate correctly', () => {
-    const html = mockHtml('USD', '9.85')
-    const rates = parseRates(html)
-    expect(rates.USD).toBeCloseTo(9.85)
+  it('extracts EUR at the correct value (most recent "Moyen" column)', () => {
+    const rates = parseRates(realFixtureHtml)
+    expect(rates.EUR).toBeCloseTo(10.7447)
   })
 
-  it('rejects implausibly low rates (< 1)', () => {
-    const html = mockHtml('XTS', '0.50')
-    const rates = parseRates(html)
-    expect(rates.XTS).toBeUndefined()
+  it('extracts USD correctly despite large whitespace padding before its value', () => {
+    const rates = parseRates(realFixtureHtml)
+    expect(rates.USD).toBeCloseTo(9.317)
   })
 
-  it('rejects implausibly high rates (> 25)', () => {
-    const html = mockHtml('JPY', '30.00')
-    const rates = parseRates(html)
-    expect(rates.JPY).toBeUndefined()
+  it('extracts GBP, CHF, CAD correctly', () => {
+    const rates = parseRates(realFixtureHtml)
+    expect(rates.GBP).toBeCloseTo(12.534)
+    expect(rates.CHF).toBeCloseTo(11.501)
+    expect(rates.CAD).toBeCloseTo(6.6537)
   })
 
-  it('handles comma as decimal separator', () => {
-    const html = mockHtml('GBP', '12,75')
-    const rates = parseRates(html)
-    expect(rates.GBP).toBeCloseTo(12.75)
+  it('picks the most recent date column, not the prior day', () => {
+    // Fixture's EUR row has 10,7447 (07/08/2026, most recent) then 10,7452 (06/08/2026)
+    const rates = parseRates(realFixtureHtml)
+    expect(rates.EUR).toBe(10.7447)
+    expect(rates.EUR).not.toBe(10.7452)
+  })
+
+  it('is not broken by bkam.ma\'s own "</sapn>" closing-tag typo', () => {
+    expect(realFixtureHtml).toContain('</sapn>')
+    const rates = parseRates(realFixtureHtml)
+    expect(rates.EUR).toBeDefined()
   })
 
   it('returns empty object for empty HTML', () => {
@@ -76,22 +66,36 @@ describe('parseRates', () => {
     expect(Object.keys(rates)).toHaveLength(0)
   })
 
-  it('extracts multiple currencies from same page', () => {
-    const html = mockHtml('EUR', '10.92') + mockHtml('USD', '9.85')
+  it('rejects implausibly low values (< 1)', () => {
+    const html = `<a title="1 EURO (EUR)">1 EURO</a><span class="number">0,50</span>`
     const rates = parseRates(html)
-    expect(Object.keys(rates)).toHaveLength(2)
-    expect(rates.EUR).toBeCloseTo(10.92)
-    expect(rates.USD).toBeCloseTo(9.85)
+    expect(rates.EUR).toBeUndefined()
+  })
+
+  it('rejects implausibly high values (> 25)', () => {
+    const html = `<a title="1 EURO (EUR)">1 EURO</a><span class="number">30,00</span>`
+    const rates = parseRates(html)
+    expect(rates.EUR).toBeUndefined()
   })
 })
 
-// ── Exchange rate API response structure ─────────────────────────────────────
+// ── URL regression guard ───────────────────────────────────────────────────
+
+describe('BAM_RATES_URL', () => {
+  it('points at the real "Cours de référence" page, not the old 404 path', () => {
+    // The route was silently 404ing in production for its entire lifetime
+    // under /Marches/Cours-des-devises — guard against regressing to it.
+    expect(BAM_RATES_URL).not.toContain('Cours-des-devises')
+    expect(BAM_RATES_URL).toContain('Cours-de-reference')
+  })
+})
+
+// ── Exchange rate API response contract ─────────────────────────────────────
 
 describe('exchange rate API contract', () => {
-  it('rates map has MAD-denominated values (1 EUR > 1 MAD)', () => {
-    // EUR/MAD is always > 1 (currently ~10-11)
-    const typicalRates = { EUR: 10.92, USD: 9.85, GBP: 12.75 }
-    for (const [, rate] of Object.entries(typicalRates)) {
+  it('rates map has MAD-denominated values (1 unit > 1 MAD)', () => {
+    const rates = parseRates(realFixtureHtml)
+    for (const rate of Object.values(rates)) {
       expect(rate).toBeGreaterThan(1)
       expect(rate).toBeLessThan(25)
     }
