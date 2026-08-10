@@ -44,6 +44,16 @@ export const paymentMethodEnum = pgEnum('payment_method', [
 
 export const declarationStatusEnum = pgEnum('declaration_status', ['pending', 'submitted'])
 
+// Sprint 6: devis (quote) management. Not a CGI Article 145 legal document —
+// separate lifecycle from invoices, never contributes to turnover.
+export const quoteStatusEnum = pgEnum('quote_status', [
+  'draft',
+  'sent',
+  'accepted',
+  'rejected',
+  'expired',
+])
+
 // v0.1: always 'not_applicable' or 'ready' — 'submitted'/'cleared'/'rejected' are reserved for
 // when a real ClearanceProvider exists (Sprint 5+); NoOpClearanceProvider never sets them.
 export const clearanceStatusEnum = pgEnum('clearance_status', [
@@ -206,6 +216,62 @@ export const invoiceLines = pgTable('invoice_lines', {
   lineTotalMad: numeric('line_total_mad', { precision: 12, scale: 2 }).notNull(),
 })
 
+// ── Quotes (Devis) ───────────────────────────────────────────────────────────
+// Sprint 6. Own numbering sequence from invoices (a devis is not a CGI Article
+// 145 legal document, so it does not share invoices' sequential-no-gaps rule).
+// Fixed 'DEVIS' prefix rather than a configurable one — see
+// .claude/sprint-backlog/sprint-6.md "Design" for the reasoning.
+
+export const quotes = pgTable(
+  'quotes',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    entrepreneurId: uuid('entrepreneur_id')
+      .notNull()
+      .references(() => entrepreneurs.id),
+    clientId: uuid('client_id')
+      .notNull()
+      .references(() => clients.id),
+    quoteNumber: text('quote_number').notNull(),
+    fiscalYear: integer('fiscal_year').notNull(),
+    sequenceNumber: integer('sequence_number').notNull(),
+    issueDate: date('issue_date').notNull(),
+    validUntilDate: date('valid_until_date').notNull(),
+    status: quoteStatusEnum('status').default('draft').notNull(),
+    currency: text('currency').default('MAD').notNull(),
+    exchangeRate: numeric('exchange_rate', { precision: 10, scale: 4 }),
+    subtotalOriginal: numeric('subtotal_original', { precision: 12, scale: 2 }).notNull(),
+    subtotalMad: numeric('subtotal_mad', { precision: 12, scale: 2 }).notNull(),
+    totalMad: numeric('total_mad', { precision: 12, scale: 2 }).notNull(),
+    notes: text('notes'),
+    pdfPath: text('pdf_path'),
+    // Set when convertQuoteToInvoice succeeds — the real invoice this devis became.
+    convertedToInvoiceId: uuid('converted_to_invoice_id').references(() => invoices.id),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (t) => [
+    unique('uq_quote_number').on(t.entrepreneurId, t.quoteNumber),
+    unique('uq_quote_sequence').on(t.entrepreneurId, t.fiscalYear, t.sequenceNumber),
+    index('idx_quotes_entrepreneur_year').on(t.entrepreneurId, t.fiscalYear),
+  ]
+)
+
+// ── Quote Lines ──────────────────────────────────────────────────────────────
+
+export const quoteLines = pgTable('quote_lines', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  quoteId: uuid('quote_id')
+    .notNull()
+    .references(() => quotes.id, { onDelete: 'cascade' }),
+  position: integer('position').notNull(),
+  description: text('description').notNull(),
+  quantity: numeric('quantity', { precision: 10, scale: 3 }).notNull(),
+  unitPriceOriginal: numeric('unit_price_original', { precision: 12, scale: 2 }).notNull(),
+  lineTotalOriginal: numeric('line_total_original', { precision: 12, scale: 2 }).notNull(),
+  lineTotalMad: numeric('line_total_mad', { precision: 12, scale: 2 }).notNull(),
+})
+
 // ── Quarterly Declarations ────────────────────────────────────────────────────
 
 export const quarterlyDeclarations = pgTable(
@@ -243,6 +309,7 @@ export const entrepreneursRelations = relations(entrepreneurs, ({ one, many }) =
   user: one(users, { fields: [entrepreneurs.userId], references: [users.id] }),
   clients: many(clients),
   invoices: many(invoices),
+  quotes: many(quotes),
   declarations: many(quarterlyDeclarations),
 }))
 
@@ -252,6 +319,7 @@ export const clientsRelations = relations(clients, ({ one, many }) => ({
     references: [entrepreneurs.id],
   }),
   invoices: many(invoices),
+  quotes: many(quotes),
 }))
 
 export const invoicesRelations = relations(invoices, ({ one, many }) => ({
@@ -265,4 +333,21 @@ export const invoicesRelations = relations(invoices, ({ one, many }) => ({
 
 export const invoiceLinesRelations = relations(invoiceLines, ({ one }) => ({
   invoice: one(invoices, { fields: [invoiceLines.invoiceId], references: [invoices.id] }),
+}))
+
+export const quotesRelations = relations(quotes, ({ one, many }) => ({
+  entrepreneur: one(entrepreneurs, {
+    fields: [quotes.entrepreneurId],
+    references: [entrepreneurs.id],
+  }),
+  client: one(clients, { fields: [quotes.clientId], references: [clients.id] }),
+  lines: many(quoteLines),
+  convertedToInvoice: one(invoices, {
+    fields: [quotes.convertedToInvoiceId],
+    references: [invoices.id],
+  }),
+}))
+
+export const quoteLinesRelations = relations(quoteLines, ({ one }) => ({
+  quote: one(quotes, { fields: [quoteLines.quoteId], references: [quotes.id] }),
 }))

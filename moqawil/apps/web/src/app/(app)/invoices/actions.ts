@@ -1,12 +1,12 @@
 'use server'
 
 import { auth } from '@/lib/auth'
+import { createInvoiceInTransaction } from '@/lib/invoice-creation'
 import { getClientAnnualTotal, getClientById } from '@/lib/queries/client'
 import { getEntrepreneur } from '@/lib/queries/entrepreneur'
 import { db, invoiceLines, invoices } from '@moqawil/db'
-import { PER_CLIENT_CAP_MAD, formatInvoiceNumber } from '@moqawil/tax-engine'
+import { PER_CLIENT_CAP_MAD } from '@moqawil/tax-engine'
 import { and, eq } from 'drizzle-orm'
-import { sql } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
@@ -120,59 +120,23 @@ export async function createInvoice(
     }
   }
 
-  const fiscalYear = new Date(data.issueDate).getFullYear()
-
-  // S1-05 core: advisory lock + transaction for sequential numbering (no gaps)
-  const result = await db.transaction(async (tx) => {
-    // PostgreSQL advisory lock — keyed on hash of entrepreneurId to prevent concurrent inserts
-    // lock key: first 8 chars of UUID as bigint via hashtext
-    await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${entrepreneur.id}))`)
-
-    // Get next sequence number within the lock
-    const [seqRow] = await tx
-      .select({
-        maxSeq: sql<number>`COALESCE(MAX(${invoices.sequenceNumber}), 0)`,
-      })
-      .from(invoices)
-      .where(and(eq(invoices.entrepreneurId, entrepreneur.id), eq(invoices.fiscalYear, fiscalYear)))
-
-    const seqNumber = (seqRow?.maxSeq ?? 0) + 1
-    const invoiceNumber = formatInvoiceNumber(entrepreneur.invoicePrefix, fiscalYear, seqNumber)
-
-    const [newInvoice] = await tx
-      .insert(invoices)
-      .values({
-        entrepreneurId: entrepreneur.id,
-        clientId: data.clientId,
-        invoiceNumber,
-        fiscalYear,
-        sequenceNumber: seqNumber,
-        issueDate: data.issueDate,
-        dueDate: data.dueDate || null,
-        status: 'draft',
-        paymentMethod: data.paymentMethod ?? null,
-        currency: data.currency,
-        exchangeRate: data.currency !== 'MAD' ? String(exchangeRate) : null,
-        subtotalOriginal: String(subtotalOriginal),
-        subtotalMad: String(subtotalMad),
-        totalMad: String(totalMad),
-        notes: data.notes || null,
-      })
-      .returning()
-
-    await tx.insert(invoiceLines).values(
-      lines.map((l, i) => ({
-        invoiceId: newInvoice.id,
-        position: i + 1,
-        description: l.description,
-        quantity: String(l.quantity),
-        unitPriceOriginal: String(l.unitPriceOriginal),
-        lineTotalOriginal: String(l.lineTotalOriginal),
-        lineTotalMad: String(l.lineTotalMad),
-      }))
-    )
-
-    return newInvoice
+  // S1-05 core, extracted to lib/invoice-creation.ts in Sprint 6 so
+  // quote-to-invoice conversion reuses this exact same advisory-lock +
+  // sequential-numbering transaction rather than duplicating it.
+  const result = await createInvoiceInTransaction({
+    entrepreneurId: entrepreneur.id,
+    invoicePrefix: entrepreneur.invoicePrefix,
+    clientId: data.clientId,
+    issueDate: data.issueDate,
+    dueDate: data.dueDate,
+    paymentMethod: data.paymentMethod,
+    currency: data.currency,
+    exchangeRate,
+    subtotalOriginal,
+    subtotalMad,
+    totalMad,
+    notes: data.notes,
+    lines,
   })
 
   redirect(`/invoices/${result.id}`)

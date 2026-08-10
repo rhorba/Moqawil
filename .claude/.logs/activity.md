@@ -1,5 +1,26 @@
 # Activity Log
 
+### 2026-08-10 MILESTONE — Sprint 6 Batches 1-2: quote data layer + business logic, real invoice-creation refactor
+- **Specialist**: DBA + Backend Dev + Security Engineer
+- **Summary**: S6-01 through S6-06.
+  - Schema: `quotes` + `quote_lines` tables, `quote_status` enum, `convertedToInvoiceId` FK → `invoices.id`; additive-only migration `0002_dry_stick.sql`, applied and verified against local Postgres.
+  - `queries/quote.ts`: `getQuotes`, `getQuoteWithLines` — same ownership-scoping (IDOR guard) pattern as `queries/invoice.ts`. Deliberately did NOT add a `getNextQuoteSequenceNumber` helper mirroring `queries/invoice.ts`'s existing dead-code `getNextSequenceNumber` (confirmed via grep it's never called by the real app, only by its own test) — no reason to propagate an established but unused pattern.
+  - **Refactor**: extracted the advisory-lock + sequential-numbering transaction out of `invoices/actions.ts`'s `createInvoice` into `lib/invoice-creation.ts`'s `createInvoiceInTransaction`, so quote-to-invoice conversion calls the exact same code path rather than a second implementation of "CGI Article 145: no gaps, ever." Re-ran the full existing test suite (102 tests, including the Sprint 5 concurrency test) after the refactor to confirm no regression before building on top of it.
+  - `quotes/actions.ts`: `createQuote`/`updateQuote` (draft-only)/`deleteQuote` (draft-only)/`updateQuoteStatus`/`convertQuoteToInvoice`. Quotes use their own advisory-lock namespace (`entrepreneurId || '-quote'`) so quote numbering never contends with invoice numbering. `convertQuoteToInvoice` re-runs the identical 80K cap check `createInvoice` does, guards against re-converting an already-converted quote, and guards against converting a rejected/expired quote.
+  - Tests (`quote-db-integration.test.ts`, 7 tests, all executed against real Postgres): ownership scoping (2 IDOR-guard cases), the explicit invariant that a 100,000 MAD quote never appears in `getClientAnnualTotal` or `getYtdTurnover`, a genuine 5-way concurrency test for quote numbering, and — highest value — a direct DB-integration test of the real (not reimplemented) `createInvoiceInTransaction` proving the convert-to-invoice numbering path is correct and shares one sequence with direct invoice creation.
+  - Security self-review: ownership scoping confirmed on every quote read/write; no SQL injection surface (advisory-lock key built from DB-derived `entrepreneur.id`, never raw user input); cap-check-then-insert has a small TOCTOU window (a second concurrent submission could theoretically read stale cap data before the first commits) — confirmed this is a **pre-existing characteristic already present in direct `createInvoice`** (the cap check happens before the advisory-lock transaction there too, not something this sprint introduced), consistent with the product's solo-operator self-host threat model. Documented, not silently accepted.
+  - Verified: 102/102 web unit tests pass (3 skipped, DB-independent), typecheck clean, lint clean.
+- **Status**: resolved
+- **Impact**: high — the refactor is the more important part: invoice numbering now has exactly one implementation instead of a second one waiting to drift out of sync
+---
+
+### 2026-08-10 PLANNING — Sprint 6 backlog drafted (devis/quote management, v0.2)
+- **Specialist**: Scrum Master
+- **Summary**: Owner chose devis (quote) management for Sprint 6 over accountant multi-client dashboard and launch-prep content. Drafted `.claude/sprint-backlog/sprint-6.md` — 13 tasks across 4 batches. Key design decisions locked in: quotes get their own numbering sequence and fixed `DEVIS` prefix (not the configurable `invoicePrefix` invoices use — a devis isn't a CGI Article 145 legal document); quotes never count toward the 80K cap or annual threshold (enforced by construction, tested explicitly); "convert to invoice" reuses the exact same advisory-lock + sequential-numbering + cap-check transaction `createInvoice` already uses rather than duplicating it. No new `packages/*` module or external integration, so Framework Rules 1/6 (mandatory System Designer + Software Architect, PRD/architecture pair) don't apply — standard DBA-then-Backend-then-Frontend flow.
+- **Status**: resolved (drafted, not started)
+- **Impact**: medium
+---
+
 ### 2026-08-10 MILESTONE — Sprint 5 Batch 3: real OASIS UBL 2.1 XSD validation (closes Sprint 4's documented known gap)
 - **Specialist**: Software Architect + DevOps/DevSecOps + Tester + Security Engineer
 - **Summary**: Sprint 4 shipped UBL 2.1 export with only hand-rolled well-formedness/element-order checks, explicitly documenting real XSD validation as a known gap. Closed it for real:
