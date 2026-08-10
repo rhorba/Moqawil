@@ -46,6 +46,12 @@ pnpm dev                         # Serveur Next.js sur http://localhost:3000
 | `pnpm lint` | Vérification Biome |
 | `pnpm format` | Formatage automatique |
 
+> **Note (tests `tax-engine`)** : la validation du XML UBL 2.1 face au vrai schéma
+> XSD OASIS nécessite `xmllint` (paquet `libxml2-utils` sur Debian/Ubuntu,
+> `apk add libxml2-utils` sur Alpine). Sans ce binaire, ces tests spécifiques
+> sont automatiquement ignorés (`skip`) plutôt que de faire échouer le reste
+> de la suite — la CI l'installe explicitement.
+
 ---
 
 ## Stack technique
