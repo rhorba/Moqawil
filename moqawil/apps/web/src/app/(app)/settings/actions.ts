@@ -4,6 +4,7 @@ import { auth } from '@/lib/auth'
 import { db, entrepreneurs } from '@moqawil/db'
 import { validateICE, validateIF } from '@moqawil/tax-engine'
 import { eq } from 'drizzle-orm'
+import { getTranslations } from 'next-intl/server'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 
@@ -42,7 +43,9 @@ export async function upsertProfile(
   formData: FormData
 ): Promise<ProfileFormState> {
   const session = await auth()
-  if (!session?.user?.id) return { message: 'Non authentifié' }
+  if (!session?.user?.id) {
+    return { message: (await getTranslations('common'))('notAuthenticated') }
+  }
 
   const raw = Object.fromEntries(formData.entries())
   const parsed = profileSchema.safeParse(raw)

@@ -3,6 +3,7 @@ import { getAllClientAnnualTotals, getClients } from '@/lib/queries/client'
 import { getEntrepreneur } from '@/lib/queries/entrepreneur'
 import { getInvoiceWithLines } from '@/lib/queries/invoice'
 import { ArrowLeft } from 'lucide-react'
+import { getTranslations } from 'next-intl/server'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { EditInvoiceForm } from './edit-form'
@@ -13,16 +14,19 @@ export default async function EditInvoicePage({ params }: { params: Promise<{ id
   const entrepreneur = session?.user?.id ? await getEntrepreneur(session.user.id) : null
   if (!entrepreneur) return null
 
-  const data = await getInvoiceWithLines(id, entrepreneur.id)
+  const [t, data] = await Promise.all([
+    getTranslations('invoice'),
+    getInvoiceWithLines(id, entrepreneur.id),
+  ])
   if (!data) notFound()
 
   if (data.invoice.status !== 'draft') {
     return (
       <div className="p-6 max-w-2xl">
         <p className="text-sm text-gray-500">
-          Seules les factures en brouillon peuvent être modifiées.{' '}
+          {t('editOnlyDraft')}{' '}
           <Link href={`/invoices/${id}`} className="text-[var(--color-primary)] underline">
-            Retour
+            {t('back')}
           </Link>
         </p>
       </div>
@@ -40,7 +44,9 @@ export default async function EditInvoicePage({ params }: { params: Promise<{ id
         <Link href={`/invoices/${id}`} className="text-gray-500 hover:text-gray-700">
           <ArrowLeft size={20} className="rtl:rotate-180" />
         </Link>
-        <h1 className="text-2xl font-bold">Modifier {data.invoice.invoiceNumber}</h1>
+        <h1 className="text-2xl font-bold">
+          {t('edit')} {data.invoice.invoiceNumber}
+        </h1>
       </div>
 
       <EditInvoiceForm

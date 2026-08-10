@@ -2,17 +2,11 @@ import { auth } from '@/lib/auth'
 import { getEntrepreneur } from '@/lib/queries/entrepreneur'
 import { getThresholdWidget } from '@/lib/queries/invoice'
 import type { ActivityType } from '@moqawil/tax-engine'
+import { getTranslations } from 'next-intl/server'
 import Link from 'next/link'
 
 function fmt(n: number) {
   return new Intl.NumberFormat('fr-MA', { maximumFractionDigits: 0 }).format(n)
-}
-
-const activityLabels: Record<string, string> = {
-  commercial: 'Commercial',
-  industrial: 'Industriel',
-  artisanal: 'Artisanal',
-  service: 'Services',
 }
 
 export default async function DashboardPage() {
@@ -21,6 +15,13 @@ export default async function DashboardPage() {
 
   const entrepreneur = await getEntrepreneur(session.user.id)
   if (!entrepreneur) return null
+
+  const [t, tEntrepreneur] = await Promise.all([
+    getTranslations('dashboard'),
+    getTranslations('entrepreneur'),
+  ])
+
+  const activityLabel = tEntrepreneur(`activityTypes.${entrepreneur.activityType}`)
 
   const year = new Date().getFullYear()
   const threshold = await getThresholdWidget(
@@ -48,18 +49,18 @@ export default async function DashboardPage() {
 
   const currentQuarter = Math.ceil((new Date().getMonth() + 1) / 3)
   const quarterDeadlines = [
-    { q: 1, label: 'T1 (jan–mars)', deadline: `${year}-04-30` },
-    { q: 2, label: 'T2 (avr–juin)', deadline: `${year}-07-31` },
-    { q: 3, label: 'T3 (jul–sep)', deadline: `${year}-10-31` },
-    { q: 4, label: 'T4 (oct–déc)', deadline: `${year + 1}-01-31` },
+    { q: 1, label: t('q1'), deadline: `${year}-04-30` },
+    { q: 2, label: t('q2'), deadline: `${year}-07-31` },
+    { q: 3, label: t('q3'), deadline: `${year}-10-31` },
+    { q: 4, label: t('q4'), deadline: `${year + 1}-01-31` },
   ]
 
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Tableau de bord</h1>
+        <h1 className="text-2xl font-bold">{t('title')}</h1>
         <p className="text-sm text-gray-500 mt-1">
-          {entrepreneur.fullName} · {activityLabels[entrepreneur.activityType]} · {year}
+          {entrepreneur.fullName} · {activityLabel} · {year}
         </p>
       </div>
 
@@ -67,7 +68,7 @@ export default async function DashboardPage() {
       <div className={`rounded-lg border p-5 ${statusBg[threshold.status]}`}>
         <div className="flex items-center justify-between mb-2">
           <h2 className={`font-semibold text-sm ${statusText[threshold.status]}`}>
-            Seuil annuel {activityLabels[entrepreneur.activityType]}
+            {t('thresholdTitle', { activity: activityLabel })}
           </h2>
           <span className={`text-xs font-bold ${statusText[threshold.status]}`}>
             {threshold.percentOfThreshold.toFixed(1)}%
@@ -83,24 +84,19 @@ export default async function DashboardPage() {
 
         <div className="flex justify-between text-xs text-gray-600">
           <span>
-            CA déclaré : <strong>{fmt(threshold.ytd)} DH</strong>
+            {t('declaredCa')} : <strong>{fmt(threshold.ytd)} DH</strong>
           </span>
           <span>
-            Seuil : <strong>{fmt(threshold.remainingMad + threshold.ytd)} DH</strong>
+            {t('thresholdAmount')} :{' '}
+            <strong>{fmt(threshold.remainingMad + threshold.ytd)} DH</strong>
           </span>
         </div>
 
         {threshold.status === 'warning' && (
-          <p className={`text-xs mt-2 ${statusText.warning}`}>
-            Attention — vous approchez du seuil. Consultez un comptable si vous pensez le dépasser
-            deux années consécutives.
-          </p>
+          <p className={`text-xs mt-2 ${statusText.warning}`}>{t('warningNote')}</p>
         )}
         {threshold.status === 'over' && (
-          <p className={`text-xs mt-2 font-semibold ${statusText.over}`}>
-            Seuil dépassé. Si c&apos;est la 2e année consécutive, vous perdrez le statut
-            auto-entrepreneur.
-          </p>
+          <p className={`text-xs mt-2 font-semibold ${statusText.over}`}>{t('overNote')}</p>
         )}
       </div>
 
@@ -110,21 +106,21 @@ export default async function DashboardPage() {
           href="/invoices/new"
           className="p-4 border rounded-lg bg-white hover:shadow-sm transition-shadow"
         >
-          <p className="font-semibold text-sm">Nouvelle facture</p>
-          <p className="text-xs text-gray-500 mt-1">Créer et numéroter une facture</p>
+          <p className="font-semibold text-sm">{t('newInvoice')}</p>
+          <p className="text-xs text-gray-500 mt-1">{t('newInvoiceDesc')}</p>
         </Link>
         <Link
           href="/declarations"
           className="p-4 border rounded-lg bg-white hover:shadow-sm transition-shadow"
         >
-          <p className="font-semibold text-sm">Déclaration T{currentQuarter}</p>
-          <p className="text-xs text-gray-500 mt-1">Préparer la déclaration trimestrielle</p>
+          <p className="font-semibold text-sm">{t('declarationQ', { quarter: currentQuarter })}</p>
+          <p className="text-xs text-gray-500 mt-1">{t('declarationDesc')}</p>
         </Link>
       </div>
 
       {/* Quarterly timeline */}
       <div>
-        <h2 className="font-semibold text-sm mb-3">Déclarations {year}</h2>
+        <h2 className="font-semibold text-sm mb-3">{t('declarationsForYear', { year })}</h2>
         <div className="grid grid-cols-4 gap-3">
           {quarterDeadlines.map(({ q, label, deadline }) => {
             const isPast = q < currentQuarter
@@ -143,7 +139,7 @@ export default async function DashboardPage() {
               >
                 <p className={`font-bold text-sm ${isCurrent ? 'text-white' : ''}`}>{label}</p>
                 <p className={`text-xs mt-1 ${isCurrent ? 'text-white/80' : 'text-gray-500'}`}>
-                  Limite : {deadline}
+                  {t('deadline', { date: deadline })}
                 </p>
               </Link>
             )

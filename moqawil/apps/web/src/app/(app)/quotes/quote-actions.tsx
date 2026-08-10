@@ -1,6 +1,7 @@
 'use client'
 
 import { CapConfirmDialog } from '@/components/cap-confirm-dialog'
+import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import {
@@ -16,6 +17,7 @@ interface QuoteActionsProps {
 }
 
 export function QuoteActions({ quoteId, currentStatus }: QuoteActionsProps) {
+  const t = useTranslations('quote')
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [convertState, setConvertState] = useState<ConvertQuoteState>({})
@@ -59,13 +61,13 @@ export function QuoteActions({ quoteId, currentStatus }: QuoteActionsProps) {
               onClick={() => startTransition(() => updateQuoteStatus(quoteId, 'sent'))}
               className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50"
             >
-              Marquer comme envoyé
+              {t('markSent')}
             </button>
             <button
               type="button"
               disabled={isPending}
               onClick={() => {
-                if (confirm('Supprimer ce devis brouillon ? Cette action est définitive.')) {
+                if (confirm(t('deleteConfirm'))) {
                   startTransition(async () => {
                     await deleteQuote(quoteId)
                     router.push('/quotes')
@@ -74,7 +76,7 @@ export function QuoteActions({ quoteId, currentStatus }: QuoteActionsProps) {
               }}
               className="px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg disabled:opacity-50"
             >
-              Supprimer
+              {t('delete')}
             </button>
           </>
         )}
@@ -85,20 +87,20 @@ export function QuoteActions({ quoteId, currentStatus }: QuoteActionsProps) {
           onClick={() => runConvert(false)}
           className="px-4 py-2 bg-[var(--color-safe)] text-white rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50"
         >
-          Convertir en facture
+          {t('convertToInvoice')}
         </button>
 
         <button
           type="button"
           disabled={isPending}
           onClick={() => {
-            if (confirm('Marquer ce devis comme refusé ?')) {
+            if (confirm(t('rejectConfirm'))) {
               startTransition(() => updateQuoteStatus(quoteId, 'rejected'))
             }
           }}
           className="px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg disabled:opacity-50"
         >
-          Marquer refusé
+          {t('markRejected')}
         </button>
       </div>
     </div>

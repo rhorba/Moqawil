@@ -5,6 +5,7 @@ import { getEntrepreneur } from '@/lib/queries/entrepreneur'
 import { db, invoices } from '@moqawil/db'
 import { and, eq } from 'drizzle-orm'
 import { ArrowLeft } from 'lucide-react'
+import { getTranslations } from 'next-intl/server'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ClientForm } from '../client-form'
@@ -15,7 +16,11 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
   const entrepreneur = session?.user?.id ? await getEntrepreneur(session.user.id) : null
   if (!entrepreneur) return null
 
-  const client = await getClientById(id, entrepreneur.id)
+  const [tClient, tInvoice, client] = await Promise.all([
+    getTranslations('client'),
+    getTranslations('invoice'),
+    getClientById(id, entrepreneur.id),
+  ])
   if (!client) notFound()
 
   const year = new Date().getFullYear()
@@ -34,6 +39,19 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
       )
     )
     .orderBy(invoices.sequenceNumber)
+
+  const statusColors: Record<string, string> = {
+    draft: 'bg-gray-100 text-gray-600',
+    sent: 'bg-blue-100 text-blue-700',
+    paid: 'bg-green-100 text-green-700',
+    cancelled: 'bg-red-100 text-red-700',
+  }
+  const statusLabels: Record<string, string> = {
+    draft: tInvoice('status.draft'),
+    sent: tInvoice('status.sent'),
+    paid: tInvoice('status.paid'),
+    cancelled: tInvoice('status.cancelled'),
+  }
 
   return (
     <div className="p-6 max-w-2xl space-y-6">
@@ -55,14 +73,14 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
       )}
 
       <div className="bg-white border rounded-lg p-4">
-        <h2 className="font-semibold mb-4">Modifier le client</h2>
+        <h2 className="font-semibold mb-4">{tClient('editTitle')}</h2>
         <ClientForm client={client} />
       </div>
 
       <div>
-        <h2 className="font-semibold mb-3">Factures {year}</h2>
+        <h2 className="font-semibold mb-3">{tClient('invoicesForYear', { year })}</h2>
         {clientInvoices.length === 0 ? (
-          <p className="text-sm text-gray-500">Aucune facture cette année.</p>
+          <p className="text-sm text-gray-500">{tClient('noInvoicesThisYear')}</p>
         ) : (
           <div className="divide-y border rounded-lg bg-white">
             {clientInvoices.map((inv) => (
@@ -82,7 +100,11 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
                     )}{' '}
                     DH
                   </p>
-                  <StatusBadge status={inv.status} />
+                  <span
+                    className={`text-xs px-2 py-0.5 rounded-full ${statusColors[inv.status] ?? ''}`}
+                  >
+                    {statusLabels[inv.status] ?? inv.status}
+                  </span>
                 </div>
               </Link>
             ))}
@@ -90,25 +112,5 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
         )}
       </div>
     </div>
-  )
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const cfg: Record<string, string> = {
-    draft: 'bg-gray-100 text-gray-600',
-    sent: 'bg-blue-100 text-blue-700',
-    paid: 'bg-green-100 text-green-700',
-    cancelled: 'bg-red-100 text-red-700',
-  }
-  const labels: Record<string, string> = {
-    draft: 'Brouillon',
-    sent: 'Envoyée',
-    paid: 'Payée',
-    cancelled: 'Annulée',
-  }
-  return (
-    <span className={`text-xs px-2 py-0.5 rounded-full ${cfg[status] ?? ''}`}>
-      {labels[status] ?? status}
-    </span>
   )
 }

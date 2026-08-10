@@ -4,6 +4,7 @@ import { getClientAnnualTotal, getClientById } from '@/lib/queries/client'
 import { getEntrepreneur } from '@/lib/queries/entrepreneur'
 import { getInvoiceWithLines } from '@/lib/queries/invoice'
 import { ArrowLeft, Download, FileCode2, Pencil } from 'lucide-react'
+import { getTranslations } from 'next-intl/server'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { InvoiceActions } from '../invoice-actions'
@@ -14,22 +15,24 @@ function fmt(n: string | number) {
   )
 }
 
-const statusConfig: Record<string, { label: string; cls: string }> = {
-  draft: { label: 'Brouillon', cls: 'bg-gray-100 text-gray-600' },
-  sent: { label: 'Envoyée', cls: 'bg-blue-100 text-blue-700' },
-  paid: { label: 'Payée', cls: 'bg-green-100 text-green-700' },
-  cancelled: { label: 'Annulée', cls: 'bg-red-100 text-red-700' },
-}
-
 export default async function InvoiceDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const session = await auth()
   const entrepreneur = session?.user?.id ? await getEntrepreneur(session.user.id) : null
   if (!entrepreneur) return null
 
-  const data = await getInvoiceWithLines(id, entrepreneur.id)
+  const [t, data] = await Promise.all([
+    getTranslations('invoice'),
+    getInvoiceWithLines(id, entrepreneur.id),
+  ])
   if (!data) notFound()
 
+  const statusConfig: Record<string, { label: string; cls: string }> = {
+    draft: { label: t('status.draft'), cls: 'bg-gray-100 text-gray-600' },
+    sent: { label: t('status.sent'), cls: 'bg-blue-100 text-blue-700' },
+    paid: { label: t('status.paid'), cls: 'bg-green-100 text-green-700' },
+    cancelled: { label: t('status.cancelled'), cls: 'bg-red-100 text-red-700' },
+  }
   const { invoice, lines } = data
   const client = await getClientById(invoice.clientId, entrepreneur.id)
   const isService = entrepreneur.activityType === 'service'
@@ -56,7 +59,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
               className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors"
             >
               <Pencil size={15} />
-              Modifier
+              {t('edit')}
             </Link>
           )}
           <a
@@ -66,7 +69,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors"
           >
             <Download size={15} />
-            Télécharger PDF
+            {t('download')}
           </a>
           {invoice.status !== 'draft' && (
             <a
@@ -76,7 +79,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
               className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors"
             >
               <FileCode2 size={15} />
-              Télécharger XML (UBL 2.1)
+              {t('downloadUbl')}
             </a>
           )}
         </div>
@@ -85,10 +88,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
       {invoice.status !== 'draft' && (
         <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
           <FileCode2 size={13} className="shrink-0" />
-          <span>
-            Format e-facturation prêt (UBL 2.1) — export uniquement, non transmis à la DGI. Ce
-            n&apos;est pas une certification ou une facture électronique cléarée.
-          </span>
+          <span>{t('ublReadyNotice')}</span>
         </div>
       )}
 
@@ -106,21 +106,28 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
       <div className="bg-white border rounded-lg p-5 space-y-4">
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
-            <p className="text-gray-500 text-xs mb-1">Client</p>
+            <p className="text-gray-500 text-xs mb-1">{t('billedTo')}</p>
             <p className="font-medium">{client?.name ?? '—'}</p>
             {client?.ice && <p className="text-gray-500 text-xs">ICE: {client.ice}</p>}
             {client?.address && <p className="text-gray-500 text-xs">{client.address}</p>}
           </div>
           <div className="text-end">
-            <p className="text-gray-500 text-xs mb-1">Dates</p>
-            <p>Émission : {invoice.issueDate}</p>
-            {invoice.dueDate && <p className="text-gray-500">Échéance : {invoice.dueDate}</p>}
+            <p className="text-gray-500 text-xs mb-1">{t('dates')}</p>
+            <p>
+              {t('issueDateLabel')} : {invoice.issueDate}
+            </p>
+            {invoice.dueDate && (
+              <p className="text-gray-500">
+                {t('dueDateLabel')} : {invoice.dueDate}
+              </p>
+            )}
           </div>
         </div>
 
         {invoice.currency !== 'MAD' && (
           <div className="bg-blue-50 border border-blue-200 rounded p-2 text-xs text-blue-700">
-            Devise : {invoice.currency} · Taux BAM : {invoice.exchangeRate} MAD/{invoice.currency}
+            {t('currencyLabel')} : {invoice.currency} · {t('bamRateLabel')} : {invoice.exchangeRate}{' '}
+            MAD/{invoice.currency}
           </div>
         )}
       </div>
@@ -130,10 +137,18 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b">
             <tr>
-              <th className="text-start px-4 py-2 font-medium text-gray-600">Description</th>
-              <th className="text-end px-4 py-2 font-medium text-gray-600 w-20">Qté</th>
-              <th className="text-end px-4 py-2 font-medium text-gray-600 w-28">Prix unitaire</th>
-              <th className="text-end px-4 py-2 font-medium text-gray-600 w-28">Total</th>
+              <th className="text-start px-4 py-2 font-medium text-gray-600">
+                {t('lines.description')}
+              </th>
+              <th className="text-end px-4 py-2 font-medium text-gray-600 w-20">
+                {t('lines.quantity')}
+              </th>
+              <th className="text-end px-4 py-2 font-medium text-gray-600 w-28">
+                {t('lines.unitPrice')}
+              </th>
+              <th className="text-end px-4 py-2 font-medium text-gray-600 w-28">
+                {t('lines.total')}
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y">
@@ -151,7 +166,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
           <tfoot className="border-t bg-gray-50">
             <tr>
               <td colSpan={3} className="px-4 py-2 text-sm text-gray-500 italic">
-                TVA non applicable — Régime auto-entrepreneur (Loi 114-13)
+                {t('vatNotice')}
               </td>
               <td className="px-4 py-2 text-end font-bold">{fmt(invoice.totalMad)} DH</td>
             </tr>

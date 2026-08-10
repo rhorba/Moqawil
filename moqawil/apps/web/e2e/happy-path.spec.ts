@@ -197,6 +197,71 @@ test.describe
     })
   })
 
+/**
+ * Sprint 7 (S7-10): i18n retrofit verification. Confirms switching to the
+ * Arabic locale genuinely translates real page CONTENT (not just the nav
+ * sidebar, which already worked before this sprint via its own inline
+ * ternaries) — this is the exact regression this sprint exists to prevent.
+ * Uses its own test user/cleanup, independent of the main serial flow above.
+ */
+test.describe('i18n — locale switch translates real page content', () => {
+  test.skip(!E2E_TEST_SECRET, 'E2E_TEST_SECRET not set — skipping authenticated tests')
+
+  const I18N_TEST_EMAIL = 'e2e-i18n-test@moqawil.test'
+  const I18N_TEST_ICE = '000000000000002'
+
+  test.beforeAll(async ({ request }) => {
+    await request.post('/api/e2e/cleanup', {
+      data: { email: I18N_TEST_EMAIL, secret: E2E_TEST_SECRET },
+    })
+  })
+
+  test.beforeEach(async ({ page }) => {
+    const response = await page.request.post('/api/e2e/signin', {
+      data: { email: I18N_TEST_EMAIL, secret: E2E_TEST_SECRET },
+    })
+    expect(response.ok()).toBeTruthy()
+  })
+
+  test('onboard, then confirm French renders by default and Arabic renders after switching', async ({
+    page,
+  }) => {
+    // Onboard — required before /dashboard renders real content
+    await page.goto('/settings?onboarding=1')
+    await page.fill('[name="fullName"]', 'i18n Test AE')
+    await page.fill('[name="ice"]', I18N_TEST_ICE)
+    await page.fill('[name="ifNumber"]', '87651234')
+    await page.selectOption('[name="activityType"]', 'service')
+    await page.fill('[name="address"]', '1 Rue Test')
+    await page.fill('[name="city"]', 'Fes')
+    await page.fill('[name="registrationDate"]', '2024-01-01')
+    await page.fill('[name="invoicePrefix"]', 'I18N')
+    await page.click('[type="submit"]')
+    await expect(page).toHaveURL(/dashboard/)
+
+    // French is the default locale — real page content (not just nav)
+    await expect(page.getByRole('heading', { name: 'Tableau de bord' })).toBeVisible()
+    await page.goto('/invoices/new')
+    await expect(page.getByRole('heading', { name: 'Nouvelle facture' })).toBeVisible()
+
+    // Switch locale via the actual UI control a user would click, not a
+    // cookie shortcut — this exercises the real toggle end-to-end.
+    await page.goto('/dashboard')
+    await page.getByRole('button', { name: /العربية/ }).click()
+    await page.waitForLoadState('networkidle')
+
+    // Page CONTENT (not just the nav sidebar) must now be genuinely Arabic
+    await expect(page.getByRole('heading', { name: 'لوحة القيادة' })).toBeVisible()
+    await page.goto('/invoices/new')
+    await expect(page.getByRole('heading', { name: 'فاتورة جديدة' })).toBeVisible()
+    await page.goto('/quotes/new')
+    await expect(page.getByRole('heading', { name: 'عرض سعر جديد' })).toBeVisible()
+
+    // RTL direction should also be active
+    await expect(page.locator('html')).toHaveAttribute('dir', 'rtl')
+  })
+})
+
 // Smoke tests that run without auth — preserved from Sprint 0
 test.describe('Auth Redirects (unauthenticated)', () => {
   test('sign-in page loads', async ({ page }) => {

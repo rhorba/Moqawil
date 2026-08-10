@@ -2,17 +2,13 @@
 
 import type { entrepreneurs } from '@moqawil/db'
 import type { InferSelectModel } from 'drizzle-orm'
+import { useTranslations } from 'next-intl'
 import { useActionState } from 'react'
 import { type ProfileFormState, upsertProfile } from './actions'
 
 type Entrepreneur = InferSelectModel<typeof entrepreneurs>
 
-const activityTypes = [
-  { value: 'commercial', label: 'Commercial (achat/revente)' },
-  { value: 'industrial', label: 'Industriel (fabrication)' },
-  { value: 'artisanal', label: 'Artisanal' },
-  { value: 'service', label: 'Services (conseil, dev, design…)' },
-] as const
+const activityTypeValues = ['commercial', 'industrial', 'artisanal', 'service'] as const
 
 export function ProfileForm({
   profile,
@@ -21,6 +17,8 @@ export function ProfileForm({
   profile: Entrepreneur | null
   isOnboarding: boolean
 }) {
+  const t = useTranslations('entrepreneur')
+  const tSettings = useTranslations('settings')
   const [state, action, pending] = useActionState<ProfileFormState, FormData>(upsertProfile, {})
 
   function fieldError(name: keyof Entrepreneur | string) {
@@ -37,7 +35,7 @@ export function ProfileForm({
       )}
 
       <Field
-        label="Nom complet"
+        label={t('fullName')}
         name="fullName"
         defaultValue={profile?.fullName}
         error={fieldError('fullName')}
@@ -46,16 +44,16 @@ export function ProfileForm({
 
       <div className="grid grid-cols-2 gap-4">
         <Field
-          label="ICE (15 chiffres)"
+          label={t('ice')}
           name="ice"
           defaultValue={profile?.ice}
           error={fieldError('ice')}
           placeholder="000000000000000"
           required
-          hint="Identifiant Commun de l'Entreprise — RNAE"
+          hint={t('iceHint')}
         />
         <Field
-          label="IF (Identifiant Fiscal)"
+          label={t('ifNumber')}
           name="ifNumber"
           defaultValue={profile?.ifNumber}
           error={fieldError('ifNumber')}
@@ -65,7 +63,7 @@ export function ProfileForm({
 
       <div>
         <label htmlFor="activityType" className="block text-sm font-medium text-gray-700 mb-1">
-          Type d&apos;activité <span className="text-red-500">*</span>
+          {t('activityType')} <span className="text-red-500">*</span>
         </label>
         <select
           id="activityType"
@@ -73,31 +71,28 @@ export function ProfileForm({
           defaultValue={profile?.activityType ?? 'service'}
           className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
         >
-          {activityTypes.map((t) => (
-            <option key={t.value} value={t.value}>
-              {t.label}
+          {activityTypeValues.map((value) => (
+            <option key={value} value={value}>
+              {t(`activityTypes.${value}`)}
             </option>
           ))}
         </select>
         {fieldError('activityType') && (
           <p className="text-xs text-red-600 mt-1">{fieldError('activityType')}</p>
         )}
-        <p className="text-xs text-gray-500 mt-1">
-          Services : taux 1% sur CA, seuil 200 000 DH/an, plafond 80 000 DH/client.
-          Commercial/Industriel/Artisanal : taux 0,5%, seuil 500 000 DH/an.
-        </p>
+        <p className="text-xs text-gray-500 mt-1">{t('activityHint')}</p>
       </div>
 
       <Field
-        label="Description de l'activité"
+        label={t('activityDescription')}
         name="activityDescription"
         defaultValue={profile?.activityDescription ?? ''}
         error={fieldError('activityDescription')}
-        placeholder="Ex: Développement web et applications mobiles"
+        placeholder={t('activityDescriptionPlaceholder')}
       />
 
       <Field
-        label="Adresse"
+        label={t('address')}
         name="address"
         defaultValue={profile?.address}
         error={fieldError('address')}
@@ -106,14 +101,14 @@ export function ProfileForm({
 
       <div className="grid grid-cols-2 gap-4">
         <Field
-          label="Ville"
+          label={t('city')}
           name="city"
           defaultValue={profile?.city}
           error={fieldError('city')}
           required
         />
         <Field
-          label="Téléphone"
+          label={t('phone')}
           name="phone"
           defaultValue={profile?.phone ?? ''}
           error={fieldError('phone')}
@@ -122,7 +117,7 @@ export function ProfileForm({
       </div>
 
       <Field
-        label="Date d'immatriculation RNAE"
+        label={t('registrationDate')}
         name="registrationDate"
         defaultValue={profile?.registrationDate ?? ''}
         error={fieldError('registrationDate')}
@@ -132,16 +127,16 @@ export function ProfileForm({
 
       <div className="grid grid-cols-2 gap-4">
         <Field
-          label="Préfixe de facture"
+          label={t('invoicePrefix')}
           name="invoicePrefix"
           defaultValue={profile?.invoicePrefix ?? 'FACT'}
           error={fieldError('invoicePrefix')}
           required
-          hint="Ex: FACT → FACT-2026-001"
+          hint={t('invoicePrefixHint')}
           placeholder="FACT"
         />
         <Field
-          label="IBAN bancaire"
+          label={t('bankIban')}
           name="bankIban"
           defaultValue={profile?.bankIban ?? ''}
           error={fieldError('bankIban')}
@@ -155,7 +150,11 @@ export function ProfileForm({
           disabled={pending}
           className="px-6 py-2 bg-[var(--color-primary)] text-white rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
         >
-          {pending ? 'Enregistrement…' : isOnboarding ? 'Terminer la configuration' : 'Enregistrer'}
+          {pending
+            ? tSettings('saving')
+            : isOnboarding
+              ? tSettings('finishOnboarding')
+              : tSettings('save')}
         </button>
       </div>
     </form>

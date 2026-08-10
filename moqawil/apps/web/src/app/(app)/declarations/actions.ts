@@ -6,6 +6,7 @@ import { getEntrepreneur } from '@/lib/queries/entrepreneur'
 import { db, quarterlyDeclarations } from '@moqawil/db'
 import type { ActivityType } from '@moqawil/tax-engine'
 import { and, eq } from 'drizzle-orm'
+import { getTranslations } from 'next-intl/server'
 import { revalidatePath } from 'next/cache'
 
 export async function generateDeclaration(
@@ -19,10 +20,11 @@ export async function generateDeclaration(
   taxDue?: number
 }> {
   const session = await auth()
-  if (!session?.user?.id) return { success: false, message: 'Non authentifié' }
+  const t = await getTranslations('common')
+  if (!session?.user?.id) return { success: false, message: t('notAuthenticated') }
 
   const entrepreneur = await getEntrepreneur(session.user.id)
-  if (!entrepreneur) return { success: false, message: 'Profil introuvable' }
+  if (!entrepreneur) return { success: false, message: t('profileNotFound') }
 
   const result = await computeAndUpsertDeclaration(
     entrepreneur.id,

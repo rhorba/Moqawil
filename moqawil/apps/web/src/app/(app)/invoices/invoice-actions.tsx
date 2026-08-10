@@ -1,6 +1,7 @@
 'use client'
 
 import { Mail } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useState, useTransition } from 'react'
 import { markInvoicePaid, sendInvoiceByEmail, updateInvoiceStatus } from './actions'
 
@@ -11,9 +12,10 @@ interface InvoiceActionsProps {
 }
 
 export function InvoiceActions({ invoiceId, currentStatus, clientEmail }: InvoiceActionsProps) {
+  const t = useTranslations('invoice')
   const [isPending, startTransition] = useTransition()
   const [paymentDate, setPaymentDate] = useState(new Date().toISOString().slice(0, 10))
-  const [emailResult, setEmailResult] = useState<string | null>(null)
+  const [emailResult, setEmailResult] = useState<{ success: boolean; message: string } | null>(null)
 
   if (currentStatus === 'cancelled' || currentStatus === 'paid') return null
 
@@ -22,12 +24,10 @@ export function InvoiceActions({ invoiceId, currentStatus, clientEmail }: Invoic
       {emailResult && (
         <p
           className={`text-xs px-3 py-2 rounded-lg ${
-            emailResult.startsWith('Facture envoyée')
-              ? 'bg-green-50 text-green-700'
-              : 'bg-red-50 text-red-700'
+            emailResult.success ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
           }`}
         >
-          {emailResult}
+          {emailResult.message}
         </p>
       )}
       <div className="flex flex-wrap gap-3 items-center">
@@ -39,7 +39,7 @@ export function InvoiceActions({ invoiceId, currentStatus, clientEmail }: Invoic
               onClick={() => startTransition(() => updateInvoiceStatus(invoiceId, 'sent'))}
               className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50"
             >
-              Marquer comme envoyée
+              {t('markSent')}
             </button>
             {clientEmail && (
               <button
@@ -48,13 +48,13 @@ export function InvoiceActions({ invoiceId, currentStatus, clientEmail }: Invoic
                 onClick={() =>
                   startTransition(async () => {
                     const r = await sendInvoiceByEmail(invoiceId)
-                    setEmailResult(r.message)
+                    setEmailResult(r)
                   })
                 }
                 className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50"
               >
                 <Mail size={14} />
-                Envoyer par e-mail
+                {t('sendByEmail')}
               </button>
             )}
           </>
@@ -73,7 +73,7 @@ export function InvoiceActions({ invoiceId, currentStatus, clientEmail }: Invoic
             onClick={() => startTransition(() => markInvoicePaid(invoiceId, paymentDate))}
             className="px-4 py-2 bg-[var(--color-safe)] text-white rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50"
           >
-            Marquer comme payée
+            {t('markPaid')}
           </button>
         </div>
 
@@ -81,13 +81,13 @@ export function InvoiceActions({ invoiceId, currentStatus, clientEmail }: Invoic
           type="button"
           disabled={isPending}
           onClick={() => {
-            if (confirm('Annuler cette facture ? Cette action ne peut pas être annulée.')) {
+            if (confirm(t('cancelConfirm'))) {
               startTransition(() => updateInvoiceStatus(invoiceId, 'cancelled'))
             }
           }}
           className="px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg disabled:opacity-50"
         >
-          Annuler la facture
+          {t('cancelInvoice')}
         </button>
       </div>
     </div>

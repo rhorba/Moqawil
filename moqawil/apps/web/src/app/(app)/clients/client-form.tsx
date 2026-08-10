@@ -2,18 +2,17 @@
 
 import type { clients } from '@moqawil/db'
 import type { InferSelectModel } from 'drizzle-orm'
+import { useTranslations } from 'next-intl'
 import { useActionState } from 'react'
 import { type ClientFormState, createClient, updateClient } from './actions'
 
 type Client = InferSelectModel<typeof clients>
 
-const clientTypes = [
-  { value: 'individual', label: 'Particulier' },
-  { value: 'company_ma', label: 'Entreprise marocaine' },
-  { value: 'company_foreign', label: 'Entreprise étrangère' },
-] as const
+const clientTypeValues = ['individual', 'company_ma', 'company_foreign'] as const
+const countryValues = ['MA', 'FR', 'BE', 'DE', 'GB', 'US', 'CA', 'OTHER'] as const
 
 export function ClientForm({ client }: { client?: Client }) {
+  const t = useTranslations('client')
   const boundUpdate = client ? updateClient.bind(null, client.id) : null
   const action = boundUpdate ?? createClient
 
@@ -32,7 +31,7 @@ export function ClientForm({ client }: { client?: Client }) {
       )}
 
       <Field
-        label="Nom / Raison sociale"
+        label={t('name')}
         name="name"
         defaultValue={client?.name}
         error={err('name')}
@@ -41,7 +40,7 @@ export function ClientForm({ client }: { client?: Client }) {
 
       <div>
         <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">
-          Type <span className="text-red-500">*</span>
+          {t('type')} <span className="text-red-500">*</span>
         </label>
         <select
           id="type"
@@ -49,9 +48,9 @@ export function ClientForm({ client }: { client?: Client }) {
           defaultValue={client?.type ?? 'individual'}
           className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
         >
-          {clientTypes.map((t) => (
-            <option key={t.value} value={t.value}>
-              {t.label}
+          {clientTypeValues.map((value) => (
+            <option key={value} value={value}>
+              {t(`types.${value}`)}
             </option>
           ))}
         </select>
@@ -60,15 +59,15 @@ export function ClientForm({ client }: { client?: Client }) {
 
       <div className="grid grid-cols-2 gap-4">
         <Field
-          label="ICE"
+          label={t('ice')}
           name="ice"
           defaultValue={client?.ice ?? ''}
           error={err('ice')}
           placeholder="000000000000000"
-          hint="Obligatoire pour les entreprises marocaines"
+          hint={t('iceHint')}
         />
         <Field
-          label="IF"
+          label={t('ifLabel')}
           name="ifNumber"
           defaultValue={client?.ifNumber ?? ''}
           error={err('ifNumber')}
@@ -76,21 +75,21 @@ export function ClientForm({ client }: { client?: Client }) {
       </div>
 
       <Field
-        label="Email"
+        label={t('email')}
         name="email"
         type="email"
         defaultValue={client?.email ?? ''}
         error={err('email')}
       />
       <Field
-        label="Téléphone"
+        label={t('phone')}
         name="phone"
         type="tel"
         defaultValue={client?.phone ?? ''}
         error={err('phone')}
       />
       <Field
-        label="Adresse"
+        label={t('address')}
         name="address"
         defaultValue={client?.address ?? ''}
         error={err('address')}
@@ -98,7 +97,7 @@ export function ClientForm({ client }: { client?: Client }) {
 
       <div>
         <label htmlFor="countryCode" className="block text-sm font-medium text-gray-700 mb-1">
-          Pays
+          {t('country')}
         </label>
         <select
           id="countryCode"
@@ -106,14 +105,11 @@ export function ClientForm({ client }: { client?: Client }) {
           defaultValue={client?.countryCode ?? 'MA'}
           className="w-full border rounded-lg px-3 py-2 text-sm"
         >
-          <option value="MA">Maroc</option>
-          <option value="FR">France</option>
-          <option value="BE">Belgique</option>
-          <option value="DE">Allemagne</option>
-          <option value="GB">Royaume-Uni</option>
-          <option value="US">États-Unis</option>
-          <option value="CA">Canada</option>
-          <option value="OTHER">Autre</option>
+          {countryValues.map((value) => (
+            <option key={value} value={value}>
+              {t(`countries.${value}`)}
+            </option>
+          ))}
         </select>
       </div>
 
@@ -123,7 +119,7 @@ export function ClientForm({ client }: { client?: Client }) {
           disabled={pending}
           className="px-6 py-2 bg-[var(--color-primary)] text-white rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
         >
-          {pending ? 'Enregistrement…' : client ? 'Mettre à jour' : 'Créer le client'}
+          {pending ? t('saving') : client ? t('update') : t('create')}
         </button>
       </div>
     </form>

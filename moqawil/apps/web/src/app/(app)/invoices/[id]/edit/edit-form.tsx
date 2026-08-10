@@ -5,6 +5,7 @@ import { CapConfirmDialog } from '@/components/cap-confirm-dialog'
 import type { clients, invoiceLines, invoices } from '@moqawil/db'
 import type { InferSelectModel } from 'drizzle-orm'
 import { Plus, Trash2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useActionState, useEffect, useState } from 'react'
 import { type EditInvoiceFormState, updateInvoice } from '../../actions'
 
@@ -49,6 +50,7 @@ export function EditInvoiceForm({
   capTotals,
   isService,
 }: EditInvoiceFormProps) {
+  const t = useTranslations('invoice')
   const boundAction = updateInvoice.bind(null, invoiceId)
   const [state, formAction, pending] = useActionState<EditInvoiceFormState, FormData>(
     boundAction,
@@ -86,10 +88,9 @@ export function EditInvoiceForm({
       if (rate) {
         setExchangeRate(String(rate))
         setBamRateError(null)
-      } else
-        setBamRateError(data.error ?? `Taux ${cur}/MAD non disponible — saisie manuelle requise`)
+      } else setBamRateError(data.error ?? t('bamRateError'))
     } catch {
-      setBamRateError('Impossible de récupérer le taux BAM — saisie manuelle requise')
+      setBamRateError(t('bamRateError'))
     }
   }
 
@@ -156,7 +157,7 @@ export function EditInvoiceForm({
 
         {/* Client — read-only on edit */}
         <div>
-          <p className="text-sm font-medium text-gray-700 mb-1">Client</p>
+          <p className="text-sm font-medium text-gray-700 mb-1">{t('client')}</p>
           <p className="text-sm text-gray-600 border rounded-lg px-3 py-2 bg-gray-50">
             {clients.find((c) => c.id === invoice.clientId)?.name ?? '—'}
           </p>
@@ -176,7 +177,7 @@ export function EditInvoiceForm({
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label htmlFor="issueDate" className="block text-sm font-medium text-gray-700 mb-1">
-              Date d&apos;émission <span className="text-red-500">*</span>
+              {t('issueDate')} <span className="text-red-500">*</span>
             </label>
             <input
               id="issueDate"
@@ -188,7 +189,7 @@ export function EditInvoiceForm({
           </div>
           <div>
             <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700 mb-1">
-              Date d&apos;échéance
+              {t('dueDateLabel')}
             </label>
             <input
               id="dueDate"
@@ -204,7 +205,7 @@ export function EditInvoiceForm({
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label htmlFor="currency" className="block text-sm font-medium text-gray-700 mb-1">
-              Devise
+              {t('currency')}
             </label>
             <select
               id="currency"
@@ -233,7 +234,7 @@ export function EditInvoiceForm({
                 htmlFor="exchangeRate"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Taux BAM (MAD/{currency})
+                {t('bamRateLabel')} (MAD/{currency})
               </label>
               <input
                 id="exchangeRate"
@@ -254,21 +255,23 @@ export function EditInvoiceForm({
         {/* Line items */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700">Lignes</span>
+            <span className="text-sm font-medium text-gray-700">{t('linesLabel')}</span>
             <button
               type="button"
               onClick={addLine}
               className="flex items-center gap-1 text-xs text-[var(--color-primary)] hover:underline"
             >
-              <Plus size={13} /> Ajouter
+              <Plus size={13} /> {t('addLine')}
             </button>
           </div>
 
           <div className="space-y-2">
             <div className="grid grid-cols-[1fr_80px_110px_32px] gap-2 px-1">
-              <span className="text-xs text-gray-500">Description</span>
-              <span className="text-xs text-gray-500">Qté</span>
-              <span className="text-xs text-gray-500">Prix HT ({currency})</span>
+              <span className="text-xs text-gray-500">{t('lines.description')}</span>
+              <span className="text-xs text-gray-500">{t('lines.quantity')}</span>
+              <span className="text-xs text-gray-500">
+                {t('lines.unitPrice')} ({currency})
+              </span>
               <span />
             </div>
             {lines.map((line, idx) => (
@@ -277,7 +280,7 @@ export function EditInvoiceForm({
                   name={`lines[${idx}][description]`}
                   value={line.description}
                   onChange={(e) => updateLine(line.id, 'description', e.target.value)}
-                  placeholder="Description"
+                  placeholder={t('lines.description')}
                   className="border rounded-lg px-3 py-1.5 text-sm"
                 />
                 <input
@@ -317,16 +320,16 @@ export function EditInvoiceForm({
         {/* Total */}
         <div className="bg-gray-50 rounded-lg p-4">
           <div className="flex justify-between text-sm mb-1">
-            <span className="text-gray-600">Total</span>
+            <span className="text-gray-600">{t('total')}</span>
             <span className="font-bold">{fmt(totalMad)} DH</span>
           </div>
-          <p className="text-xs text-gray-400">TVA non applicable — Régime auto-entrepreneur</p>
+          <p className="text-xs text-gray-400">{t('vatNotice')}</p>
         </div>
 
         {/* Payment method */}
         <div>
           <label htmlFor="paymentMethod" className="block text-sm font-medium text-gray-700 mb-1">
-            Mode de paiement
+            {t('paymentMethodLabel')}
           </label>
           <select
             id="paymentMethod"
@@ -334,20 +337,20 @@ export function EditInvoiceForm({
             defaultValue={invoice.paymentMethod ?? ''}
             className="w-full border rounded-lg px-3 py-2 text-sm"
           >
-            <option value="">— Non spécifié —</option>
-            <option value="virement">Virement bancaire</option>
-            <option value="cheque">Chèque</option>
-            <option value="espece">Espèces</option>
-            <option value="effet">Effet de commerce</option>
-            <option value="carte">Carte bancaire</option>
-            <option value="other">Autre</option>
+            <option value="">{t('paymentMethodNone')}</option>
+            <option value="virement">{t('paymentMethod.virement')}</option>
+            <option value="cheque">{t('paymentMethod.cheque')}</option>
+            <option value="espece">{t('paymentMethod.espece')}</option>
+            <option value="effet">{t('paymentMethod.effet')}</option>
+            <option value="carte">{t('paymentMethod.carte')}</option>
+            <option value="other">{t('paymentMethod.other')}</option>
           </select>
         </div>
 
         {/* Notes */}
         <div>
           <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
-            Notes
+            {t('notes')}
           </label>
           <textarea
             id="notes"
@@ -364,7 +367,7 @@ export function EditInvoiceForm({
             disabled={pending}
             className="px-6 py-2 bg-[var(--color-primary)] text-white rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50"
           >
-            {pending ? 'Enregistrement…' : 'Enregistrer les modifications'}
+            {pending ? t('saving') : t('save')}
           </button>
         </div>
       </form>

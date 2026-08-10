@@ -7,6 +7,7 @@ import { getEntrepreneur } from '@/lib/queries/entrepreneur'
 import { db, invoiceLines, invoices } from '@moqawil/db'
 import { PER_CLIENT_CAP_MAD } from '@moqawil/tax-engine'
 import { and, eq } from 'drizzle-orm'
+import { getTranslations } from 'next-intl/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
@@ -63,10 +64,11 @@ export async function createInvoice(
   formData: FormData
 ): Promise<InvoiceFormState> {
   const session = await auth()
-  if (!session?.user?.id) return { message: 'Non authentifié' }
+  const [t, tInvoice] = await Promise.all([getTranslations('common'), getTranslations('invoice')])
+  if (!session?.user?.id) return { message: t('notAuthenticated') }
 
   const entrepreneur = await getEntrepreneur(session.user.id)
-  if (!entrepreneur) return { message: 'Profil introuvable' }
+  if (!entrepreneur) return { message: t('profileNotFound') }
 
   const raw = Object.fromEntries(formData.entries())
   const parsed = invoiceSchema.safeParse(raw)
@@ -76,7 +78,7 @@ export async function createInvoice(
   const rawLines = parseLines(formData)
 
   if (rawLines.length === 0) {
-    return { errors: { lines: ['Au moins une ligne requise'] } }
+    return { errors: { lines: [tInvoice('linesRequired')] } }
   }
 
   const lineValidations = rawLines.map((l) => lineSchema.safeParse(l))
@@ -86,7 +88,7 @@ export async function createInvoice(
   }
 
   const client = await getClientById(data.clientId, entrepreneur.id)
-  if (!client) return { errors: { clientId: ['Client introuvable'] } }
+  if (!client) return { errors: { clientId: [tInvoice('clientNotFound')] } }
 
   // Calculate totals
   const exchangeRate = data.currency === 'MAD' ? 1 : (data.exchangeRate ?? 1)
@@ -146,10 +148,14 @@ export async function sendInvoiceByEmail(
   invoiceId: string
 ): Promise<{ success: boolean; message: string }> {
   const session = await auth()
-  if (!session?.user?.id) return { success: false, message: 'Non authentifié' }
+  const [tCommon, tInvoice] = await Promise.all([
+    getTranslations('common'),
+    getTranslations('invoice'),
+  ])
+  if (!session?.user?.id) return { success: false, message: tCommon('notAuthenticated') }
 
   const entrepreneur = await getEntrepreneur(session.user.id)
-  if (!entrepreneur) return { success: false, message: 'Profil introuvable' }
+  if (!entrepreneur) return { success: false, message: tCommon('profileNotFound') }
 
   const [invoice] = await db
     .select()
@@ -157,11 +163,11 @@ export async function sendInvoiceByEmail(
     .where(and(eq(invoices.id, invoiceId), eq(invoices.entrepreneurId, entrepreneur.id)))
     .limit(1)
 
-  if (!invoice) return { success: false, message: 'Facture introuvable' }
+  if (!invoice) return { success: false, message: tInvoice('invoiceNotFound') }
 
   const client = await getClientById(invoice.clientId, entrepreneur.id)
   if (!client?.email) {
-    return { success: false, message: "Le client n'a pas d'adresse e-mail enregistrée" }
+    return { success: false, message: tInvoice('noEmailOnFile') }
   }
 
   const { renderInvoicePdf } = await import('@moqawil/pdf-templates')
@@ -230,7 +236,7 @@ export async function sendInvoiceByEmail(
       revalidatePath(`/invoices/${invoiceId}`)
       revalidatePath('/invoices')
     }
-    return { success: true, message: `Facture envoyée à ${client.email}` }
+    return { success: true, message: tInvoice('sentTo', { email: client.email }) }
   }
 
   return { success: false, message: result.reason }
@@ -302,10 +308,14 @@ export async function updateInvoice(
   formData: FormData
 ): Promise<EditInvoiceFormState> {
   const session = await auth()
-  if (!session?.user?.id) return { message: 'Non authentifié' }
+  const [tCommon, tInvoice] = await Promise.all([
+    getTranslations('common'),
+    getTranslations('invoice'),
+  ])
+  if (!session?.user?.id) return { message: tCommon('notAuthenticated') }
 
   const entrepreneur = await getEntrepreneur(session.user.id)
-  if (!entrepreneur) return { message: 'Profil introuvable' }
+  if (!entrepreneur) return { message: tCommon('profileNotFound') }
 
   const raw = Object.fromEntries(formData.entries())
   const parsed = editInvoiceSchema.safeParse(raw)
@@ -313,7 +323,7 @@ export async function updateInvoice(
 
   const data = parsed.data
   const rawLines = parseLines(formData)
-  if (rawLines.length === 0) return { errors: { lines: ['Au moins une ligne requise'] } }
+  if (rawLines.length === 0) return { errors: { lines: [tInvoice('linesRequired')] } }
 
   const lineValidations = rawLines.map((l) => lineSchema.safeParse(l))
   const invalidLine = lineValidations.find((r) => !r.success)
@@ -328,9 +338,8 @@ export async function updateInvoice(
     .where(and(eq(invoices.id, invoiceId), eq(invoices.entrepreneurId, entrepreneur.id)))
     .limit(1)
 
-  if (!existing) return { message: 'Facture introuvable' }
-  if (existing.status !== 'draft')
-    return { message: 'Seules les factures brouillon peuvent être modifiées' }
+  if (!existing) return { message: tInvoice('invoiceNotFound') }
+  if (existing.status !== 'draft') return { message: tInvoice('editOnlyDraft') }
 
   const exchangeRate = data.currency === 'MAD' ? 1 : (data.exchangeRate ?? 1)
   const lines = rawLines.map((l) => ({

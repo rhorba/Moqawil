@@ -2,14 +2,8 @@ import { auth } from '@/lib/auth'
 import { getEntrepreneur } from '@/lib/queries/entrepreneur'
 import { getInvoices } from '@/lib/queries/invoice'
 import { Plus } from 'lucide-react'
+import { getTranslations } from 'next-intl/server'
 import Link from 'next/link'
-
-const statusConfig: Record<string, { label: string; cls: string }> = {
-  draft: { label: 'Brouillon', cls: 'bg-gray-100 text-gray-600' },
-  sent: { label: 'Envoyée', cls: 'bg-blue-100 text-blue-700' },
-  paid: { label: 'Payée', cls: 'bg-green-100 text-green-700' },
-  cancelled: { label: 'Annulée', cls: 'bg-red-100 text-red-700' },
-}
 
 function fmt(n: string) {
   return new Intl.NumberFormat('fr-MA', { maximumFractionDigits: 2 }).format(Number.parseFloat(n))
@@ -20,40 +14,50 @@ export default async function InvoicesPage() {
   const entrepreneur = session?.user?.id ? await getEntrepreneur(session.user.id) : null
   if (!entrepreneur) return null
 
-  const invoiceList = await getInvoices(entrepreneur.id)
+  const [t, invoiceList] = await Promise.all([
+    getTranslations('invoice'),
+    getInvoices(entrepreneur.id),
+  ])
+
+  const statusConfig: Record<string, { label: string; cls: string }> = {
+    draft: { label: t('status.draft'), cls: 'bg-gray-100 text-gray-600' },
+    sent: { label: t('status.sent'), cls: 'bg-blue-100 text-blue-700' },
+    paid: { label: t('status.paid'), cls: 'bg-green-100 text-green-700' },
+    cancelled: { label: t('status.cancelled'), cls: 'bg-red-100 text-red-700' },
+  }
 
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Factures</h1>
+        <h1 className="text-2xl font-bold">{t('title')}</h1>
         <Link
           href="/invoices/new"
           className="flex items-center gap-2 px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
         >
           <Plus size={16} />
-          Nouvelle facture
+          {t('new')}
         </Link>
       </div>
 
       {invoiceList.length === 0 ? (
         <div className="text-center py-16 text-gray-500">
-          <p className="mb-4">Aucune facture. Créez votre première facture.</p>
+          <p className="mb-4">{t('empty')}</p>
           <Link
             href="/invoices/new"
             className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
           >
             <Plus size={16} />
-            Créer une facture
+            {t('addFirst')}
           </Link>
         </div>
       ) : (
         <div className="divide-y border rounded-lg bg-white">
           <div className="grid grid-cols-[auto_1fr_140px_120px_100px] gap-4 px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-            <span>N°</span>
-            <span>Client</span>
-            <span>Date</span>
-            <span className="text-end">Montant</span>
-            <span className="text-center">Statut</span>
+            <span>{t('number')}</span>
+            <span>{t('client')}</span>
+            <span>{t('date')}</span>
+            <span className="text-end">{t('amount')}</span>
+            <span className="text-center">{t('statusHeader')}</span>
           </div>
           {invoiceList.map(({ invoice, clientName }) => {
             const status = statusConfig[invoice.status] ?? statusConfig.draft

@@ -7,6 +7,7 @@ import { getEntrepreneur } from '@/lib/queries/entrepreneur'
 import { db, quoteLines, quotes } from '@moqawil/db'
 import { PER_CLIENT_CAP_MAD, formatInvoiceNumber } from '@moqawil/tax-engine'
 import { and, eq, sql } from 'drizzle-orm'
+import { getTranslations } from 'next-intl/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
@@ -67,10 +68,11 @@ export async function createQuote(
   formData: FormData
 ): Promise<QuoteFormState> {
   const session = await auth()
-  if (!session?.user?.id) return { message: 'Non authentifié' }
+  const [t, tQuote] = await Promise.all([getTranslations('common'), getTranslations('quote')])
+  if (!session?.user?.id) return { message: t('notAuthenticated') }
 
   const entrepreneur = await getEntrepreneur(session.user.id)
-  if (!entrepreneur) return { message: 'Profil introuvable' }
+  if (!entrepreneur) return { message: t('profileNotFound') }
 
   const raw = Object.fromEntries(formData.entries())
   const parsed = quoteSchema.safeParse(raw)
@@ -78,7 +80,7 @@ export async function createQuote(
 
   const data = parsed.data
   const rawLines = parseLines(formData)
-  if (rawLines.length === 0) return { errors: { lines: ['Au moins une ligne requise'] } }
+  if (rawLines.length === 0) return { errors: { lines: [tQuote('linesRequired')] } }
 
   const lineValidations = rawLines.map((l) => lineSchema.safeParse(l))
   const invalidLine = lineValidations.find((r) => !r.success)
@@ -87,7 +89,7 @@ export async function createQuote(
   }
 
   const client = await getClientById(data.clientId, entrepreneur.id)
-  if (!client) return { errors: { clientId: ['Client introuvable'] } }
+  if (!client) return { errors: { clientId: [tQuote('clientLookupFailed')] } }
 
   const exchangeRate = data.currency === 'MAD' ? 1 : (data.exchangeRate ?? 1)
   const { lines, subtotalOriginal, subtotalMad, totalMad } = computeTotals(rawLines, exchangeRate)
@@ -160,10 +162,11 @@ export async function updateQuote(
   formData: FormData
 ): Promise<QuoteFormState> {
   const session = await auth()
-  if (!session?.user?.id) return { message: 'Non authentifié' }
+  const [t, tQuote] = await Promise.all([getTranslations('common'), getTranslations('quote')])
+  if (!session?.user?.id) return { message: t('notAuthenticated') }
 
   const entrepreneur = await getEntrepreneur(session.user.id)
-  if (!entrepreneur) return { message: 'Profil introuvable' }
+  if (!entrepreneur) return { message: t('profileNotFound') }
 
   const raw = Object.fromEntries(formData.entries())
   const parsed = editQuoteSchema.safeParse(raw)
@@ -171,7 +174,7 @@ export async function updateQuote(
 
   const data = parsed.data
   const rawLines = parseLines(formData)
-  if (rawLines.length === 0) return { errors: { lines: ['Au moins une ligne requise'] } }
+  if (rawLines.length === 0) return { errors: { lines: [tQuote('linesRequired')] } }
 
   const lineValidations = rawLines.map((l) => lineSchema.safeParse(l))
   const invalidLine = lineValidations.find((r) => !r.success)
@@ -185,9 +188,8 @@ export async function updateQuote(
     .where(and(eq(quotes.id, quoteId), eq(quotes.entrepreneurId, entrepreneur.id)))
     .limit(1)
 
-  if (!existing) return { message: 'Devis introuvable' }
-  if (existing.status !== 'draft')
-    return { message: 'Seuls les devis brouillon peuvent être modifiés' }
+  if (!existing) return { message: tQuote('quoteNotFound') }
+  if (existing.status !== 'draft') return { message: tQuote('editOnlyDraft') }
 
   const exchangeRate = data.currency === 'MAD' ? 1 : (data.exchangeRate ?? 1)
   const { lines, subtotalOriginal, subtotalMad, totalMad } = computeTotals(rawLines, exchangeRate)
@@ -291,10 +293,11 @@ export async function convertQuoteToInvoice(
   capConfirmed: boolean
 ): Promise<ConvertQuoteState> {
   const session = await auth()
-  if (!session?.user?.id) return { message: 'Non authentifié' }
+  const [t, tQuote] = await Promise.all([getTranslations('common'), getTranslations('quote')])
+  if (!session?.user?.id) return { message: t('notAuthenticated') }
 
   const entrepreneur = await getEntrepreneur(session.user.id)
-  if (!entrepreneur) return { message: 'Profil introuvable' }
+  if (!entrepreneur) return { message: t('profileNotFound') }
 
   const [quote] = await db
     .select()
@@ -302,10 +305,10 @@ export async function convertQuoteToInvoice(
     .where(and(eq(quotes.id, quoteId), eq(quotes.entrepreneurId, entrepreneur.id)))
     .limit(1)
 
-  if (!quote) return { message: 'Devis introuvable' }
-  if (quote.convertedToInvoiceId) return { message: 'Ce devis a déjà été converti en facture' }
+  if (!quote) return { message: tQuote('quoteNotFound') }
+  if (quote.convertedToInvoiceId) return { message: tQuote('alreadyConverted') }
   if (quote.status === 'rejected' || quote.status === 'expired') {
-    return { message: 'Un devis refusé ou expiré ne peut pas être converti en facture' }
+    return { message: tQuote('cannotConvertRejectedExpired') }
   }
 
   const lines = await db

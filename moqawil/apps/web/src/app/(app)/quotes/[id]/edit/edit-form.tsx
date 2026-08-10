@@ -3,6 +3,7 @@
 import type { clients, quoteLines, quotes } from '@moqawil/db'
 import type { InferSelectModel } from 'drizzle-orm'
 import { Plus, Trash2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useActionState, useState } from 'react'
 import { type QuoteFormState, updateQuote } from '../../actions'
 
@@ -36,6 +37,7 @@ export function EditQuoteForm({
   lines: initialLines,
   clients,
 }: EditQuoteFormProps) {
+  const t = useTranslations('quote')
   const boundAction = updateQuote.bind(null, quoteId)
   const [state, formAction, pending] = useActionState<QuoteFormState, FormData>(boundAction, {})
 
@@ -61,10 +63,9 @@ export function EditQuoteForm({
       if (rate) {
         setExchangeRate(String(rate))
         setBamRateError(null)
-      } else
-        setBamRateError(data.error ?? `Taux ${cur}/MAD non disponible — saisie manuelle requise`)
+      } else setBamRateError(data.error ?? t('bamRateError'))
     } catch {
-      setBamRateError('Impossible de récupérer le taux BAM — saisie manuelle requise')
+      setBamRateError(t('bamRateError'))
     }
   }
 
@@ -97,7 +98,7 @@ export function EditQuoteForm({
       )}
 
       <div>
-        <p className="text-sm font-medium text-gray-700 mb-1">Client</p>
+        <p className="text-sm font-medium text-gray-700 mb-1">{t('client')}</p>
         <p className="text-sm text-gray-600 border rounded-lg px-3 py-2 bg-gray-50">
           {clients.find((c) => c.id === quote.clientId)?.name ?? '—'}
         </p>
@@ -106,7 +107,7 @@ export function EditQuoteForm({
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label htmlFor="issueDate" className="block text-sm font-medium text-gray-700 mb-1">
-            Date d&apos;émission <span className="text-red-500">*</span>
+            {t('issueDate')} <span className="text-red-500">*</span>
           </label>
           <input
             id="issueDate"
@@ -118,7 +119,7 @@ export function EditQuoteForm({
         </div>
         <div>
           <label htmlFor="validUntilDate" className="block text-sm font-medium text-gray-700 mb-1">
-            Valable jusqu&apos;au <span className="text-red-500">*</span>
+            {t('validUntil')} <span className="text-red-500">*</span>
           </label>
           <input
             id="validUntilDate"
@@ -133,7 +134,7 @@ export function EditQuoteForm({
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label htmlFor="currency" className="block text-sm font-medium text-gray-700 mb-1">
-            Devise
+            {t('currency')}
           </label>
           <select
             id="currency"
@@ -159,7 +160,7 @@ export function EditQuoteForm({
         {currency !== 'MAD' && (
           <div>
             <label htmlFor="exchangeRate" className="block text-sm font-medium text-gray-700 mb-1">
-              Taux BAM (MAD/{currency})
+              {t('bamRateLabel')} (MAD/{currency})
             </label>
             <input
               id="exchangeRate"
@@ -179,20 +180,22 @@ export function EditQuoteForm({
 
       <div>
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-gray-700">Lignes</span>
+          <span className="text-sm font-medium text-gray-700">{t('linesLabel')}</span>
           <button
             type="button"
             onClick={addLine}
             className="flex items-center gap-1 text-xs text-[var(--color-primary)] hover:underline"
           >
-            <Plus size={13} /> Ajouter
+            <Plus size={13} /> {t('addLine')}
           </button>
         </div>
         <div className="space-y-2">
           <div className="grid grid-cols-[1fr_80px_110px_32px] gap-2 px-1">
-            <span className="text-xs text-gray-500">Description</span>
-            <span className="text-xs text-gray-500">Qté</span>
-            <span className="text-xs text-gray-500">Prix HT ({currency})</span>
+            <span className="text-xs text-gray-500">{t('lines.description')}</span>
+            <span className="text-xs text-gray-500">{t('lines.quantity')}</span>
+            <span className="text-xs text-gray-500">
+              {t('lines.unitPrice')} ({currency})
+            </span>
             <span />
           </div>
           {lines.map((line, idx) => (
@@ -201,7 +204,7 @@ export function EditQuoteForm({
                 name={`lines[${idx}][description]`}
                 value={line.description}
                 onChange={(e) => updateLine(line.id, 'description', e.target.value)}
-                placeholder="Description"
+                placeholder={t('lines.description')}
                 className="border rounded-lg px-3 py-1.5 text-sm"
               />
               <input
@@ -240,15 +243,15 @@ export function EditQuoteForm({
 
       <div className="bg-gray-50 rounded-lg p-4">
         <div className="flex justify-between text-sm mb-1">
-          <span className="text-gray-600">Total estimé</span>
+          <span className="text-gray-600">{t('totalEstimate')}</span>
           <span className="font-bold">{fmt(totalMad)} DH</span>
         </div>
-        <p className="text-xs text-gray-400">Devis — sans valeur comptable ni fiscale</p>
+        <p className="text-xs text-gray-400">{t('estimateOnly')}</p>
       </div>
 
       <div>
         <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
-          Notes
+          {t('notes')}
         </label>
         <textarea
           id="notes"
@@ -265,7 +268,7 @@ export function EditQuoteForm({
           disabled={pending}
           className="px-6 py-2 bg-[var(--color-primary)] text-white rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50"
         >
-          {pending ? 'Enregistrement…' : 'Enregistrer les modifications'}
+          {pending ? t('saving') : t('save')}
         </button>
       </div>
     </form>

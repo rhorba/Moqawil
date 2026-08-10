@@ -1,6 +1,7 @@
 'use client'
 
 import { signIn } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 
 /**
@@ -13,6 +14,7 @@ import { useState } from 'react'
  * via a real 302 through NextAuth's callback route, not an in-flight RSC transition).
  */
 export function TestCredentialsForm() {
+  const t = useTranslations('auth')
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -26,7 +28,7 @@ export function TestCredentialsForm() {
 
     const result = await signIn('test-credentials', { email, secret, redirect: false })
     if (result?.error) {
-      setError('Échec de connexion — vérifiez le secret E2E')
+      setError(t('testCredentialsError'))
       setPending(false)
       return
     }
@@ -39,7 +41,7 @@ export function TestCredentialsForm() {
       onSubmit={handleSubmit}
       className="space-y-2 border-t pt-4 mt-2"
     >
-      <p className="text-xs text-gray-400 text-center">Test credentials (dev only)</p>
+      <p className="text-xs text-gray-400 text-center">{t('testCredentialsLabel')}</p>
       <input
         name="test-email"
         type="email"
@@ -61,7 +63,7 @@ export function TestCredentialsForm() {
         data-testid="test-credentials-submit"
         className="w-full py-2 px-4 border border-dashed rounded-lg text-sm hover:bg-gray-50 transition-colors disabled:opacity-50"
       >
-        {pending ? 'Connexion…' : 'Test Sign In'}
+        {pending ? t('testCredentialsConnecting') : t('testCredentialsSubmit')}
       </button>
     </form>
   )

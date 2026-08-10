@@ -1,6 +1,7 @@
 import { auth } from '@/lib/auth'
 import { getDeclarationsForYear } from '@/lib/queries/declaration'
 import { getEntrepreneur } from '@/lib/queries/entrepreneur'
+import { getTranslations } from 'next-intl/server'
 import { DeclarationCard } from './declaration-card'
 
 export default async function DeclarationsPage({
@@ -15,7 +16,10 @@ export default async function DeclarationsPage({
   const { year: yearParam } = await searchParams
   const year = yearParam ? Number.parseInt(yearParam) : new Date().getFullYear()
 
-  const declarations = await getDeclarationsForYear(entrepreneur.id, year)
+  const [t, declarations] = await Promise.all([
+    getTranslations('declaration'),
+    getDeclarationsForYear(entrepreneur.id, year),
+  ])
 
   const prevYear = year - 1
   const nextYear = year + 1
@@ -24,7 +28,7 @@ export default async function DeclarationsPage({
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Déclarations trimestrielles</h1>
+        <h1 className="text-2xl font-bold">{t('title')}</h1>
 
         {/* Year selector */}
         <div className="flex items-center gap-2 text-sm">
@@ -53,9 +57,7 @@ export default async function DeclarationsPage({
       </div>
 
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
-        <strong>Comment ça marche :</strong> Cliquez sur "Générer" pour calculer votre CA
-        trimestriel à partir des factures payées. Imprimez le PDF et déposez-le à Al Barid Bank
-        avant la date limite. Même si votre CA est zéro, la déclaration est obligatoire.
+        <strong>{t('howItWorksTitle')}</strong> {t('howItWorksBody')}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

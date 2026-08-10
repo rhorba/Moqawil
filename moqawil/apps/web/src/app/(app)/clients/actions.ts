@@ -5,6 +5,7 @@ import { getEntrepreneur } from '@/lib/queries/entrepreneur'
 import { clients, db } from '@moqawil/db'
 import { validateICE } from '@moqawil/tax-engine'
 import { and, eq } from 'drizzle-orm'
+import { getTranslations } from 'next-intl/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
@@ -58,7 +59,7 @@ export async function createClient(
   formData: FormData
 ): Promise<ClientFormState> {
   const entrepreneur = await getAuthenticatedEntrepreneur()
-  if (!entrepreneur) return { message: 'Non authentifié' }
+  if (!entrepreneur) return { message: (await getTranslations('common'))('notAuthenticated') }
 
   const raw = Object.fromEntries(formData.entries())
   const parsed = clientSchema.safeParse(raw)
@@ -86,7 +87,7 @@ export async function updateClient(
   formData: FormData
 ): Promise<ClientFormState> {
   const entrepreneur = await getAuthenticatedEntrepreneur()
-  if (!entrepreneur) return { message: 'Non authentifié' }
+  if (!entrepreneur) return { message: (await getTranslations('common'))('notAuthenticated') }
 
   const raw = Object.fromEntries(formData.entries())
   const parsed = clientSchema.safeParse(raw)

@@ -1,22 +1,9 @@
 'use client'
 
 import { AlertTriangle, CheckCircle, Clock, FileText } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useState, useTransition } from 'react'
 import { generateDeclaration, markDeclarationSubmitted } from './actions'
-
-const quarterLabels: Record<number, string> = {
-  1: 'T1 — Janvier · Février · Mars',
-  2: 'T2 — Avril · Mai · Juin',
-  3: 'T3 — Juillet · Août · Septembre',
-  4: 'T4 — Octobre · Novembre · Décembre',
-}
-
-const quarterShort: Record<number, string> = {
-  1: 'T1',
-  2: 'T2',
-  3: 'T3',
-  4: 'T4',
-}
 
 function fmt(n: number) {
   return new Intl.NumberFormat('fr-MA', {
@@ -43,6 +30,7 @@ interface DeclarationCardProps {
 }
 
 export function DeclarationCard({ declaration, year, activityType }: DeclarationCardProps) {
+  const t = useTranslations('declaration')
   const [isPending, startTransition] = useTransition()
   const [generated, setGenerated] = useState<{
     turnover: number
@@ -56,6 +44,7 @@ export function DeclarationCard({ declaration, year, activityType }: Declaration
   const [status, setStatus] = useState(declaration.status)
 
   const { quarter, daysLeft, deadline } = declaration
+  const quarterKey = String(quarter) as '1' | '2' | '3' | '4'
 
   const isOverdue = daysLeft < 0
   const isUrgent = daysLeft >= 0 && daysLeft <= 7
@@ -70,11 +59,11 @@ export function DeclarationCard({ declaration, year, activityType }: Declaration
 
   function deadlineLabel() {
     if (status === 'submitted')
-      return `Soumise le ${declaration.submittedAt?.toLocaleDateString('fr-MA') ?? '—'}`
-    if (isOverdue) return `En retard de ${Math.abs(daysLeft)} j — limite ${deadline}`
-    if (isUrgent) return `Urgent — ${daysLeft} j restants (limite ${deadline})`
-    if (isFuture) return `Limite : ${deadline}`
-    return `${daysLeft} j restants — limite ${deadline}`
+      return t('submittedOn', { date: declaration.submittedAt?.toLocaleDateString('fr-MA') ?? '—' })
+    if (isOverdue) return t('overdueBy', { days: Math.abs(daysLeft), date: deadline })
+    if (isUrgent) return t('urgentDaysLeft', { days: daysLeft, date: deadline })
+    if (isFuture) return t('deadline', { date: deadline })
+    return t('daysLeft', { days: daysLeft, date: deadline })
   }
 
   function handleGenerate() {
@@ -109,9 +98,9 @@ export function DeclarationCard({ declaration, year, activityType }: Declaration
       <div className="flex items-center justify-between px-4 pt-4 pb-2">
         <div>
           <span className="text-lg font-bold">
-            {quarterShort[quarter]} {year}
+            {t(`quarterShort.${quarterKey}`)} {year}
           </span>
-          <p className="text-xs text-gray-500 mt-0.5">{quarterLabels[quarter]}</p>
+          <p className="text-xs text-gray-500 mt-0.5">{t(`quarterLong.${quarterKey}`)}</p>
         </div>
         <div className="flex items-center gap-1.5">
           {status === 'submitted' ? (
@@ -128,7 +117,7 @@ export function DeclarationCard({ declaration, year, activityType }: Declaration
                 : 'bg-gray-100 text-gray-600'
             }`}
           >
-            {status === 'submitted' ? 'Soumise' : 'En attente'}
+            {status === 'submitted' ? t('status.submitted') : t('status.pending')}
           </span>
         </div>
       </div>
@@ -140,29 +129,24 @@ export function DeclarationCard({ declaration, year, activityType }: Declaration
       {generated ? (
         <div className="px-4 pb-3 space-y-1 border-t pt-3">
           <div className="flex justify-between text-sm">
-            <span className="text-gray-600">CA trimestriel</span>
+            <span className="text-gray-600">{t('quarterlyTurnover')}</span>
             <span className="font-medium">{fmt(generated.turnover)} DH</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-gray-600">
-              Taux ({activityType === 'service' ? '1,0%' : '0,5%'})
+              {t('taxRateAt', { rate: activityType === 'service' ? '1,0%' : '0,5%' })}
             </span>
             <span className="font-medium text-[var(--color-primary)]">
               {fmt(generated.taxDue)} DH
             </span>
           </div>
           {generated.turnover === 0 && (
-            <p className="text-xs text-[var(--color-warning)] mt-1">
-              CA nul — déclaration à zéro obligatoire. Deux déclarations nulles consécutives dès
-              l&apos;an 2 entraînent la perte du statut AE.
-            </p>
+            <p className="text-xs text-[var(--color-warning)] mt-1">{t('zeroWarning')}</p>
           )}
         </div>
       ) : (
         <div className="px-4 pb-3 border-t pt-3">
-          <p className="text-xs text-gray-400 italic">
-            Cliquez sur "Générer" pour calculer depuis vos factures payées.
-          </p>
+          <p className="text-xs text-gray-400 italic">{t('generateHint')}</p>
         </div>
       )}
 
@@ -176,7 +160,7 @@ export function DeclarationCard({ declaration, year, activityType }: Declaration
             className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--color-primary)] text-white rounded-lg text-xs font-medium hover:opacity-90 disabled:opacity-50"
           >
             <FileText size={13} />
-            {isPending ? 'Calcul…' : 'Générer'}
+            {isPending ? t('generating') : t('generate')}
           </button>
         )}
 
@@ -188,7 +172,7 @@ export function DeclarationCard({ declaration, year, activityType }: Declaration
             className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 rounded-lg text-xs hover:bg-gray-50"
           >
             <FileText size={13} />
-            Imprimer PDF
+            {t('printPdf')}
           </a>
         )}
 
@@ -200,7 +184,7 @@ export function DeclarationCard({ declaration, year, activityType }: Declaration
             className="flex items-center gap-1.5 px-3 py-1.5 border border-[var(--color-safe)] text-[var(--color-safe)] rounded-lg text-xs hover:bg-[var(--color-safe-bg)] disabled:opacity-50"
           >
             <CheckCircle size={13} />
-            Marquer soumise
+            {t('markSubmitted')}
           </button>
         )}
       </div>

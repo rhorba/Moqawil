@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth'
 import { getAllClientAnnualTotals, getClients } from '@/lib/queries/client'
 import { getEntrepreneur } from '@/lib/queries/entrepreneur'
 import { ChevronRight, Plus } from 'lucide-react'
+import { getTranslations } from 'next-intl/server'
 import Link from 'next/link'
 
 export default async function ClientsPage() {
@@ -11,35 +12,41 @@ export default async function ClientsPage() {
   if (!entrepreneur) return null
 
   const year = new Date().getFullYear()
-  const [clientList, capTotals] = await Promise.all([
+  const [t, clientList, capTotals] = await Promise.all([
+    getTranslations('client'),
     getClients(entrepreneur.id),
     getAllClientAnnualTotals(entrepreneur.id, year),
   ])
 
   const isService = entrepreneur.activityType === 'service'
+  const typeLabels: Record<string, string> = {
+    individual: t('types.individual'),
+    company_ma: t('types.company_ma'),
+    company_foreign: t('types.company_foreign'),
+  }
 
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Clients</h1>
+        <h1 className="text-2xl font-bold">{t('title')}</h1>
         <Link
           href="/clients/new"
           className="flex items-center gap-2 px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
         >
           <Plus size={16} />
-          Nouveau client
+          {t('new')}
         </Link>
       </div>
 
       {clientList.length === 0 ? (
         <div className="text-center py-16 text-gray-500">
-          <p className="mb-4">Aucun client. Ajoutez votre premier client.</p>
+          <p className="mb-4">{t('empty')}</p>
           <Link
             href="/clients/new"
             className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
           >
             <Plus size={16} />
-            Ajouter un client
+            {t('addFirst')}
           </Link>
         </div>
       ) : (
@@ -55,7 +62,9 @@ export default async function ClientsPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3">
                     <p className="font-medium text-gray-900 truncate">{client.name}</p>
-                    <ClientTypeBadge type={client.type} />
+                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                      {typeLabels[client.type] ?? client.type}
+                    </span>
                   </div>
                   {client.email && <p className="text-sm text-gray-500 mt-0.5">{client.email}</p>}
                 </div>
@@ -78,18 +87,5 @@ export default async function ClientsPage() {
         </div>
       )}
     </div>
-  )
-}
-
-function ClientTypeBadge({ type }: { type: string }) {
-  const labels: Record<string, string> = {
-    individual: 'Particulier',
-    company_ma: 'Entreprise MA',
-    company_foreign: 'Étranger',
-  }
-  return (
-    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-      {labels[type] ?? type}
-    </span>
   )
 }

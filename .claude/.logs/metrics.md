@@ -1,5 +1,19 @@
 # Project Metrics
 
+### 2026-08-10 SPRINT_SNAPSHOT — Sprint 7 (i18n Retrofit — real next-intl usage)
+- **Planned**: 12 tasks (S7-01 through S7-12), 4 batches
+- **Completed**: 12/12 (100%), plus one unplanned bugfix (email-result color logic)
+- **Blocked**: 0
+- **Scope**: 24 `(app)` pages/components + 3 shared components + 2 `(auth)` pages converted to real `useTranslations`/`getTranslations`; ~26 server-action-returned messages also translated (server-side, via `getTranslations()` inside the action functions). 2 new message namespaces added (`dashboard`, `settings`); dozens of keys filled into the 11 existing ones.
+- **Real bug found and fixed**: `invoice-actions.tsx` determined its email-send result banner's color by string-matching the (French) success message text instead of using the action's own already-computed `success` boolean — would have broken once that message was translated, and was fragile regardless.
+- **Documented, not fixed** (deliberate, size-scoped): Zod validation-schema messages remain French-only — translating them requires restructuring every action file's schemas to build per-request instead of at module scope.
+- **Verification**: live runtime check (real `next start` server, real onboarded session, curl) confirmed zero i18n errors and genuine translated headings on 9 pages × 2 locales. New Playwright test clicks the real locale-toggle button and asserts genuine Arabic content + `dir="rtl"`. Full e2e suite 18/18 passing with `--workers=1` (matches CI's own forced serialization — a local-only flake from concurrent test-user collisions was found and correctly attributed, not "fixed" in the app).
+- **Test totals**: Vitest 103 passing/3 skipped (unchanged — this sprint touched presentation only), Playwright 18/18 passing (17 existing + 1 new i18n test).
+- **New dependency**: none.
+- **Velocity**: 7 sprints (+ 3.5) completed. Sprint 7 = 12 tasks + 1 unplanned fix in one session.
+- **Pushed**: pending — see next `.logs/activity.md`/session entry for commit hash once pushed.
+---
+
 ### 2026-08-10 SPRINT_SNAPSHOT — Sprint 6 (Devis / Quote Management, v0.2)
 - **Planned**: 13 tasks (S6-01 through S6-13), 4 batches
 - **Completed**: 13/13 (100%), plus one unplanned fix (wiring `deleteQuote` to an actual UI control)

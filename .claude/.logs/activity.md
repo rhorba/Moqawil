@@ -1,5 +1,26 @@
 # Activity Log
 
+### 2026-08-10 MILESTONE — Sprint 7 complete: real i18n retrofit, AR now genuinely translates page content
+- **Specialist**: Frontend Dev + Tester
+- **Summary**: Closed the gap found at the end of Sprint 6 for real. All 12 tasks across 4 batches.
+  - Converted every `(app)` page/component (invoices, quotes, clients, dashboard, declarations, settings — 24 files), all 3 shared components (`cap-badge.tsx`, `cap-confirm-dialog.tsx`, `app-nav.tsx`), and both `(auth)/sign-in` files to real `useTranslations`/`getTranslations`, using the 11 message namespaces already defined in `messages/{fr,ar}.json` plus 2 new ones (`dashboard`, `settings`) and dozens of filled-in gaps.
+  - `app-nav.tsx` previously had its own parallel, working-but-nonstandard i18n system (inline `isAr ? x : y` ternaries with a hardcoded `labelAr` field per nav item) — simplified to `useTranslations('nav')` so there's one mechanism in the app, not two. Kept exactly one deliberate exception, documented in a code comment: the locale-switch button shows language names in their own script ("Français"/"العربية") regardless of active locale, since translating "العربية" into French for a French-speaking user switching to Arabic would defeat the point.
+  - Went beyond the literal page-content scope: found and translated the ~26 simple hardcoded messages returned by server actions (`'Non authentifié'`, `'Profil introuvable'`, `'Facture introuvable'`, etc. across `invoices/quotes/clients/settings/declarations actions.ts`) — these run server-side so `getTranslations()` works directly inside them. While doing this, found and fixed a real pre-existing bug: `invoice-actions.tsx`'s email-send result banner picked its green/red color by string-matching the French success message (`.startsWith('Facture envoyée')`) — which would have shown the wrong color once that message was translated (and was fragile even before, since the action's own `success` boolean was being computed but discarded). Fixed to use the boolean directly.
+  - Explicitly left un-translated and documented rather than silently dropped: Zod validation-schema messages (e.g. `.min(1, 'Description requise')`) — these live at module scope outside any request context, so translating them needs every action file's schemas restructured to build per-request; scoped out for size, client-side validation already catches most of these before submission reaches the server.
+  - Verification, not just typecheck: ran a live `next start` server, signed in via the e2e test route with a real onboarded profile, and curl-checked every converted page in both FR and AR for zero `MISSING_MESSAGE`/`IntlError` errors and genuine translated heading text (not just nav chrome) — confirmed on all 9 checked pages in both locales. Added a new Playwright test that clicks the real locale-toggle button (not a cookie shortcut) and asserts genuine Arabic headings plus `dir="rtl"`.
+  - Real, not fake, flake found and fixed along the way: the first full local Playwright run with the new test added failed with a duplicate-client error — traced to fixed test-user emails colliding when independent `test.describe` blocks run concurrently under Playwright's local default (unlimited workers) against the same shared local Postgres. Not a real app bug — `playwright.config.ts` already forces `workers: 1` in CI specifically for this reason. Re-ran locally with `--workers=1` to match: 18/18 pass, deterministic.
+  - Verified: `pnpm build` succeeds, full Vitest suite (103 tests) + coverage gate unchanged and passing, full Playwright suite 18/18 passing under CI-matching conditions, lint clean across `apps/web/src` and `apps/web/e2e`.
+- **Status**: resolved
+- **Impact**: high — Moqawil can now honestly claim the AR locale translates the application, not just its layout direction; closes a gap CLAUDE.md §10/§14 implicitly promised since v0.1
+---
+
+### 2026-08-10 PLANNING — Sprint 7 backlog drafted (i18n retrofit)
+- **Specialist**: Scrum Master
+- **Summary**: Owner chose to close the i18n gap found at the end of Sprint 6 rather than the accountant dashboard or launch-prep directions. Drafted `.claude/sprint-backlog/sprint-7.md` — 12 tasks across 4 batches. Confirmed the infrastructure is already fully wired (`NextIntlClientProvider` at root, working locale-switch cookie + toggle button, 11 message namespaces already defined) — the gap is purely that `useTranslations`/`getTranslations` are never called in page components (~26 files: 24 `(app)` pages/components, 3 shared components, 2 `(auth)` pages). `app-nav.tsx` already has a working (if parallel/non-standard) inline-ternary Arabic path for the nav sidebar only — will be simplified to use the same `useTranslations` mechanism as everything else rather than left as a second system. No new package/external integration, so Framework Rules 1/6 don't apply.
+- **Status**: resolved (drafted, not started)
+- **Impact**: medium
+---
+
 ### 2026-08-10 MILESTONE — Sprint 6 Batches 3-4: quote PDF + UI, Playwright e2e coverage, docs, sprint close
 - **Specialist**: Frontend Dev + Tester + Project Monitor
 - **Summary**: S6-07 through S6-13.

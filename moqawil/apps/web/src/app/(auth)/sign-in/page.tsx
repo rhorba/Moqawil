@@ -1,15 +1,17 @@
 import { signIn } from '@/lib/auth'
+import { getTranslations } from 'next-intl/server'
 import { TestCredentialsForm } from './test-credentials-form'
 
-export default function SignInPage() {
+export default async function SignInPage() {
   const hasTestSecret = !!process.env.E2E_TEST_SECRET
+  const [t, tNav] = await Promise.all([getTranslations('auth'), getTranslations('nav')])
 
   return (
     <main className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold">Moqawil</h1>
-          <p className="text-sm text-gray-600">La conformité auto-entrepreneur, sans effort.</p>
+          <h1 className="text-2xl font-bold">{tNav('brand')}</h1>
+          <p className="text-sm text-gray-600">{t('tagline')}</p>
         </div>
 
         <div className="space-y-3">
@@ -24,7 +26,7 @@ export default function SignInPage() {
               type="submit"
               className="w-full py-2 px-4 border rounded-lg hover:bg-gray-50 transition-colors"
             >
-              Continuer avec Google
+              {t('withGoogle')}
             </button>
           </form>
 
@@ -40,7 +42,7 @@ export default function SignInPage() {
             <input
               name="email"
               type="email"
-              placeholder="votre@email.com"
+              placeholder={t('emailPlaceholder')}
               required
               className="w-full py-2 px-3 border rounded-lg text-sm"
             />
@@ -48,7 +50,7 @@ export default function SignInPage() {
               type="submit"
               className="w-full py-2 px-4 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity"
             >
-              Envoyer un lien de connexion
+              {t('withEmail')}
             </button>
           </form>
 
@@ -57,7 +59,7 @@ export default function SignInPage() {
         </div>
 
         <p className="text-xs text-center text-gray-500">
-          Open-source · AGPL-3.0 ·{' '}
+          {t('openSource')}{' '}
           <a href="https://github.com/moqawil/moqawil" className="underline">
             GitHub
           </a>
