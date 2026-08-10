@@ -1,5 +1,19 @@
 # Session Log
 
+### 2026-08-10 SESSION_END — Sprint 5 (Close Known Gaps) COMPLETE, CI confirmed green
+- **Completed**: Sprint 5 all 13 tasks (S5-01 through S5-13) across 4 batches.
+- **Key deliverables**:
+  - Fixed a real production bug: BAM exchange-rate scraper's URL was a live 404 since Sprint 2, silently falling back to manual entry on every request
+  - Closed 2 long-open risks (BAM scraper, Auth.js v5) with concrete evidence
+  - Added real DB-integration tests for `client.ts`/`entrepreneur.ts`/`invoice.ts` queries (16 new tests) plus a genuine-concurrency test proving invoice numbering has no gaps under contention
+  - Closed Sprint 4's documented known gap: UBL 2.1 export now validates against the real, live-fetched OASIS XSD schema set via `xmllint`
+  - Cleaned up a stray duplicate `.claude/` folder under `moqawil/`
+  - CI run `31381010461` confirmed all 6 jobs green (Lint, TypeCheck, Unit Tests, Security, Build, E2E) after the push
+- **Blocked**: None
+- **Next session**: No Sprint 6 backlog exists yet — options discussed earlier remain open (devis/quote management, accountant multi-client dashboard, launch-prep/distribution content), or continue hardening
+- **Open risks**: local pnpm (10.28.1) enforces supply-chain hardening settings that were assumed no-ops on CI's pinned 9.15.4 — worth a closer look
+---
+
 ### 2026-08-10 SESSION_START — resuming, catching up unlogged prior-session work
 - **Context**: Resumed via "continue". Verified real repo/CI state rather than trusting stale logs: working tree clean, `master` up to date with `origin/master`, last 5 CI runs on GitHub Actions all green (most recent: `ce4005e`, run `31278744178`, 3m44s).
 - **Found**: The most recent commit (`ce4005e` — sign-in RSC redirect bugfix, walkthrough recording tooling, trilingual pitch deck/memo) was never logged to `.logs/activity.md` or `.logs/sessions.md` in a prior session. Backfilled to `activity.md`.
