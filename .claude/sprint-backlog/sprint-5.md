@@ -3,7 +3,8 @@
 **Goal**: Close the three concrete, previously-documented gaps in already-shipped work: BAM scraper never live-tested against real bkam.ma, three DB-dependent query modules with zero test coverage, and UBL 2.1 export never validated against the real OASIS XSD schema. No new user-facing features.
 **Depends on**: Sprint 4 complete ✅ (CI green, pushed)
 **Auto-handoff**: ENABLED — 🟡 BALANCED
-**Status**: IN PROGRESS (Batch 1 done)
+**Status**: COMPLETE ✅
+**Completed**: 2026-08-10
 
 ---
 
@@ -50,18 +51,18 @@ No new `packages/*` module or external-system integration is introduced, so Fram
 ### BATCH 4 — Wrap
 | ID | Task | Specialist | Size | Status | Handoff-To |
 |---|---|---|---|---|---|
-| S5-13 | Sprint 5 snapshot (coverage %, risks closed, gaps closed) → `.logs/metrics.md`; `git push origin master` (Framework Rule 3) | Project Monitor | S | todo | USER |
+| S5-13 | Sprint 5 snapshot (coverage %, risks closed, gaps closed) → `.logs/metrics.md`; `git push origin master` (Framework Rule 3) | Project Monitor | S | **done** | USER |
 
 ---
 
 ## Definition of Done (Sprint 5 closes)
-- [ ] BAM scraper verified against real bkam.ma HTML (fixed if broken, confirmed if not) — risk closed or updated with real findings
-- [ ] Auth.js v5 risk closed with evidence
-- [ ] `client.ts`, `entrepreneur.ts`, `invoice.ts` have real DB integration tests; invoice numbering is tested under concurrency
-- [ ] Combined coverage ≥80% (Framework Rule 2), verified honestly (no threshold-lowering)
-- [ ] UBL 2.1 export validated against the real OASIS XSD via `xmllint`, in CI — not just structural/order heuristics
-- [ ] Sprint 4's known-gap note updated to reflect closure
-- [ ] `git push origin master` at sprint close
+- [x] BAM scraper verified against real bkam.ma HTML (fixed if broken, confirmed if not) — risk closed or updated with real findings
+- [x] Auth.js v5 risk closed with evidence
+- [x] `client.ts`, `entrepreneur.ts`, `invoice.ts` have real DB integration tests; invoice numbering is tested under concurrency
+- [x] Combined coverage ≥80% (Framework Rule 2), verified honestly (no threshold-lowering)
+- [x] UBL 2.1 export validated against the real OASIS XSD via `xmllint`, in CI — not just structural/order heuristics
+- [x] Sprint 4's known-gap note updated to reflect closure
+- [x] `git push origin master` at sprint close
 
 ## Explicitly out of scope for this sprint
 - Any new user-facing feature (devis/quote management, accountant dashboard, launch-prep content) — deferred per the earlier scoping decision to focus purely on hardening

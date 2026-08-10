@@ -1,5 +1,22 @@
 # Project Metrics
 
+### 2026-08-10 SPRINT_SNAPSHOT — Sprint 5 (Close Known Gaps — hardening, no new features)
+- **Planned**: 13 tasks (S5-01 through S5-13), 4 batches
+- **Completed**: 13/13 (100%)
+- **Blocked**: 0
+- **Real bugs found and fixed** (not just test-coverage padding):
+  - BAM exchange-rate scraper's hardcoded URL was a live 404 in production since Sprint 2 — silently falling back to manual entry on every request, undetected because its unit test validated a hand-invented HTML structure instead of the real page. Fixed URL + parser against real captured markup.
+  - Invoice numbering's "no gaps, ever" guarantee had only ever been tested with transactions awaited serially (never real lock contention) — added a genuine 8-way `Promise.all` concurrency test through the advisory lock; confirmed correct (no gaps/duplicates) across 4 repeated runs.
+- **Risks closed** (`.logs/risks.md`): BAM scraper (open since Sprint 0), Auth.js v5 (open since Sprint 0) — both closed with concrete evidence, not just marked done.
+- **Coverage gap closed**: `queries/{client,entrepreneur,invoice}.ts` — documented as excluded from the coverage gate since Sprint 3.5 — now have real DB-integration tests (16 new tests across 3 files), all executed against an actual local Postgres, not just typechecked.
+- **Sprint 4 known gap closed**: UBL 2.1 export now validates against the real, live-fetched OASIS UBL 2.1 XSD schema set (14 vendored files) via `xmllint`, replacing the hand-rolled structural/order heuristic. Verified genuine (not rubber-stamp) validation in a Linux container before wiring into CI.
+- **Test totals**: tax-engine 68 passed + 4 skipped (72) — coverage 99.24% stmts/97.91% branch/100% funcs/99.24% lines. Web 95 passed + 3 skipped (98) — coverage on newly-gated files 100% stmts/89.85% branch/100% funcs/100% lines. Combined: 163 passing, both packages clear the 80% gate on every metric (Framework Rule 2).
+- **New dependency**: none added to the runtime/committed stack — `xmllint` is CI/test-tooling only (owner-approved); `@types/node` added to `packages/tax-engine` devDependencies (test-only Node builtin typings).
+- **Environment note**: local pnpm (10.28.1) enforces `pnpm-workspace.yaml`'s supply-chain hardening settings that were documented as no-ops on CI's pinned pnpm 9.15.4 — they are not no-ops on newer pnpm. Worked around locally per-install; not a committed config change. Worth a closer look in a future sprint.
+- **Velocity**: 5 sprints (+ 3.5) completed, Sprint 5 = 13 tasks in one session
+- **Pushed**: `git push origin master` at sprint close (Framework Rule 3) — 3 commits (`02ed7c9`, `0407b59`, `8d5c0fe`)
+---
+
 ### 2026-05-20 00:30 SPRINT_SNAPSHOT — Sprint 3 (v0.1 COMPLETE)
 - **Planned**: 8 tasks
 - **Completed**: 8 tasks (100%)
