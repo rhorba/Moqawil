@@ -165,6 +165,36 @@ test.describe
       // Cancel to not actually create the invoice
       await page.getByRole('button', { name: /annuler/i }).click()
     })
+
+    test('8 — create a devis, convert it to an invoice with the correct sequential number', async ({
+      page,
+    }) => {
+      // Sprint 6: quote (devis) management. Confirms the full create → convert
+      // flow, including that the resulting invoice shares the invoice-form's
+      // numbering sequence (this AE already has invoice FACT-<year>-001 from
+      // step 3, so the converted quote must become FACT-<year>-002).
+      await page.goto('/quotes/new')
+      await page.waitForLoadState('networkidle')
+
+      await page.selectOption('[name="clientId"]', { label: 'Acme Corp' })
+      await page.locator('[name="lines[0][description]"]').fill('Refonte identité visuelle')
+      await page.locator('[name="lines[0][quantity]"]').fill('1')
+      await page.locator('[name="lines[0][unitPriceOriginal]"]').fill('8000')
+      await page.locator('[name="issueDate"]').fill(new Date().toISOString().slice(0, 10))
+
+      await page.getByRole('button', { name: /créer le devis/i }).click()
+
+      await expect(page).toHaveURL(/\/quotes\/[a-f0-9-]+$/, { timeout: 15000 })
+      await expect(page.getByText('DEVIS-')).toBeVisible()
+      await expect(page.getByText(/pas une facture/i)).toBeVisible()
+
+      await page.getByRole('button', { name: /convertir en facture/i }).click()
+
+      // Lands on the newly-created invoice, continuing the same FACT sequence
+      await expect(page).toHaveURL(/\/invoices\/[a-f0-9-]+$/, { timeout: 15000 })
+      await expect(page.getByText('FACT-')).toBeVisible()
+      await expect(page.getByText(/8[\s.,]000/).first()).toBeVisible()
+    })
   })
 
 // Smoke tests that run without auth — preserved from Sprint 0
@@ -181,6 +211,11 @@ test.describe('Auth Redirects (unauthenticated)', () => {
 
   test('invoices redirects to sign-in when unauthenticated', async ({ page }) => {
     await page.goto('/invoices')
+    await expect(page).toHaveURL(/sign-in/)
+  })
+
+  test('quotes redirects to sign-in when unauthenticated', async ({ page }) => {
+    await page.goto('/quotes')
     await expect(page).toHaveURL(/sign-in/)
   })
 

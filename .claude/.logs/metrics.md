@@ -1,5 +1,20 @@
 # Project Metrics
 
+### 2026-08-10 SPRINT_SNAPSHOT — Sprint 6 (Devis / Quote Management, v0.2)
+- **Planned**: 13 tasks (S6-01 through S6-13), 4 batches
+- **Completed**: 13/13 (100%), plus one unplanned fix (wiring `deleteQuote` to an actual UI control)
+- **Blocked**: 0
+- **Key refactor**: extracted the advisory-lock + sequential-numbering transaction out of `createInvoice` into a shared `createInvoiceInTransaction` helper (`lib/invoice-creation.ts`) — quote-to-invoice conversion reuses this exact function instead of a second implementation of "CGI Article 145: no gaps, ever." Re-ran the full pre-existing suite (102 tests) immediately after the refactor to confirm zero regression before building on it.
+- **New feature surface**: `quotes`/`quote_lines` tables (own numbering sequence + lock namespace, separate from invoices), 5 server actions, quote PDF template, 4 new pages, quote i18n namespace.
+- **Tests**: 15 new tests (`quote-db-integration.test.ts`, 8 tests: ownership scoping ×2 IDOR cases, the explicit "quotes never affect cap/threshold" invariant, 5-way numbering concurrency, real `createInvoiceInTransaction` conversion path + optional-field branch coverage; `invoice-numbering.test.ts` untouched, still 9/9). Web suite total: 103 passing, 3 skipped. Coverage on gated files: 100% stmts/funcs/lines, 89.02% branches — clears the 80% gate on every metric (Framework Rule 2).
+- **E2E**: full Playwright suite run locally against a real dev server (not CI-only) — 17/17 pass, including a new devis-to-invoice conversion flow test through a real browser.
+- **Build**: `pnpm build` succeeds cleanly, all quote routes generated.
+- **Real gap found and documented** (not fixed this sprint — flagged in `.logs/risks.md`): next-intl is configured but never actually used for page-content translation anywhere in the app, pre-existing since Sprint 1. Followed the established (hardcoded-FR) pattern for consistency; added the `quote` i18n keys to both message files regardless, ready for a future i18n-retrofit sprint.
+- **New dependency**: none.
+- **Velocity**: 6 sprints (+ 3.5) completed. Sprint 6 = 13 tasks + 1 unplanned fix in one session.
+- **Pushed**: pending — see next `.logs/activity.md` entry for commit hashes once pushed.
+---
+
 ### 2026-08-10 SPRINT_SNAPSHOT — Sprint 5 (Close Known Gaps — hardening, no new features)
 - **Planned**: 13 tasks (S5-01 through S5-13), 4 batches
 - **Completed**: 13/13 (100%)

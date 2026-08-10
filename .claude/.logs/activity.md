@@ -1,5 +1,19 @@
 # Activity Log
 
+### 2026-08-10 MILESTONE — Sprint 6 Batches 3-4: quote PDF + UI, Playwright e2e coverage, docs, sprint close
+- **Specialist**: Frontend Dev + Tester + Project Monitor
+- **Summary**: S6-07 through S6-13.
+  - `packages/pdf-templates/src/quote-template.tsx` + `renderQuotePdf` — mirrors the invoice PDF layout (amber theme instead of teal, to be visually distinct at a glance) but headed "DEVIS", no TVA/Article 145 legal-mention block, an explicit bilingual "this is not an invoice" disclaimer box with the validity date. `/api/quotes/[id]/pdf` route mirrors the invoice PDF route's auth/ownership pattern.
+  - Full quote UI: list, create form, detail page (status badges, PDF download, convert-to-invoice with the reused `CapConfirmDialog`), edit form (draft-only), status actions (mark sent/rejected, delete draft). Added "Devis" to the app nav between Dashboard and Factures (business-flow order: quote precedes invoice).
+  - Added the `quote` i18n namespace + a `nav.quotes` key to both `messages/fr.json` and `messages/ar.json`. While doing this, discovered and documented (see `.logs/risks.md`) that next-intl's `useTranslations`/`getTranslations` are never actually called anywhere in the app's page components — every existing page hardcodes French text, and AR support that genuinely works today is RTL-layout-only, not per-string translation. Pre-existing since Sprint 1, not a Sprint 6 regression; followed the same established pattern for consistency rather than being the sole page using real i18n.
+  - Found `deleteQuote`'s backend action had no UI control wired to it — added a "Supprimer" button (draft-only) so Sprint 6's own DoD promise ("edit, and delete a devis") is actually reachable.
+  - Verified with real tooling, not just typechecks: full production build (`pnpm build`) succeeds with all quote routes generated; full Vitest suite (103 tests) + coverage gate passes; **full Playwright e2e suite run locally against a real dev server** (not just typecheck/CI) — 17/17 pass, including a new step 8 covering create-devis → convert-to-invoice → land on the resulting invoice with the correct sequential invoice number, via real browser interaction. Local e2e run needed `AUTH_SECRET`/`E2E_TEST_SECRET` set as explicit shell env vars (Next.js only auto-loads `.env` from `apps/web/`, not the monorepo root where this repo's `.env` lives) — a pre-existing environment quirk, matches how CI's job already sets these explicitly rather than relying on `.env`.
+  - `docs/docs/guide-devis.md` — new FR guide covering the devis lifecycle and the convert-to-invoice flow, following the existing `guide-facturation.md` structure and Docusaurus admonition style.
+  - Expanded `vitest.config.ts` coverage `include` to add `queries/quote.ts` and `lib/invoice-creation.ts`; added one more DB-integration test exercising `createInvoiceInTransaction`'s optional-field branches (dueDate, paymentMethod, foreign currency, notes) after noticing its branch coverage sat at 60% with only the "not provided" path exercised — now 80%.
+- **Status**: resolved
+- **Impact**: high — Sprint 6 (devis management) is feature-complete, real-tested end-to-end, and closes with a genuine coverage/build/e2e green light rather than typecheck-only confidence
+---
+
 ### 2026-08-10 MILESTONE — Sprint 6 Batches 1-2: quote data layer + business logic, real invoice-creation refactor
 - **Specialist**: DBA + Backend Dev + Security Engineer
 - **Summary**: S6-01 through S6-06.

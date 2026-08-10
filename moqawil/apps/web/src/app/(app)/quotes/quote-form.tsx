@@ -1,0 +1,293 @@
+'use client'
+
+import type { clients } from '@moqawil/db'
+import type { InferSelectModel } from 'drizzle-orm'
+import { Plus, Trash2 } from 'lucide-react'
+import { useActionState, useState } from 'react'
+import { type QuoteFormState, createQuote } from './actions'
+
+type Client = InferSelectModel<typeof clients>
+
+interface Line {
+  id: number
+  description: string
+  quantity: string
+  unitPriceOriginal: string
+}
+
+interface QuoteFormProps {
+  clients: Client[]
+}
+
+const currencies = ['MAD', 'EUR', 'USD', 'GBP', 'CAD', 'CHF']
+
+function fmt(n: number) {
+  return new Intl.NumberFormat('fr-MA', { maximumFractionDigits: 2 }).format(n)
+}
+
+function defaultValidUntil() {
+  const d = new Date()
+  d.setDate(d.getDate() + 30)
+  return d.toISOString().slice(0, 10)
+}
+
+export function QuoteForm({ clients }: QuoteFormProps) {
+  const [state, formAction, pending] = useActionState<QuoteFormState, FormData>(createQuote, {})
+  const [lines, setLines] = useState<Line[]>([
+    { id: 0, description: '', quantity: '1', unitPriceOriginal: '' },
+  ])
+  const [selectedClientId, setSelectedClientId] = useState(clients[0]?.id ?? '')
+  const [currency, setCurrency] = useState('MAD')
+  const [exchangeRate, setExchangeRate] = useState('1')
+  const [bamRateError, setBamRateError] = useState<string | null>(null)
+
+  async function fetchBamRate(cur: string) {
+    if (cur === 'MAD') return
+    try {
+      const res = await fetch('/api/exchange-rate')
+      const data = await res.json()
+      const rate = data[cur]
+      if (rate) {
+        setExchangeRate(String(rate))
+        setBamRateError(null)
+      } else {
+        setBamRateError(data.error ?? `Taux ${cur}/MAD non disponible — saisie manuelle requise`)
+      }
+    } catch {
+      setBamRateError('Impossible de récupérer le taux BAM — saisie manuelle requise')
+    }
+  }
+
+  const totalMad = lines.reduce((sum, l) => {
+    const qty = Number.parseFloat(l.quantity) || 0
+    const price = Number.parseFloat(l.unitPriceOriginal) || 0
+    const rate = Number.parseFloat(exchangeRate) || 1
+    return sum + qty * price * rate
+  }, 0)
+
+  function addLine() {
+    setLines((prev) => [
+      ...prev,
+      { id: Date.now(), description: '', quantity: '1', unitPriceOriginal: '' },
+    ])
+  }
+
+  function removeLine(id: number) {
+    setLines((prev) => prev.filter((l) => l.id !== id))
+  }
+
+  function updateLine(id: number, field: keyof Line, value: string) {
+    setLines((prev) => prev.map((l) => (l.id === id ? { ...l, [field]: value } : l)))
+  }
+
+  return (
+    <form action={formAction} className="space-y-6">
+      {state.message && (
+        <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+          {state.message}
+        </div>
+      )}
+
+      <div>
+        <label htmlFor="clientId" className="block text-sm font-medium text-gray-700 mb-1">
+          Client <span className="text-red-500">*</span>
+        </label>
+        <select
+          id="clientId"
+          name="clientId"
+          value={selectedClientId}
+          onChange={(e) => setSelectedClientId(e.target.value)}
+          className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+        >
+          {clients.length === 0 && <option value="">Aucun client — créez-en un d'abord</option>}
+          {clients.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+        {state.errors?.clientId && (
+          <p className="text-xs text-red-600 mt-1">{state.errors.clientId[0]}</p>
+        )}
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="issueDate" className="block text-sm font-medium text-gray-700 mb-1">
+            Date d&apos;émission <span className="text-red-500">*</span>
+          </label>
+          <input
+            id="issueDate"
+            name="issueDate"
+            type="date"
+            defaultValue={new Date().toISOString().slice(0, 10)}
+            className="w-full border rounded-lg px-3 py-2 text-sm"
+          />
+        </div>
+        <div>
+          <label htmlFor="validUntilDate" className="block text-sm font-medium text-gray-700 mb-1">
+            Valable jusqu&apos;au <span className="text-red-500">*</span>
+          </label>
+          <input
+            id="validUntilDate"
+            name="validUntilDate"
+            type="date"
+            defaultValue={defaultValidUntil()}
+            className="w-full border rounded-lg px-3 py-2 text-sm"
+          />
+          {state.errors?.validUntilDate && (
+            <p className="text-xs text-red-600 mt-1">{state.errors.validUntilDate[0]}</p>
+          )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="currency" className="block text-sm font-medium text-gray-700 mb-1">
+            Devise
+          </label>
+          <select
+            id="currency"
+            name="currency"
+            value={currency}
+            onChange={(e) => {
+              const cur = e.target.value
+              setCurrency(cur)
+              if (cur === 'MAD') {
+                setExchangeRate('1')
+                setBamRateError(null)
+              } else fetchBamRate(cur)
+            }}
+            className="w-full border rounded-lg px-3 py-2 text-sm"
+          >
+            {currencies.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+        </div>
+        {currency !== 'MAD' && (
+          <div>
+            <label htmlFor="exchangeRate" className="block text-sm font-medium text-gray-700 mb-1">
+              Taux BAM (MAD/{currency})
+            </label>
+            <input
+              id="exchangeRate"
+              name="exchangeRate"
+              type="number"
+              step="0.0001"
+              value={exchangeRate}
+              onChange={(e) => setExchangeRate(e.target.value)}
+              className="w-full border rounded-lg px-3 py-2 text-sm"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Taux Bank Al-Maghrib à la date d&apos;encaissement (bkam.ma)
+            </p>
+            {bamRateError && (
+              <p className="text-xs text-[var(--color-warning)] mt-1">{bamRateError}</p>
+            )}
+          </div>
+        )}
+      </div>
+
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm font-medium text-gray-700">Lignes du devis</span>
+          <button
+            type="button"
+            onClick={addLine}
+            className="flex items-center gap-1 text-xs text-[var(--color-primary)] hover:underline"
+          >
+            <Plus size={13} /> Ajouter une ligne
+          </button>
+        </div>
+
+        <div className="space-y-2">
+          <div className="grid grid-cols-[1fr_80px_110px_32px] gap-2 px-1">
+            <span className="text-xs text-gray-500">Description</span>
+            <span className="text-xs text-gray-500">Qté</span>
+            <span className="text-xs text-gray-500">Prix HT ({currency})</span>
+            <span />
+          </div>
+
+          {lines.map((line, idx) => (
+            <div key={line.id} className="grid grid-cols-[1fr_80px_110px_32px] gap-2">
+              <input
+                name={`lines[${idx}][description]`}
+                value={line.description}
+                onChange={(e) => updateLine(line.id, 'description', e.target.value)}
+                placeholder="Description du service"
+                className="border rounded-lg px-3 py-1.5 text-sm"
+              />
+              <input
+                name={`lines[${idx}][quantity]`}
+                type="number"
+                step="0.001"
+                min="0"
+                value={line.quantity}
+                onChange={(e) => updateLine(line.id, 'quantity', e.target.value)}
+                className="border rounded-lg px-2 py-1.5 text-sm text-right"
+              />
+              <input
+                name={`lines[${idx}][unitPriceOriginal]`}
+                type="number"
+                step="0.01"
+                min="0"
+                value={line.unitPriceOriginal}
+                onChange={(e) => updateLine(line.id, 'unitPriceOriginal', e.target.value)}
+                className="border rounded-lg px-2 py-1.5 text-sm text-right"
+              />
+              <button
+                type="button"
+                onClick={() => removeLine(line.id)}
+                disabled={lines.length === 1}
+                className="flex items-center justify-center text-gray-400 hover:text-red-500 disabled:opacity-30"
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {state.errors?.lines && (
+          <p className="text-xs text-red-600 mt-1">{state.errors.lines[0]}</p>
+        )}
+      </div>
+
+      <div className="bg-gray-50 rounded-lg p-4">
+        <div className="flex justify-between font-bold">
+          <span>Total estimé</span>
+          <span>{fmt(totalMad)} DH</span>
+        </div>
+        <p className="text-xs text-gray-500 mt-2">
+          Un devis n&apos;est pas une facture — aucune valeur comptable ou fiscale tant qu&apos;il
+          n&apos;est pas converti.
+        </p>
+      </div>
+
+      <div>
+        <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
+          Notes
+        </label>
+        <textarea
+          id="notes"
+          name="notes"
+          rows={3}
+          className="w-full border rounded-lg px-3 py-2 text-sm resize-none"
+          placeholder="Notes internes (non imprimées)"
+        />
+      </div>
+
+      <div className="pt-2">
+        <button
+          type="submit"
+          disabled={pending || clients.length === 0}
+          className="px-6 py-2 bg-[var(--color-primary)] text-white rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
+        >
+          {pending ? 'Création…' : 'Créer le devis'}
+        </button>
+      </div>
+    </form>
+  )
+}

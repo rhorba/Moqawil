@@ -1,5 +1,12 @@
 # Risk Log
 
+### 2026-08-10 GAP — next-intl is configured but never actually used for page content (CLAUDE.md §5/§11 i18n requirement not met)
+- **Specialist**: Frontend Dev (found while building Sprint 6 quote pages)
+- **Summary**: CLAUDE.md requires "All UI strings extracted to translation files. No hardcoded user-facing text." Confirmed via repo-wide grep: `useTranslations`/`getTranslations` (next-intl's hooks) are never called anywhere in `apps/web/src/app/(app)/**` or `apps/web/src/components/**`. Every page (invoices, clients, declarations, and now quotes) hardcodes French text directly. `messages/fr.json` and `messages/ar.json` exist with a fairly complete key set (common, nav, auth, entrepreneur, client, invoice, quote, cap, ...) but are dead configuration as far as page bodies are concerned. What genuinely works today: `getLocale()` drives `dir="rtl"`/`dir="ltr"` layout switching, and `app-nav.tsx` hardcodes a `labelAr` field per nav item for the sidebar only. This has been true since at least Sprint 1 — not introduced by Sprint 6, just first noticed and documented now.
+- **Probability**: certain (already true) | **Mitigation**: none applied yet — would require a dedicated i18n-retrofit sprint to convert every `(app)` page to `useTranslations`/`getTranslations` and verify AR renders correctly end-to-end, not just RTL direction.
+- **Status**: open
+- **Impact**: medium — doesn't block usage (French-first is the stated primary anyway, per CLAUDE.md §10), but the "AR equal-class second" and "full RTL layout" claims in CLAUDE.md §10/§14 DoD are only partially true (layout direction yes, actual Arabic page content no)
+
 ### 2026-05-19 00:00 TECHNICAL — Auth.js v5 breaking changes
 - **Specialist**: Tech Lead
 - **Summary**: Auth.js v5 has a different API from v4. Must pin version and test all auth flows.

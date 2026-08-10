@@ -1,7 +1,15 @@
 'use client'
 
 import { setLocale } from '@/app/actions/locale'
-import { ClipboardList, FileText, LayoutDashboard, LogOut, Settings, Users } from 'lucide-react'
+import {
+  ClipboardList,
+  FileEdit,
+  FileText,
+  LayoutDashboard,
+  LogOut,
+  Settings,
+  Users,
+} from 'lucide-react'
 import { signOut } from 'next-auth/react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -9,6 +17,7 @@ import { useTransition } from 'react'
 
 const navItems = [
   { href: '/dashboard', label: 'Tableau de bord', labelAr: 'لوحة القيادة', icon: LayoutDashboard },
+  { href: '/quotes', label: 'Devis', labelAr: 'عروض الأسعار', icon: FileEdit },
   { href: '/invoices', label: 'Factures', labelAr: 'الفواتير', icon: FileText },
   { href: '/clients', label: 'Clients', labelAr: 'العملاء', icon: Users },
   { href: '/declarations', label: 'Déclarations', labelAr: 'التصريحات', icon: ClipboardList },

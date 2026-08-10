@@ -304,4 +304,38 @@ describe.skipIf(SKIP_INTEGRATION)('Quotes — DB integration', () => {
     expect(invoice2.invoiceNumber).toBe('QTE-2092-002')
     expect(invoice2.sequenceNumber).toBe(2)
   })
+
+  it('createInvoiceInTransaction persists all optional fields when provided (dueDate, paymentMethod, foreign currency, notes)', async () => {
+    const { createInvoiceInTransaction } = await import('@/lib/invoice-creation')
+
+    const invoice = await createInvoiceInTransaction({
+      entrepreneurId: TEST_ENTREPRENEUR_ID,
+      invoicePrefix: 'QTE',
+      clientId: TEST_CLIENT_ID,
+      issueDate: '2091-01-01',
+      dueDate: '2091-02-01',
+      paymentMethod: 'virement',
+      currency: 'EUR',
+      exchangeRate: 10.75,
+      subtotalOriginal: 1000,
+      subtotalMad: 10750,
+      totalMad: 10750,
+      notes: 'Converted from devis DEVIS-2091-001',
+      lines: [
+        {
+          description: 'Consulting',
+          quantity: 1,
+          unitPriceOriginal: 1000,
+          lineTotalOriginal: 1000,
+          lineTotalMad: 10750,
+        },
+      ],
+    })
+
+    expect(invoice.dueDate).toBe('2091-02-01')
+    expect(invoice.paymentMethod).toBe('virement')
+    expect(invoice.currency).toBe('EUR')
+    expect(invoice.exchangeRate).toBe('10.7500')
+    expect(invoice.notes).toBe('Converted from devis DEVIS-2091-001')
+  })
 })

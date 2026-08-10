@@ -19,6 +19,7 @@
   },
   "nav": {
     "dashboard": "Tableau de bord",
+    "quotes": "Devis",
     "invoices": "Factures",
     "clients": "Clients",
     "declarations": "Déclarations",
@@ -100,6 +101,37 @@
     "vatNotice": "TVA non applicable — Régime auto-entrepreneur (Loi 114-13)",
     "empty": "Aucune facture. Créez votre première facture.",
     "addFirst": "Créer une facture"
+  },
+  "quote": {
+    "title": "Devis",
+    "new": "Nouveau devis",
+    "number": "Numéro",
+    "date": "Date d'émission",
+    "validUntil": "Valable jusqu'au",
+    "status": {
+      "draft": "Brouillon",
+      "sent": "Envoyé",
+      "accepted": "Accepté",
+      "rejected": "Refusé",
+      "expired": "Expiré"
+    },
+    "lines": {
+      "description": "Description",
+      "quantity": "Quantité",
+      "unitPrice": "Prix unitaire (HT)",
+      "total": "Total"
+    },
+    "subtotal": "Sous-total",
+    "total": "Total estimé",
+    "notInvoiceNotice": "Ce devis n'est pas une facture — sans valeur comptable ni fiscale tant qu'il n'est pas converti.",
+    "notInCapNotice": "Un devis n'apparaît jamais dans le plafond client 80K DH ni dans le seuil de chiffre d'affaires annuel.",
+    "convertToInvoice": "Convertir en facture",
+    "convertedTo": "Converti en facture",
+    "markSent": "Marquer comme envoyé",
+    "markRejected": "Marquer refusé",
+    "editOnlyDraft": "Seuls les devis en brouillon peuvent être modifiés.",
+    "empty": "Aucun devis. Créez votre premier devis.",
+    "addFirst": "Créer un devis"
   },
   "cap": {
     "label": "Plafond client (80 000 DH/an)",
