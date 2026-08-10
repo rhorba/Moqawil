@@ -169,4 +169,61 @@ describe.skipIf(SKIP_INTEGRATION)('Invoice numbering — DB integration (advisor
 
     expect(sequences).toEqual([1, 2, 3])
   })
+
+  // Sprint 5 (S5-06): the test above calls the transactions serially (awaited
+  // one at a time), which never actually exercises lock contention — each
+  // transaction always starts after the previous one fully committed. This
+  // test fires N transactions genuinely concurrently via Promise.all, which
+  // is the only way to prove pg_advisory_xact_lock actually serializes them
+  // instead of relying on there never having been overlapping requests.
+  it('assigns sequential numbers with no gaps and no duplicates under genuine concurrency', async () => {
+    const drizzle = await import('drizzle-orm')
+    const { sql, eq, and } = drizzle
+
+    const year = 2097
+    const CONCURRENCY = 8
+
+    const runOne = () =>
+      db.transaction(async (tx: typeof db) => {
+        await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${TEST_ENTREPRENEUR_ID}))`)
+        const [row] = await tx
+          .select({ maxSeq: sql`COALESCE(MAX(${invoicesTable.sequenceNumber}), 0)` })
+          .from(invoicesTable)
+          .where(
+            and(
+              eq(invoicesTable.entrepreneurId, TEST_ENTREPRENEUR_ID),
+              eq(invoicesTable.fiscalYear, year)
+            )
+          )
+        const seqNum = (row?.maxSeq ?? 0) + 1
+
+        await tx.insert(invoicesTable).values({
+          entrepreneurId: TEST_ENTREPRENEUR_ID,
+          clientId: '00000000-0000-0000-0000-000000000099',
+          invoiceNumber: formatInvoiceNumber('TST', year, seqNum),
+          fiscalYear: year,
+          sequenceNumber: seqNum,
+          issueDate: '2097-01-01',
+          status: 'draft',
+          currency: 'MAD',
+          subtotalOriginal: '1000.00',
+          subtotalMad: '1000.00',
+          totalMad: '1000.00',
+        })
+        return seqNum
+      })
+
+    // Fire all transactions at once — this is the actual contention scenario
+    // (two browser tabs / two rapid clicks submitting an invoice at the same time).
+    const sequences = await Promise.all(Array.from({ length: CONCURRENCY }, runOne))
+
+    // No gaps, no duplicates: the set of assigned numbers is exactly 1..CONCURRENCY
+    expect([...sequences].sort((a, b) => a - b)).toEqual(
+      Array.from({ length: CONCURRENCY }, (_, i) => i + 1)
+    )
+
+    // Sequential invoice numbers must also be unique at the DB level (belt-and-braces
+    // check against the unique(entrepreneurId, fiscalYear, sequenceNumber) constraint)
+    expect(new Set(sequences).size).toBe(CONCURRENCY)
+  })
 })
