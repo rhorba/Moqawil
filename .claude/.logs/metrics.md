@@ -10,7 +10,7 @@
 - **New dependency**: none.
 - **Infra**: `packageManager` field now pins pnpm to `9.15.4`, matching CI exactly — closes the local/CI pnpm-version divergence flagged in Sprint 5.
 - **Velocity**: 8 sprints (+ 3.5) completed.
-- **Pushed**: `git push origin master` at sprint close (Framework Rule 3) — see `.logs/activity.md` for commit details.
+- **Pushed**: `git push origin master` at sprint close (Framework Rule 3) — commits `805f40f`, `ecdd6be`. CI run `31398029763`: all 6 jobs green (Unit Tests, Security, Lint, TypeCheck, Build, E2E) — first run (`31397631483`) caught a real `package.json` formatting drift from the pnpm pin, fixed in a follow-up commit (see `.logs/activity.md`).
 ---
 
 ### 2026-08-10 SPRINT_SNAPSHOT — Sprint 7 (i18n Retrofit — real next-intl usage)

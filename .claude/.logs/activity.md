@@ -1,5 +1,12 @@
 # Activity Log
 
+### 2026-08-10 BUGFIX — CI's first real Sprint 8 run caught a formatting drift, fixed and confirmed green
+- **Specialist**: DevOps/DevSecOps
+- **Summary**: First CI run on the Sprint 8 push (`805f40f`) failed the Lint job: `corepack use pnpm@9.15.4` (run locally during S8-05) had reformatted `package.json`'s `pnpm.onlyBuiltDependencies` array to multi-line as a side effect of rewriting the file to add the `packageManager` field, which Biome's formatter disagrees with. Not caught locally because verification ran `pnpm --filter @moqawil/web lint` (scoped to the app) rather than the root `pnpm lint` (`biome check .` across the whole repo) — a real gap in this session's own verification step. Fixed with `biome check --write package.json`, pushed as a new commit (`ecdd6be`) rather than amending the already-pushed one. Also cleaned up local-only gitignored artifacts (`packages/tax-engine/coverage/`, `apps/web/coverage/`, `.recordings/e2e-debug/`) that briefly made a full local `biome check .` look broken — confirmed via `git status` these were never tracked/pushed, so CI never saw them; the noise was purely from this session's own local coverage/e2e runs.
+- **Status**: resolved — CI run `31398029763`: all 6 jobs green (Unit Tests, Security, Lint, TypeCheck, Build, E2E)
+- **Impact**: medium — would have blocked the sprint's own DoD ("pnpm build succeeds... lint... passes") from being honestly true until confirmed in the real CI environment, not just locally
+---
+
 ### 2026-08-10 MILESTONE — Sprint 8 complete: Zod i18n retrofit, pnpm version pin, stale risk closed
 - **Specialist**: Frontend Dev + Backend Dev + Tester + DevOps/DevSecOps + Project Monitor
 - **Summary**: All 8 tasks (S8-01 through S8-08) across 4 batches.
