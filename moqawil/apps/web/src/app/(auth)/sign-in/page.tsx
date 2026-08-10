@@ -2,9 +2,17 @@ import { signIn } from '@/lib/auth'
 import { getTranslations } from 'next-intl/server'
 import { TestCredentialsForm } from './test-credentials-form'
 
-export default async function SignInPage() {
+export default async function SignInPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ callbackUrl?: string }>
+}) {
   const hasTestSecret = !!process.env.E2E_TEST_SECRET
   const [t, tNav] = await Promise.all([getTranslations('auth'), getTranslations('nav')])
+  const { callbackUrl } = await searchParams
+  // Only ever a same-origin relative path (set by our own middleware) — never
+  // pass an external URL through to redirectTo.
+  const redirectTo = callbackUrl?.startsWith('/') ? callbackUrl : '/dashboard'
 
   return (
     <main className="min-h-screen flex items-center justify-center p-4">
@@ -19,7 +27,7 @@ export default async function SignInPage() {
           <form
             action={async () => {
               'use server'
-              await signIn('google', { redirectTo: '/dashboard' })
+              await signIn('google', { redirectTo })
             }}
           >
             <button
@@ -35,7 +43,7 @@ export default async function SignInPage() {
             action={async (formData: FormData) => {
               'use server'
               const email = formData.get('email') as string
-              await signIn('resend', { email, redirectTo: '/dashboard' })
+              await signIn('resend', { email, redirectTo })
             }}
             className="space-y-2"
           >

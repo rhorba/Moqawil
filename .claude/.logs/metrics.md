@@ -1,5 +1,19 @@
 # Project Metrics
 
+### 2026-08-10 SPRINT_SNAPSHOT — Sprint 9 (Accountant Multi-Client Dashboard, v0.2)
+- **Planned**: 17 tasks (S9-01 through S9-17), 6 batches
+- **Completed**: 17/17 (100%)
+- **Blocked**: 0 (Docker Desktop got stuck on first startup this session — force-restarted, resolved, not a code blocker)
+- **Scope**: new `accountant_links` table (entrepreneur-initiated invite, no `role` column on `users`); authorization boundary (`getAccessibleEntrepreneurs`/`assertAccountantAccess`/batched dashboard query, all joining through `accountant_links`); bespoke invite-token flow deliberately separate from Auth.js's `verificationTokens`; entrepreneur-side Settings UI (invite/list/revoke); accountant-side route group (list + per-entrepreneur drill-down with 80K cap badges, reusing existing tax-engine functions); nav gating; FR/AR i18n. Framework Rules 1 and 6 applied — System Designer + Software Architect passes produced `docs/system-design-accountant-dashboard.md` + `docs/architecture-accountant-dashboard.md`, committed before implementation.
+- **Security review (Framework Rule 5, mandatory)**: IDOR, invite-token entropy/single-use/race-safety/expiry, and revocation-latency all CONFIRMED OK with file:line evidence. Invite-spam/enumeration explicitly logged as an ACCEPTED RISK (self-hosted single-tenant threat model, reasoning in `.logs/risks.md`). Two low-severity issues found during review were fixed same-session, not deferred: email-mismatch check on the accept page now fails closed on a missing session email; entrepreneur `SELECT`s narrowed to avoid over-fetching `bankIban`/ICE/IF/address/phone into Server Component data.
+- **Real bugs found and fixed during this sprint** (none deferred): (1) accountant drilldown reused the wrong empty-state copy for "no clients yet" (found via manual browser QA); (2) the pre-existing `/api/e2e/cleanup` test-only route never deleted `quotes`, so a quote converted to an invoice in one test run permanently blocked that invoice's deletion in the next (test-infra only, not production code, discovered while getting a clean Playwright run).
+- **Verification**: `pnpm build` clean. Full Playwright suite 19/19 passing (3 intentionally skipped), run with `--workers=1` against a real `next start` server on a freshly rebuilt `.next` (a mid-session mistake — running `next build` against the same `.next` directory as a live `next dev` process — corrupted the dev server's chunk manifest; rebuilt clean, not a code defect). New two-actor Playwright test (`accountant-dashboard.spec.ts`) uses two isolated browser contexts to genuinely simulate the entrepreneur and accountant as separate signed-in users, covering invite → SMTP-fallback link → cross-user accept → scoped dashboard → drill-down → revoke → immediate access loss on the very next request.
+- **Coverage**: new Sprint 9 files pass the 80% gate comfortably in isolation — `queries/accountant.ts` 92.85% stmts/90.9% branch/83.33% funcs, `invite-token.ts` 100% across the board (added to `vitest.config.ts`'s coverage-include list per this repo's established convention). Full-suite local coverage run blocked by 3 pre-existing, already-flagged-this-session local Postgres fixture collisions (real manual-testing data reusing tax-engine's placeholder ICE values, declined to delete — see mid-session exchange) — unrelated to Sprint 9 (all 3 files pre-date this sprint, none touched), confirmed by Sprint 9's own suite passing 9/9 cleanly every run. CI's fresh-DB run is the authoritative full-suite+coverage signal, per this project's established closing pattern.
+- **New dependency**: none.
+- **Velocity**: 9 sprints (+ 3.5) completed.
+- **Pushed**: pending — see next log entry.
+---
+
 ### 2026-08-10 SPRINT_SNAPSHOT — Sprint 8 (Close Remaining Small Gaps)
 - **Planned**: 8 tasks (S8-01 through S8-08), 4 batches
 - **Completed**: 8/8 (100%)

@@ -44,6 +44,14 @@ export const paymentMethodEnum = pgEnum('payment_method', [
 
 export const declarationStatusEnum = pgEnum('declaration_status', ['pending', 'submitted'])
 
+// Sprint 9: accountant multi-client dashboard. 'pending' = invite sent, not yet accepted;
+// 'active' = accountant has read access; 'revoked' = entrepreneur withdrew access.
+export const accountantLinkStatusEnum = pgEnum('accountant_link_status', [
+  'pending',
+  'active',
+  'revoked',
+])
+
 // Sprint 6: devis (quote) management. Not a CGI Article 145 legal document —
 // separate lifecycle from invoices, never contributes to turnover.
 export const quoteStatusEnum = pgEnum('quote_status', [
@@ -296,6 +304,42 @@ export const quarterlyDeclarations = pgTable(
   (t) => [unique('uq_declaration_quarter').on(t.entrepreneurId, t.year, t.quarter)]
 )
 
+// ── Accountant Links ─────────────────────────────────────────────────────────
+// Sprint 9: entrepreneur-initiated grant of read-only access for an accountant
+// (docs/system-design-accountant-dashboard.md). Entrepreneur is always the
+// consenting party — an accountant can never self-attach to an entrepreneur.
+// No `role` column on `users`: a user can be an AE and an accountant for
+// others simultaneously, so access is capability-based via this table, not
+// identity-based.
+
+export const accountantLinks = pgTable(
+  'accountant_links',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    entrepreneurId: uuid('entrepreneur_id')
+      .notNull()
+      .references(() => entrepreneurs.id, { onDelete: 'cascade' }),
+    // Null until the invite is accepted and matched to a real user.
+    accountantUserId: text('accountant_user_id').references(() => users.id, {
+      onDelete: 'cascade',
+    }),
+    invitedEmail: text('invited_email').notNull(),
+    status: accountantLinkStatusEnum('status').default('pending').notNull(),
+    inviteToken: text('invite_token').unique(),
+    inviteExpiresAt: timestamp('invite_expires_at'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (t) => [
+    // Keyed on invitedEmail, not accountantUserId, since the latter is null
+    // while the invite is pending.
+    unique('uq_accountant_link_invite').on(t.entrepreneurId, t.invitedEmail),
+    // Authorization boundary query: "which entrepreneurs can this accountant see" —
+    // the hottest query path for the whole feature.
+    index('idx_accountant_links_accountant').on(t.accountantUserId, t.status),
+  ]
+)
+
 // ── Relations ─────────────────────────────────────────────────────────────────
 
 export const usersRelations = relations(users, ({ one }) => ({
@@ -350,4 +394,15 @@ export const quotesRelations = relations(quotes, ({ one, many }) => ({
 
 export const quoteLinesRelations = relations(quoteLines, ({ one }) => ({
   quote: one(quotes, { fields: [quoteLines.quoteId], references: [quotes.id] }),
+}))
+
+export const accountantLinksRelations = relations(accountantLinks, ({ one }) => ({
+  entrepreneur: one(entrepreneurs, {
+    fields: [accountantLinks.entrepreneurId],
+    references: [entrepreneurs.id],
+  }),
+  accountantUser: one(users, {
+    fields: [accountantLinks.accountantUserId],
+    references: [users.id],
+  }),
 }))

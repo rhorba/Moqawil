@@ -14,10 +14,15 @@ export default auth((req: NextRequest & { auth: unknown }) => {
     pathname.startsWith('/invoices') ||
     pathname.startsWith('/clients') ||
     pathname.startsWith('/declarations') ||
-    pathname.startsWith('/settings')
+    pathname.startsWith('/settings') ||
+    pathname.startsWith('/accountant')
 
   if (isAppRoute && !isAuthenticated) {
-    return NextResponse.redirect(new URL('/sign-in', req.url))
+    // Preserve the destination (incl. accountant invite tokens in the query string)
+    // so the user lands back where they intended after signing in.
+    const signInUrl = new URL('/sign-in', req.url)
+    signInUrl.searchParams.set('callbackUrl', pathname + req.nextUrl.search)
+    return NextResponse.redirect(signInUrl)
   }
 
   if (pathname === '/sign-in' && isAuthenticated) {

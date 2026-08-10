@@ -2,6 +2,7 @@
 
 import { setLocale } from '@/app/actions/locale'
 import {
+  BookUser,
   ClipboardList,
   FileEdit,
   FileText,
@@ -27,9 +28,10 @@ const navItems = [
 
 interface AppNavProps {
   currentLocale?: string
+  hasAccountantAccess?: boolean
 }
 
-export function AppNav({ currentLocale = 'fr' }: AppNavProps) {
+export function AppNav({ currentLocale = 'fr', hasAccountantAccess = false }: AppNavProps) {
   const t = useTranslations('nav')
   const pathname = usePathname()
   const [isPending, startTransition] = useTransition()
@@ -67,6 +69,19 @@ export function AppNav({ currentLocale = 'fr' }: AppNavProps) {
             </Link>
           )
         })}
+        {hasAccountantAccess && (
+          <Link
+            href="/accountant"
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+              pathname.startsWith('/accountant')
+                ? 'bg-[var(--color-primary)] text-white'
+                : 'text-gray-700 hover:bg-gray-100'
+            }`}
+          >
+            <BookUser size={16} />
+            {t('accountantSpace')}
+          </Link>
+        )}
       </nav>
 
       <div className="p-2 border-t space-y-1">

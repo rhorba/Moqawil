@@ -20,6 +20,8 @@ export default defineConfig({
       // Sprint 6 (S6-11): src/lib/queries/quote.ts and src/lib/invoice-creation.ts
       // (the shared advisory-lock transaction) covered by
       // quote-db-integration.test.ts and invoice-numbering.test.ts.
+      // Sprint 9 (S9-16): src/lib/queries/accountant.ts and src/lib/invite-token.ts
+      // covered by accountant-db-integration.test.ts.
       // Do not add files to this list just to keep the average up; add them
       // when real tests exist for them.
       include: [
@@ -31,6 +33,8 @@ export default defineConfig({
         'src/lib/queries/quote.ts',
         'src/lib/bam-parser.ts',
         'src/lib/invoice-creation.ts',
+        'src/lib/queries/accountant.ts',
+        'src/lib/invite-token.ts',
       ],
       thresholds: {
         statements: 80,

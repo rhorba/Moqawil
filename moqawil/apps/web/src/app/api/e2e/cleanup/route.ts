@@ -21,8 +21,17 @@ export async function POST(request: NextRequest) {
 
   const email = body.email ?? 'e2e-test@moqawil.test'
 
-  const { db, users, entrepreneurs, clients, invoices, invoiceLines, quarterlyDeclarations } =
-    await import('@moqawil/db')
+  const {
+    db,
+    users,
+    entrepreneurs,
+    clients,
+    invoices,
+    invoiceLines,
+    quotes,
+    quarterlyDeclarations,
+    accountantLinks,
+  } = await import('@moqawil/db')
   const { eq } = await import('drizzle-orm')
 
   const [user] = await db
@@ -45,6 +54,11 @@ export async function POST(request: NextRequest) {
       .from(clients)
       .where(eq(clients.entrepreneurId, entrepreneur.id))
 
+    // Quotes reference invoices via convertedToInvoiceId (no cascade) — must go
+    // first, or a converted quote from a prior run blocks its invoice's delete.
+    // quoteLines cascade automatically on quote delete (see schema.ts).
+    await db.delete(quotes).where(eq(quotes.entrepreneurId, entrepreneur.id))
+
     for (const { id } of clientIds) {
       const invoiceIds = await db
         .select({ id: invoices.id })
@@ -59,6 +73,9 @@ export async function POST(request: NextRequest) {
     await db
       .delete(quarterlyDeclarations)
       .where(eq(quarterlyDeclarations.entrepreneurId, entrepreneur.id))
+    // accountant_links cascades automatically on entrepreneur delete (onDelete:
+    // 'cascade' in schema.ts) — deleted explicitly first anyway for clarity/safety.
+    await db.delete(accountantLinks).where(eq(accountantLinks.entrepreneurId, entrepreneur.id))
     await db.delete(clients).where(eq(clients.entrepreneurId, entrepreneur.id))
     await db.delete(entrepreneurs).where(eq(entrepreneurs.id, entrepreneur.id))
   }

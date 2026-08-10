@@ -1,5 +1,6 @@
 import { AppNav } from '@/components/app-nav'
 import { auth } from '@/lib/auth'
+import { hasActiveAccountantAccess } from '@/lib/queries/accountant'
 import { db, entrepreneurs } from '@moqawil/db'
 import { eq } from 'drizzle-orm'
 import { getLocale } from 'next-intl/server'
@@ -19,16 +20,22 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     const { headers } = await import('next/headers')
     const headersList = await headers()
     const pathname = headersList.get('x-pathname') ?? ''
-    if (!pathname.startsWith('/settings')) {
+    // Accountants (Sprint 9) may never have their own AE profile — exempt
+    // /accountant alongside /settings so a profile-less accountant isn't
+    // forced into onboarding just to view a dashboard they were invited to.
+    if (!pathname.startsWith('/settings') && !pathname.startsWith('/accountant')) {
       redirect('/settings?onboarding=1')
     }
   }
 
-  const locale = await getLocale()
+  const [locale, hasAccountantAccess] = await Promise.all([
+    getLocale(),
+    hasActiveAccountantAccess(session.user.id),
+  ])
 
   return (
     <div className="min-h-screen flex">
-      <AppNav currentLocale={locale} />
+      <AppNav currentLocale={locale} hasAccountantAccess={hasAccountantAccess} />
       <main className="flex-1 overflow-auto">{children}</main>
     </div>
   )

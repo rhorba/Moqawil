@@ -1,6 +1,7 @@
 import { auth } from '@/lib/auth'
 import { getEntrepreneur } from '@/lib/queries/entrepreneur'
 import { getTranslations } from 'next-intl/server'
+import { AccountantLinksSection } from './accountant-links/section'
 import { ProfileForm } from './profile-form'
 
 export default async function SettingsPage({
@@ -25,6 +26,10 @@ export default async function SettingsPage({
       </div>
 
       <ProfileForm profile={profile} isOnboarding={isOnboarding} />
+
+      {/* Accountant access (Sprint 9) — only once the profile exists; onboarding
+          has nothing to grant access to yet. */}
+      {!isOnboarding && profile && <AccountantLinksSection entrepreneurId={profile.id} />}
     </div>
   )
 }
