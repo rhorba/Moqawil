@@ -226,7 +226,7 @@ describe.skipIf(SKIP_INTEGRATION)('Accountant authorization queries — DB integ
       id: NO_INVOICE_ENTREPRENEUR,
       userId: AE_USER_A,
       fullName: 'No Invoice Entrepreneur',
-      ice: '000000000000010',
+      ice: '000000000000011',
       ifNumber: '11223344',
       activityType: 'service',
       address: '1 Rue Test',
