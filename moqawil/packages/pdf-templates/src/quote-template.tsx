@@ -153,6 +153,7 @@ const styles = StyleSheet.create({
   },
   disclaimerAr: {
     flex: 1,
+    fontFamily: 'NotoSansArabic',
     fontSize: 7.5,
     color: '#555',
     textAlign: 'right',

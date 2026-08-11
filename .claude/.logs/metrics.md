@@ -1,5 +1,18 @@
 # Project Metrics
 
+### 2026-08-11 SPRINT_SNAPSHOT — Sprint 10 (Hardening/Polish + Full Walkthrough Refresh)
+- **Planned**: 11 tasks (S10-01 through S10-11), 4 batches
+- **Completed**: 11/11 (100%)
+- **Blocked**: 0
+- **Scope**: doc-nav/README hardening (orphaned `guide-devis` page fixed, new `guide-comptable.md`, README version/feature-list refresh), coverage-gap review (6 flagged spots — all justified as unreachable defensive branches, one genuine gap closed with a new test), `.env.example`/`biome.json` completeness fixes, full walkthrough script extension (devis section, real PDF-viewer screenshots for all 4 generated-document types, full accountant multi-actor flow), fresh screenshot set (34 PNGs) + fresh screen-recorded video, replacing the stale pre-Sprint-6 set.
+- **Unplanned critical fix (not in original scope)**: all 4 PDF/XML generation routes were returning HTTP 500 in both dev and production — a stacked bug (webpack/RSC bundling incompatibility for `@react-pdf/renderer`'s reconciler + an upstream `4.1.6`-`4.5.1` version bug) found only because writing the new PDF-viewer walkthrough steps actually exercised the routes for the first time. Fixed: `webpack.externals` override, exact-pin `@react-pdf/renderer@4.6.0`, plus a genuinely separate pre-existing gap (no Arabic font ever registered for mandatory bilingual legal text) fixed alongside it via a base64-embedded Noto Sans Arabic font. New regression test `pdf-templates.test.ts` checks real `%PDF` magic bytes — first test in the project's history to verify actual PDF output rather than just UI interaction. Full incident detail: `.logs/risks.md`.
+- **User feedback addressed mid-sprint**: "dont forget to scrolldown in the video and the screenshots" — `shot()` helper was viewport-only (620px), truncating Settings' profile+accountant-links section below the fold. Fixed: `fullPage: true` on all screenshots, plus a `scrollThroughPage()` helper so the recorded video visibly scrolls through long pages, not just the screenshot silently capturing everything.
+- **Verification**: `pnpm lint` clean (129 files). Full Vitest suite 119/119 passing (3 intentionally skipped). Coverage on included files: 100% stmts/lines, 100% funcs, 92.78% branch — comfortably over the 80% gate (Framework Rule 2). `pnpm build` clean on a freshly wiped `.next`. Walkthrough dry-run then real recording both passed 1/1, producing 34 screenshots + a 98s video, spot-checked visually (Arabic PDF text renders correctly, cap badges show real data, Settings page no longer truncated).
+- **New dependency**: none (the `@react-pdf/renderer` version pin is an existing dependency's version change, not a new package).
+- **Velocity**: 10 sprints (+ 3.5) completed.
+- **Pushed**: see `.logs/activity.md` for commit hash once pushed.
+---
+
 ### 2026-08-10 SPRINT_SNAPSHOT — Sprint 9 (Accountant Multi-Client Dashboard, v0.2)
 - **Planned**: 17 tasks (S9-01 through S9-17), 6 batches
 - **Completed**: 17/17 (100%)

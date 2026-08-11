@@ -1,11 +1,4 @@
-import { Document, Font, Page, StyleSheet, Text, View } from '@react-pdf/renderer'
-
-// Register a font that supports Arabic characters for bilingual mentions
-// Falls back to Helvetica for French content
-Font.registerEmojiSource({
-  format: 'png',
-  url: 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/',
-})
+import { Document, Page, StyleSheet, Text, View } from '@react-pdf/renderer'
 
 const styles = StyleSheet.create({
   page: {
@@ -156,6 +149,7 @@ const styles = StyleSheet.create({
   },
   legalAr: {
     flex: 1,
+    fontFamily: 'NotoSansArabic',
     fontSize: 7.5,
     color: '#555',
     textAlign: 'right',

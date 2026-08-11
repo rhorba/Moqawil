@@ -30,6 +30,7 @@ test-results/
 # Per-test debug videos (ephemeral). Versioned completion recordings
 # (.recordings/v[version]-[date].webm, Framework Rule 7) are NOT ignored — commit those.
 .recordings/e2e-debug/
+.recordings/_walkthrough-test-results/
 
 # TypeScript
 *.tsbuildinfo

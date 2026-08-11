@@ -212,10 +212,72 @@ describe.skipIf(SKIP_INTEGRATION)('Accountant authorization queries — DB integ
     }
   })
 
+  it('getAccountantDashboardRows reports ytdMad 0 for an accessible entrepreneur with zero invoices this year', async () => {
+    const NO_INVOICE_ENTREPRENEUR = '00000000-0000-0000-0000-000000000504'
+    await db
+      .insert(usersTable)
+      .values({ id: AE_USER_A, email: 'acct-ae-a@moqawil.test', name: 'AE A' })
+      .onConflictDoNothing()
+    await db
+      .insert(usersTable)
+      .values({ id: ACCOUNTANT_USER, email: 'acct-accountant@moqawil.test', name: 'Accountant' })
+      .onConflictDoNothing()
+    await db.insert(entrepreneursTable).values({
+      id: NO_INVOICE_ENTREPRENEUR,
+      userId: AE_USER_A,
+      fullName: 'No Invoice Entrepreneur',
+      ice: '000000000000010',
+      ifNumber: '11223344',
+      activityType: 'service',
+      address: '1 Rue Test',
+      city: 'Rabat',
+      registrationDate: '2024-01-01',
+      invoicePrefix: 'NOI',
+    })
+    await db.insert(accountantLinksTable).values({
+      entrepreneurId: NO_INVOICE_ENTREPRENEUR,
+      accountantUserId: ACCOUNTANT_USER,
+      invitedEmail: 'acct-accountant@moqawil.test',
+      status: 'active',
+    })
+
+    try {
+      const { getAccountantDashboardRows } = await import('@/lib/queries/accountant')
+      const rows = await getAccountantDashboardRows(ACCOUNTANT_USER, TEST_YEAR)
+      expect(rows).toHaveLength(1)
+      expect(rows[0].ytdMad).toBe(0)
+      expect(rows[0].threshold.status).toBe('safe')
+    } finally {
+      await db
+        .delete(accountantLinksTable)
+        .where(eq(accountantLinksTable.entrepreneurId, NO_INVOICE_ENTREPRENEUR))
+      await db.delete(entrepreneursTable).where(eq(entrepreneursTable.id, NO_INVOICE_ENTREPRENEUR))
+      await db.delete(usersTable).where(eq(usersTable.id, AE_USER_A))
+      await db.delete(usersTable).where(eq(usersTable.id, ACCOUNTANT_USER))
+    }
+  })
+
   it('getAccountantDashboardRows returns [] with zero DB reads to invoices/declarations when the accountant has no accessible entrepreneurs', async () => {
     const { getAccountantDashboardRows } = await import('@/lib/queries/accountant')
     const rows = await getAccountantDashboardRows('nobody-has-invited-this-user', TEST_YEAR)
     expect(rows).toEqual([])
+  })
+
+  it('getAccountantLinksForEntrepreneur returns all links for that entrepreneur, active and revoked alike', async () => {
+    await setup()
+    try {
+      const { getAccountantLinksForEntrepreneur } = await import('@/lib/queries/accountant')
+      const links = await getAccountantLinksForEntrepreneur(ENTREPRENEUR_A)
+      expect(links).toHaveLength(1)
+      expect(links[0].status).toBe('active')
+      expect(links[0].invitedEmail).toBe('acct-accountant@moqawil.test')
+
+      const otherEntrepreneurLinks = await getAccountantLinksForEntrepreneur(ENTREPRENEUR_B)
+      expect(otherEntrepreneurLinks).toHaveLength(1)
+      expect(otherEntrepreneurLinks[0].status).toBe('revoked')
+    } finally {
+      await teardown()
+    }
   })
 
   it('hasActiveAccountantAccess reflects only active links', async () => {

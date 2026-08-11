@@ -13,11 +13,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 // vi.hoisted ensures mockSendMail is defined before the vi.mock factory runs
 const mocks = vi.hoisted(() => ({
   sendMail: vi.fn().mockResolvedValue({ messageId: 'test-message-id' }),
+  createTransport: vi.fn(),
 }))
+mocks.createTransport.mockImplementation(() => ({ sendMail: mocks.sendMail }))
 
 vi.mock('nodemailer', () => ({
   default: {
-    createTransport: vi.fn(() => ({ sendMail: mocks.sendMail })),
+    createTransport: mocks.createTransport,
   },
 }))
 
@@ -76,6 +78,7 @@ describe('checkAndSendThresholdAlerts — SMTP configured', () => {
     Object.assign(process.env, SMTP_ENV)
     mocks.sendMail.mockClear()
     mocks.sendMail.mockResolvedValue({ messageId: 'test-message-id' })
+    mocks.createTransport.mockClear()
   })
 
   afterEach(() => {
@@ -252,6 +255,19 @@ describe('checkAndSendThresholdAlerts — SMTP configured', () => {
     expect(typeof mail.text).toBe('string')
     expect(typeof mail.html).toBe('string')
     expect(mail.html).toContain('<p>')
+  })
+
+  it('defaults to port 587 when SMTP_PORT is not set', async () => {
+    // biome-ignore lint/performance/noDelete: process.env.X = undefined stringifies to "undefined" instead of deleting the key, which would defeat the `?? 587` fallback this test exercises.
+    delete process.env.SMTP_PORT
+    await checkAndSendThresholdAlerts({
+      userEmail: 'ae@test.ma',
+      entrepreneurName: 'Karim',
+      activityType: 'service',
+      previousYtd: 130_000,
+      newYtd: 145_000,
+    })
+    expect(mocks.createTransport).toHaveBeenCalledWith(expect.objectContaining({ port: 587 }))
   })
 
   it('MAD amounts are formatted in French locale', async () => {

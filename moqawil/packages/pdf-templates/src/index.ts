@@ -7,12 +7,14 @@
 import { renderToBuffer } from '@react-pdf/renderer'
 import React from 'react'
 import { DeclarationDocument, type DeclarationPdfProps } from './declaration-template'
+import { registerFonts } from './fonts'
 import { InvoiceDocument, type InvoicePdfProps } from './invoice-template'
 import { QuoteDocument, type QuotePdfProps } from './quote-template'
 
 export type { InvoicePdfProps, DeclarationPdfProps, QuotePdfProps }
 
 export async function renderInvoicePdf(data: InvoicePdfProps): Promise<Buffer> {
+  registerFonts()
   // biome-ignore lint/suspicious/noExplicitAny: react-pdf's Document element type doesn't compose with React.createElement's generic signature.
   const element = React.createElement(InvoiceDocument as any, data)
   // biome-ignore lint/suspicious/noExplicitAny: renderToBuffer expects react-pdf's own ReactElement<DocumentProps>, which this doesn't satisfy.
@@ -20,6 +22,7 @@ export async function renderInvoicePdf(data: InvoicePdfProps): Promise<Buffer> {
 }
 
 export async function renderDeclarationPdf(data: DeclarationPdfProps): Promise<Buffer> {
+  registerFonts()
   // biome-ignore lint/suspicious/noExplicitAny: see renderInvoicePdf above.
   const element = React.createElement(DeclarationDocument as any, data)
   // biome-ignore lint/suspicious/noExplicitAny: see renderInvoicePdf above.
@@ -27,6 +30,7 @@ export async function renderDeclarationPdf(data: DeclarationPdfProps): Promise<B
 }
 
 export async function renderQuotePdf(data: QuotePdfProps): Promise<Buffer> {
+  registerFonts()
   // biome-ignore lint/suspicious/noExplicitAny: see renderInvoicePdf above.
   const element = React.createElement(QuoteDocument as any, data)
   // biome-ignore lint/suspicious/noExplicitAny: see renderInvoicePdf above.

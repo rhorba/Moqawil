@@ -1,11 +1,11 @@
 # Moqawil — Toolkit de conformité auto-entrepreneur marocain
 
-![Version](https://img.shields.io/badge/version-0.1.0-blue) ![Licence](https://img.shields.io/badge/licence-AGPL--3.0-green) ![Tests](https://img.shields.io/badge/tests-111%20passing-brightgreen)
+![Version](https://img.shields.io/badge/version-0.2.0-blue) ![Licence](https://img.shields.io/badge/licence-AGPL--3.0-green) ![Tests](https://img.shields.io/badge/tests-180%20passing-brightgreen)
 
-> Suivi du plafond de 80 000 DH par client, alertes de seuil annuel, déclarations trimestrielles pré-remplies, facturation légale.
+> Suivi du plafond de 80 000 DH par client, alertes de seuil annuel, déclarations trimestrielles pré-remplies, facturation légale, devis, espace comptable.
 > **AGPL-3.0 · Open source · Auto-hébergeable · Gratuit**
 
-**[Documentation complète](docs/)** · [Guide d'installation](docs/docs/guide-installation.md) · [Facturation](docs/docs/guide-facturation.md) · [Déclarations](docs/docs/guide-declaration.md)
+**[Documentation complète](docs/)** · [Guide d'installation](docs/docs/guide-installation.md) · [Facturation](docs/docs/guide-facturation.md) · [Devis](docs/docs/guide-devis.md) · [Déclarations](docs/docs/guide-declaration.md) · [Espace comptable](docs/docs/guide-comptable.md)
 
 ---
 
@@ -96,14 +96,21 @@ pnpm dev   # Docs sur http://localhost:3001
 
 ---
 
-## Fonctionnalités (v0.1)
+## Fonctionnalités
 
 - **Génération de factures conformes** — tous les champs obligatoires CGI Article 145
 - **Suivi du plafond 80 000 DH par client** — badge 3 couleurs visible partout
 - **Alertes de seuil annuel** — 200 000 DH (services) ou 500 000 DH (commercial/artisanal)
 - **Déclarations trimestrielles** — PDF pré-rempli pour Barid Al-Maghrib
+- **Devis** — estimation avant facturation, conversion en facture en un clic (numérotation et
+  contrôle du plafond partagés avec la facturation directe)
+- **Export e-facturation (UBL 2.1)** — format prêt pour la conformité DGI à venir, validé contre le
+  schéma XSD OASIS officiel
+- **Espace comptable** — invitez votre comptable à consulter vos données en lecture seule ;
+  révocable à tout moment, effet immédiat
 - **Facturation devise étrangère** — taux BAM intégré
-- **Interface bilingue** — Français + Arabe (RTL)
+- **Interface bilingue** — Français + Arabe (RTL), traduction réelle du contenu (pas seulement la
+  mise en page)
 - **Auto-hébergeable** — `docker compose up -d` sur n'importe quel VPS Ubuntu
 
 ---

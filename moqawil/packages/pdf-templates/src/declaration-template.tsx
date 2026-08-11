@@ -28,6 +28,7 @@ const styles = StyleSheet.create({
     color: '#1a6e7e',
   },
   subtitle: { fontSize: 8, color: '#555', marginTop: 2 },
+  arabic: { fontFamily: 'NotoSansArabic' },
   // Section blocks
   sectionLabel: {
     fontSize: 7,
@@ -185,18 +186,22 @@ export function DeclarationDocument({ declaration, entrepreneur }: DeclarationPd
             </Text>
           </View>
           <View style={styles.headerAr}>
-            <Text style={[styles.title, { textAlign: 'right' }]}>تصريح برقم الأعمال</Text>
-            <Text style={[styles.subtitle, { textAlign: 'right' }]}>
+            <Text style={[styles.title, styles.arabic, { textAlign: 'right' }]}>
+              تصريح برقم الأعمال
+            </Text>
+            <Text style={[styles.subtitle, styles.arabic, { textAlign: 'right' }]}>
               نظام المقاول الذاتي — القانون 114-13
             </Text>
-            <Text style={[styles.subtitle, { textAlign: 'right' }]}>
+            <Text style={[styles.subtitle, styles.arabic, { textAlign: 'right' }]}>
               {ql.ar} {declaration.year}
             </Text>
           </View>
         </View>
 
         {/* Identity section */}
-        <Text style={styles.sectionLabel}>Identité du déclarant / هوية المصرح</Text>
+        <Text style={styles.sectionLabel}>
+          Identité du déclarant / <Text style={styles.arabic}>هوية المصرح</Text>
+        </Text>
         <View style={styles.row}>
           <Text style={styles.fieldLabel}>Nom complet :</Text>
           <Text style={styles.fieldValue}>{entrepreneur.fullName}</Text>
@@ -227,7 +232,9 @@ export function DeclarationDocument({ declaration, entrepreneur }: DeclarationPd
         </View>
 
         {/* Declaration period */}
-        <Text style={styles.sectionLabel}>Période de déclaration / فترة التصريح</Text>
+        <Text style={styles.sectionLabel}>
+          Période de déclaration / <Text style={styles.arabic}>فترة التصريح</Text>
+        </Text>
         <View style={styles.row}>
           <Text style={styles.fieldLabel}>Exercice fiscal :</Text>
           <Text style={styles.fieldValue}>{declaration.year}</Text>
@@ -239,7 +246,7 @@ export function DeclarationDocument({ declaration, entrepreneur }: DeclarationPd
 
         {/* CA breakdown */}
         <Text style={styles.sectionLabel}>
-          Chiffre d&apos;affaires déclaré / رقم الأعمال المصرح به
+          Chiffre d&apos;affaires déclaré / <Text style={styles.arabic}>رقم الأعمال المصرح به</Text>
         </Text>
         <View style={styles.tableHeader}>
           <Text style={[styles.headerText, styles.col1]}>Désignation</Text>
@@ -295,7 +302,7 @@ export function DeclarationDocument({ declaration, entrepreneur }: DeclarationPd
             Régime Auto-Entrepreneur — Loi 114-13 · À déposer à Al Barid Bank, Attijariwafa, BMCE ou
             tout établissement agréé
           </Text>
-          <Text style={styles.legalText}>
+          <Text style={[styles.legalText, styles.arabic]}>
             نظام المقاول الذاتي — القانون 114-13 · للإيداع لدى بريد بنك أو أي مؤسسة معتمدة
           </Text>
         </View>

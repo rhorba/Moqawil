@@ -226,4 +226,74 @@ describe.skipIf(SKIP_INTEGRATION)('Invoice numbering — DB integration (advisor
     // check against the unique(entrepreneurId, fiscalYear, sequenceNumber) constraint)
     expect(new Set(sequences).size).toBe(CONCURRENCY)
   })
+
+  it('createInvoiceInTransaction stores the exchange rate for a foreign-currency invoice, null for MAD', async () => {
+    const { createInvoiceInTransaction } = await import('@/lib/invoice-creation')
+
+    const eurInvoice = await createInvoiceInTransaction({
+      entrepreneurId: TEST_ENTREPRENEUR_ID,
+      invoicePrefix: 'TST',
+      clientId: '00000000-0000-0000-0000-000000000099',
+      issueDate: '2096-01-01',
+      currency: 'EUR',
+      exchangeRate: 10.85,
+      subtotalOriginal: 100,
+      subtotalMad: 1085,
+      totalMad: 1085,
+      lines: [
+        {
+          description: 'Foreign client work',
+          quantity: 1,
+          unitPriceOriginal: 100,
+          lineTotalOriginal: 100,
+          lineTotalMad: 1085,
+        },
+      ],
+    })
+    expect(eurInvoice.currency).toBe('EUR')
+    expect(eurInvoice.exchangeRate).toBe('10.8500')
+
+    // exchangeRate omitted on a foreign-currency invoice — falls back to 1
+    const eurNoRateInvoice = await createInvoiceInTransaction({
+      entrepreneurId: TEST_ENTREPRENEUR_ID,
+      invoicePrefix: 'TST',
+      clientId: '00000000-0000-0000-0000-000000000099',
+      issueDate: '2096-01-03',
+      currency: 'USD',
+      subtotalOriginal: 50,
+      subtotalMad: 50,
+      totalMad: 50,
+      lines: [
+        {
+          description: 'Foreign client work, no rate supplied',
+          quantity: 1,
+          unitPriceOriginal: 50,
+          lineTotalOriginal: 50,
+          lineTotalMad: 50,
+        },
+      ],
+    })
+    expect(eurNoRateInvoice.exchangeRate).toBe('1.0000')
+
+    const madInvoice = await createInvoiceInTransaction({
+      entrepreneurId: TEST_ENTREPRENEUR_ID,
+      invoicePrefix: 'TST',
+      clientId: '00000000-0000-0000-0000-000000000099',
+      issueDate: '2096-01-02',
+      currency: 'MAD',
+      subtotalOriginal: 1000,
+      subtotalMad: 1000,
+      totalMad: 1000,
+      lines: [
+        {
+          description: 'Local work',
+          quantity: 1,
+          unitPriceOriginal: 1000,
+          lineTotalOriginal: 1000,
+          lineTotalMad: 1000,
+        },
+      ],
+    })
+    expect(madInvoice.exchangeRate).toBeNull()
+  })
 })

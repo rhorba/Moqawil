@@ -9,8 +9,10 @@ const sidebars: SidebarsConfig = {
       items: [
         'guide-installation',
         'guide-facturation',
+        'guide-devis',
         'guide-declaration',
         'guide-e-facturation',
+        'guide-comptable',
       ],
     },
   ],
