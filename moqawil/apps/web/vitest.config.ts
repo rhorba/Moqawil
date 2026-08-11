@@ -8,6 +8,14 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
+    // Sprint 11 (2026-08-11): the *-db-integration.test.ts / invoice-numbering.test.ts files
+    // all write to the same persistent local Postgres instance with hardcoded fixture IDs and
+    // no per-test transaction isolation. Running test files in parallel (Vitest's default) let
+    // their concurrent inserts/deletes race, producing intermittent count/sum mismatches that
+    // look like real bugs but are pure scheduling artifacts (confirmed: every file passes 100%
+    // alone, only fails under concurrent file execution). Suite is small (14 files) so running
+    // sequentially costs a few seconds, not worth the flakiness.
+    fileParallelism: false,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html', 'lcov'],

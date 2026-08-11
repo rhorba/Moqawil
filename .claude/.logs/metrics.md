@@ -10,7 +10,7 @@
 - **Verification**: `pnpm --filter @moqawil/web typecheck` clean, `pnpm lint` clean (143 files). Full Vitest suite 120/120 passing (3 intentionally skipped) after fixture cleanup — the one file that failed before cleanup (`invoice-queries-db-integration.test.ts`) was re-confirmed passing 100% in isolation both before and after, consistent with the known parallel-DB-integration-test flakiness class diagnosed earlier this session (not a regression). Playwright e2e: 21/21 passing single-threaded (3 intentionally skipped), including 2 new landing-page smoke tests — confirms the rate limiter doesn't false-positive against legitimate e2e traffic. Manual: `/api/health` returns `{"status":"ok"}`; a 10-request burst against `/api/auth/signin/credentials` returned exactly 5×302 then 5×429, matching the configured `limit: 5` exactly.
 - **New dependency**: none — rate limiter is in-process (no Redis/Upstash), consistent with the existing single-VPS/no-horizontal-scaling NFR.
 - **Velocity**: 11 sprints (+ 3.5) completed.
-- **Pushed**: pending — see activity.md for the push entry once it lands.
+- **Pushed**: `git push origin master` at sprint close (Framework Rule 3) — commit `a62a293`.
 ---
 
 ### 2026-08-11 SPRINT_SNAPSHOT — Sprint 10 (Hardening/Polish + Full Walkthrough Refresh)

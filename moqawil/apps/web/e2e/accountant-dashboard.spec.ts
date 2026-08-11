@@ -16,7 +16,8 @@ import { expect, test } from '@playwright/test'
 const E2E_TEST_SECRET = process.env.E2E_TEST_SECRET
 const AE_EMAIL = 'e2e-accountant-ae@moqawil.test'
 const ACCOUNTANT_EMAIL = 'e2e-accountant-user@moqawil.test'
-const AE_ICE = '000000000000009'
+// Sprint 11 fixture-collision fix: block 111 reserved for this file — see docs/test-strategy-moqawil.md
+const AE_ICE = '000000000000111'
 
 test.describe('Accountant multi-client dashboard — two-actor flow', () => {
   test.skip(!E2E_TEST_SECRET, 'E2E_TEST_SECRET not set — skipping authenticated tests')

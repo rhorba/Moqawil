@@ -1,5 +1,12 @@
 # Activity Log
 
+### 2026-08-11 FIX — ICE test-fixture collisions eliminated across all test suites
+- **Specialist**: Tester, on direct user instruction
+- **Summary**: Root-caused and fixed the recurring cross-suite ICE (`entrepreneurs.ice`) fixture collision that had required manual DB cleanup 4 times across Sprints 10-11. See full writeup in `.logs/issues.md`. Two compounding causes fixed: (1) overlapping hardcoded ICE constants across Vitest DB-integration files and Playwright specs — now assigned non-overlapping reserved blocks, documented in `docs/test-strategy-moqawil.md` §7; (2) untargeted `.onConflictDoNothing()` silently swallowing real ICE conflicts instead of throwing — now target the primary key explicitly so a future collision fails loudly. Also disabled Vitest `fileParallelism` after confirming a separate, structurally different flakiness source (DB-integration files racing each other under concurrent file execution).
+- **Verification**: full Vitest suite (14 files/124 tests) green ×2, full Playwright suite green (21/21 non-skipped, `--workers=1` matching CI's actual config), typecheck clean.
+- **Status**: resolved
+- **Impact**: medium — removes recurring test-suite friction and false-failure noise, no production code touched.
+
 ### 2026-08-11 MILESTONE — Sprint 11 complete: SaaS readiness (multi-tenant hosting, no billing)
 - **Specialist**: Orchestrator + PM + System Designer + Security Engineer + DevOps + Backend Dev + Frontend Dev + Tester
 - **Summary**: User asked to "convert the app to a SaaS and permit many entreprises to use the app." Clarified via 2 questions before scoping: still the same solo auto-entrepreneur persona (not registered companies, not team accounts), multi-tenancy/hosting infra this sprint with billing deferred. Planned via `EnterPlanMode` (approved plan: `docs/prd-sprint11-saas-readiness.md`), executed as `.claude/sprint-backlog/sprint-11.md`. Claims the "Sprint 11" slot Sprint 10 had reserved for launch/distribution content — pushed that to Sprint 12, since publicizing a hosted product before its hosting/security posture is ready would be backwards.

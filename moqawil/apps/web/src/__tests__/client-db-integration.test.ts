@@ -44,7 +44,9 @@ describe.skipIf(SKIP_INTEGRATION)('Client queries — DB integration', () => {
         { id: TEST_USER_ID, email: 'client-test@moqawil.test', name: 'Client Test User' },
         { id: OTHER_USER_ID, email: 'client-test-2@moqawil.test', name: 'Other Test User' },
       ])
-      .onConflictDoNothing()
+      // Sprint 11: explicit target so a real conflict (e.g. stale ICE from another
+      // suite) fails loudly instead of silently no-oping on the wrong constraint.
+      .onConflictDoNothing({ target: usersTable.id })
 
     await db
       .insert(entrepreneursTable)
@@ -53,7 +55,7 @@ describe.skipIf(SKIP_INTEGRATION)('Client queries — DB integration', () => {
           id: TEST_ENTREPRENEUR_ID,
           userId: TEST_USER_ID,
           fullName: 'Test AE Client',
-          ice: '000000000000003',
+          ice: '000000000000031', // Sprint 11 fixture-collision fix: block 031/032 reserved for this file — see docs/test-strategy-moqawil.md
           ifNumber: '11111111',
           activityType: 'service',
           address: '1 Rue Test',
@@ -65,7 +67,7 @@ describe.skipIf(SKIP_INTEGRATION)('Client queries — DB integration', () => {
           id: OTHER_ENTREPRENEUR_ID,
           userId: OTHER_USER_ID,
           fullName: 'Other AE',
-          ice: '000000000000004',
+          ice: '000000000000032',
           ifNumber: '22222222',
           activityType: 'service',
           address: '2 Rue Test',
@@ -74,7 +76,7 @@ describe.skipIf(SKIP_INTEGRATION)('Client queries — DB integration', () => {
           invoicePrefix: 'OTH',
         },
       ])
-      .onConflictDoNothing()
+      .onConflictDoNothing({ target: entrepreneursTable.id })
 
     await db
       .insert(clientsTable)

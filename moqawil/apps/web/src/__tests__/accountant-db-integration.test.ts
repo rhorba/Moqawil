@@ -82,7 +82,9 @@ describe.skipIf(SKIP_INTEGRATION)('Accountant authorization queries — DB integ
         { id: AE_USER_B, email: 'acct-ae-b@moqawil.test', name: 'AE B' },
         { id: ACCOUNTANT_USER, email: 'acct-accountant@moqawil.test', name: 'Accountant' },
       ])
-      .onConflictDoNothing()
+      // Sprint 11: explicit target so a real conflict (e.g. stale ICE from another
+      // suite) fails loudly instead of silently no-oping on the wrong constraint.
+      .onConflictDoNothing({ target: usersTable.id })
 
     await db
       .insert(entrepreneursTable)
@@ -91,7 +93,7 @@ describe.skipIf(SKIP_INTEGRATION)('Accountant authorization queries — DB integ
           id: ENTREPRENEUR_A,
           userId: AE_USER_A,
           fullName: 'Entrepreneur A',
-          ice: '000000000000007',
+          ice: '000000000000071', // Sprint 11 fixture-collision fix: block 071/072/073 reserved for this file — see docs/test-strategy-moqawil.md
           ifNumber: '66666666',
           activityType: 'service',
           address: '1 Rue Test',
@@ -103,7 +105,7 @@ describe.skipIf(SKIP_INTEGRATION)('Accountant authorization queries — DB integ
           id: ENTREPRENEUR_B,
           userId: AE_USER_B,
           fullName: 'Entrepreneur B',
-          ice: '000000000000008',
+          ice: '000000000000072',
           ifNumber: '77777777',
           activityType: 'commercial',
           address: '2 Rue Test',
@@ -112,7 +114,7 @@ describe.skipIf(SKIP_INTEGRATION)('Accountant authorization queries — DB integ
           invoicePrefix: 'ACB',
         },
       ])
-      .onConflictDoNothing()
+      .onConflictDoNothing({ target: entrepreneursTable.id })
 
     // A: active grant to the accountant. B: revoked grant — must NOT be visible.
     await db
@@ -217,16 +219,16 @@ describe.skipIf(SKIP_INTEGRATION)('Accountant authorization queries — DB integ
     await db
       .insert(usersTable)
       .values({ id: AE_USER_A, email: 'acct-ae-a@moqawil.test', name: 'AE A' })
-      .onConflictDoNothing()
+      .onConflictDoNothing({ target: usersTable.id })
     await db
       .insert(usersTable)
       .values({ id: ACCOUNTANT_USER, email: 'acct-accountant@moqawil.test', name: 'Accountant' })
-      .onConflictDoNothing()
+      .onConflictDoNothing({ target: usersTable.id })
     await db.insert(entrepreneursTable).values({
       id: NO_INVOICE_ENTREPRENEUR,
       userId: AE_USER_A,
       fullName: 'No Invoice Entrepreneur',
-      ice: '000000000000011',
+      ice: '000000000000073',
       ifNumber: '11223344',
       activityType: 'service',
       address: '1 Rue Test',
@@ -299,14 +301,14 @@ describe.skipIf(SKIP_INTEGRATION)('Accountant authorization queries — DB integ
         { id: AE_USER_A, email: 'acct-ae-a@moqawil.test', name: 'AE A' },
         { id: ACCOUNTANT_USER, email: 'acct-accountant@moqawil.test', name: 'Accountant' },
       ])
-      .onConflictDoNothing()
+      .onConflictDoNothing({ target: usersTable.id })
     await db
       .insert(entrepreneursTable)
       .values({
         id: ENTREPRENEUR_A,
         userId: AE_USER_A,
         fullName: 'Entrepreneur A',
-        ice: '000000000000007',
+        ice: '000000000000071',
         ifNumber: '66666666',
         activityType: 'service',
         address: '1 Rue Test',
@@ -314,7 +316,7 @@ describe.skipIf(SKIP_INTEGRATION)('Accountant authorization queries — DB integ
         registrationDate: '2024-01-01',
         invoicePrefix: 'ACA',
       })
-      .onConflictDoNothing()
+      .onConflictDoNothing({ target: entrepreneursTable.id })
     await db.insert(accountantLinksTable).values({
       id: linkId,
       entrepreneurId: ENTREPRENEUR_A,

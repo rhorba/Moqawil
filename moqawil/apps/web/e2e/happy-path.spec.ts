@@ -17,7 +17,8 @@ const E2E_TEST_SECRET = process.env.E2E_TEST_SECRET
 const TEST_EMAIL = 'e2e-test@moqawil.test'
 
 // ICE: 15 digits, unique enough for tests
-const TEST_ICE = '000000000000001'
+// Sprint 11 fixture-collision fix: e2e specs own block 100-199 — see docs/test-strategy-moqawil.md
+const TEST_ICE = '000000000000101'
 
 // Tests are intentionally sequential — each step depends on previous data
 test.describe
@@ -208,7 +209,7 @@ test.describe('i18n — locale switch translates real page content', () => {
   test.skip(!E2E_TEST_SECRET, 'E2E_TEST_SECRET not set — skipping authenticated tests')
 
   const I18N_TEST_EMAIL = 'e2e-i18n-test@moqawil.test'
-  const I18N_TEST_ICE = '000000000000002'
+  const I18N_TEST_ICE = '000000000000102'
 
   test.beforeAll(async ({ request }) => {
     await request.post('/api/e2e/cleanup', {

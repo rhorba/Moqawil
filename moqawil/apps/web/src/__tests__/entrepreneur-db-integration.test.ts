@@ -28,7 +28,8 @@ describe.skipIf(SKIP_INTEGRATION)('Entrepreneur queries — DB integration', () 
   const NO_PROFILE_USER_ID = 'test-entr-user-002'
   const DUPLICATE_ICE_USER_ID = 'test-entr-user-003'
   const TEST_ENTREPRENEUR_ID = '00000000-0000-0000-0000-000000000401'
-  const SHARED_ICE = '000000000000005'
+  // Sprint 11 fixture-collision fix: block 041/042 reserved for this file — see docs/test-strategy-moqawil.md
+  const SHARED_ICE = '000000000000041'
 
   beforeAll(async () => {
     const mod = await import('@moqawil/db')
@@ -47,7 +48,9 @@ describe.skipIf(SKIP_INTEGRATION)('Entrepreneur queries — DB integration', () 
           name: 'Duplicate ICE User',
         },
       ])
-      .onConflictDoNothing()
+      // Sprint 11: explicit target so a real conflict (e.g. stale ICE from another
+      // suite) fails loudly instead of silently no-oping on the wrong constraint.
+      .onConflictDoNothing({ target: usersTable.id })
 
     await db
       .insert(entrepreneursTable)
@@ -63,7 +66,7 @@ describe.skipIf(SKIP_INTEGRATION)('Entrepreneur queries — DB integration', () 
         registrationDate: '2024-01-01',
         invoicePrefix: 'ENT',
       })
-      .onConflictDoNothing()
+      .onConflictDoNothing({ target: entrepreneursTable.id })
   })
 
   afterAll(async () => {
@@ -112,7 +115,7 @@ describe.skipIf(SKIP_INTEGRATION)('Entrepreneur queries — DB integration', () 
       db.insert(entrepreneursTable).values({
         userId: TEST_USER_ID,
         fullName: 'Second Profile Same User',
-        ice: '000000000000006',
+        ice: '000000000000042',
         ifNumber: '55555555',
         activityType: 'commercial',
         address: '3 Rue Test',

@@ -79,7 +79,9 @@ describe.skipIf(SKIP_INTEGRATION)('Invoice numbering — DB integration (advisor
     await db
       .insert(usersTable)
       .values({ id: TEST_USER_ID, email: 'seq-test@moqawil.test', name: 'Seq Test User' })
-      .onConflictDoNothing()
+      // Sprint 11: explicit target so a real conflict (e.g. stale ICE from another
+      // suite) fails loudly instead of silently no-oping on the wrong constraint.
+      .onConflictDoNothing({ target: usersTable.id })
 
     // Seed a minimal test entrepreneur row
     await db
@@ -88,7 +90,7 @@ describe.skipIf(SKIP_INTEGRATION)('Invoice numbering — DB integration (advisor
         id: TEST_ENTREPRENEUR_ID,
         userId: TEST_USER_ID,
         fullName: 'Test AE Seq',
-        ice: '000000000000001',
+        ice: '000000000000011', // Sprint 11 fixture-collision fix: block 011 reserved for this file — see docs/test-strategy-moqawil.md
         ifNumber: '12345678',
         activityType: 'service',
         address: '1 Rue Test',
@@ -96,7 +98,7 @@ describe.skipIf(SKIP_INTEGRATION)('Invoice numbering — DB integration (advisor
         registrationDate: '2024-01-01',
         invoicePrefix: 'TST',
       })
-      .onConflictDoNothing()
+      .onConflictDoNothing({ target: entrepreneursTable.id })
 
     // Seed a dummy client row required by invoices FK constraint
     await db

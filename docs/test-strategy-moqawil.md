@@ -42,6 +42,27 @@ First real run of this pipeline (2026-08-08) caught two genuine pre-existing bug
 ## 6. Video Recording (Framework Rule 7)
 At version completion with user-facing changes, record a Playwright video of the critical flows, save to `.recordings/v[version]-[date].webm` at repo root. Distinct from the per-test debug videos Playwright captures on every e2e run (now correctly routed to gitignored `.recordings/e2e-debug/`, not the public docs folder — fixed 2026-08-08).
 
+## 7. Fixture ICE Numbering Convention (added Sprint 11, 2026-08-11)
+Vitest DB-integration tests and Playwright e2e/walkthrough specs both write directly to the shared persistent local dev Postgres instance, and neither wipes its rows after a successful run. `entrepreneurs.ice` is UNIQUE, so two suites picking the same hardcoded ICE collide — and because fixture inserts used bare `onConflictDoNothing()` (no `target`), the collision silently no-op'd on the *wrong* constraint (ICE) instead of the intended one (id), leaving a downstream FK-violation error at a confusing point in the test. Hit 4 times across Sprints 10-11 before being fixed properly.
+
+**Fix**: every suite that inserts an `entrepreneurs` or `users` row now owns a reserved, non-overlapping ICE block, and every fixture `onConflictDoNothing()` on those two tables now specifies `{ target: entrepreneursTable.id }` / `{ target: usersTable.id }` — so a real future collision throws a loud, immediate unique-constraint error instead of silently vanishing.
+
+| Block | Owner |
+|---|---|
+| `000000000000011` | `invoice-numbering.test.ts` |
+| `000000000000021` | `declaration-db-integration.test.ts` |
+| `000000000000031`/`032` | `client-db-integration.test.ts` |
+| `000000000000041`/`042` | `entrepreneur-db-integration.test.ts` |
+| `000000000000051`/`052` | `invoice-queries-db-integration.test.ts` |
+| `000000000000061`/`062` | `quote-db-integration.test.ts` |
+| `000000000000071`-`073` | `accountant-db-integration.test.ts` |
+| `000000000000101`/`102` | `e2e/happy-path.spec.ts` |
+| `000000000000111` | `e2e/accountant-dashboard.spec.ts` |
+| `000000000000201` | `walkthrough-e2e/walkthrough.spec.ts` |
+| `000000000000001` (×3, safe — no DB access) | `pdf-templates.test.ts` — pure-function test, never touches the real DB, excluded from this scheme |
+
+**Rule for future test authors**: adding a new DB-touching Vitest file or Playwright spec that creates an `entrepreneurs` row must claim the next unused `0XX`/`1XX`/`2XX` block above and record it in this table — don't reuse a value already listed.
+
 ## Handoff
 ← From all specialists: testability requirements
 → Tester: day-to-day test execution

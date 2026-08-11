@@ -28,7 +28,8 @@ import { type Locator, type Page, expect, test } from '@playwright/test'
 
 const E2E_TEST_SECRET = process.env.E2E_TEST_SECRET
 const TEST_EMAIL = 'demo-walkthrough@moqawil.test'
-const TEST_ICE = '000000000000099'
+// Sprint 11 fixture-collision fix: walkthrough specs own block 200-209 — see docs/test-strategy-moqawil.md
+const TEST_ICE = '000000000000201'
 const ACCOUNTANT_EMAIL = 'demo-accountant@moqawil.test'
 
 // __dirname (not import.meta.dirname): Playwright transforms this file to CommonJS since
