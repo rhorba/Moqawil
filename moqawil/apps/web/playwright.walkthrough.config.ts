@@ -24,7 +24,16 @@ export default defineConfig({
     // scripts/run-walkthrough.mjs.
     headless: false,
     launchOptions: {
-      args: ['--window-position=0,0', '--window-size=1200,700'],
+      // --force-device-scale-factor=1: this machine runs Windows display scaling at 150%
+      // (1920x1080 physical, 1280x720 logical). Without this flag, Chromium's
+      // --window-size=1200,700 is interpreted in logical (DIP) pixels and renders at ~1.5x
+      // that in actual physical pixels (~1800x1050) — far larger than the fixed 1280x720
+      // physical-pixel region scripts/run-walkthrough.mjs's ffmpeg gdigrab captures, so only
+      // the window's top-left corner ever appeared in the recorded video (screenshots were
+      // unaffected — those capture the DOM directly via CDP, not the physical screen).
+      // Forcing scale factor 1 makes the window's physical pixel size match its requested
+      // size 1:1, so it fits entirely inside the capture region regardless of OS scaling.
+      args: ['--window-position=0,0', '--window-size=1200,700', '--force-device-scale-factor=1'],
     },
     video: 'off',
     viewport: { width: 1184, height: 620 },
