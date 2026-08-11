@@ -15,7 +15,7 @@ export function RevokeButton({ linkId, email }: { linkId: string; email: string 
     >
       <button
         type="submit"
-        className="text-xs text-red-600 hover:underline"
+        className="text-xs text-danger hover:underline"
         aria-label={`${t('revoke')} ${email}`}
       >
         {t('revoke')}

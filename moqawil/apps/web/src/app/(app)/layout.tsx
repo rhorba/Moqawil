@@ -34,9 +34,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   ])
 
   return (
-    <div className="min-h-screen flex">
+    <div className="flex min-h-screen">
       <AppNav currentLocale={locale} hasAccountantAccess={hasAccountantAccess} />
-      <main className="flex-1 overflow-auto">{children}</main>
+      <main className="flex-1 overflow-auto">
+        {/* Constrains content on wide screens so pages don't trail off into empty gutter —
+            found by the design-loop craft critic on the clients/dashboard screens. */}
+        <div className="mx-auto w-full max-w-5xl">{children}</div>
+      </main>
     </div>
   )
 }

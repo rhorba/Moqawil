@@ -6,7 +6,7 @@
   --color-primary: oklch(0.45 0.15 200);
   --color-primary-foreground: oklch(0.98 0 0);
 
-  /* Cap / Threshold status colors */
+  /* Cap / Threshold status colors — load-bearing, see docs/ui-moqawil.md §2. Never redefine ad hoc. */
   --color-safe: oklch(0.55 0.15 145);
   --color-warning: oklch(0.65 0.16 75);
   --color-danger: oklch(0.55 0.2 25);
@@ -15,9 +15,36 @@
   --color-warning-bg: oklch(0.97 0.04 75);
   --color-danger-bg: oklch(0.97 0.03 25);
 
+  /* Neutral surface scale — one step off pure white/black, border-based elevation (no shadows on
+     static cards; see docs/ui-moqawil.md §1.1). Kept in the same teal-tinted hue as primary (200)
+     so surfaces/borders/text read as one family instead of generic gray. Named per shadcn/ui
+     convention (background/foreground/card/border) so components read idiomatically. */
+  --color-background: oklch(1 0 0);
+  --color-foreground: oklch(0.2 0.01 200);
+  --color-card: oklch(0.985 0.002 200);
+  --color-card-foreground: oklch(0.2 0.01 200);
+  --color-border: oklch(0.9 0.005 200);
+  --color-input: oklch(0.9 0.005 200);
+  --color-ring: oklch(0.45 0.15 200);
+  --color-muted: oklch(0.96 0.003 200);
+  --color-muted-foreground: oklch(0.5 0.01 200);
+  --color-secondary: oklch(0.96 0.003 200);
+  --color-secondary-foreground: oklch(0.2 0.01 200);
+  --color-destructive: oklch(0.55 0.2 25);
+  --color-destructive-foreground: oklch(0.98 0 0);
+
+  /* Radius scale — one shared value per role, see docs/ui-moqawil.md §1.1 */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+
   /* Typography */
   --font-sans: Inter, "Segoe UI", Arial, sans-serif;
   --font-arabic: Cairo, Amiri, "Arabic Typesetting", serif;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
 }
 
 /* RTL: apply Arabic font for Arabic locale */

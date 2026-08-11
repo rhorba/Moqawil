@@ -19,10 +19,14 @@ export default async function SettingsPage({
   const isOnboarding = onboarding === '1'
 
   return (
-    <div className="p-6 max-w-2xl">
+    <div className="max-w-2xl p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">{isOnboarding ? t('onboardingTitle') : t('title')}</h1>
-        {isOnboarding && <p className="text-sm text-gray-600 mt-1">{t('onboardingHint')}</p>}
+        <h1 className="text-2xl font-medium text-foreground">
+          {isOnboarding ? t('onboardingTitle') : t('title')}
+        </h1>
+        {isOnboarding && (
+          <p className="mt-1 text-sm text-muted-foreground">{t('onboardingHint')}</p>
+        )}
       </div>
 
       <ProfileForm profile={profile} isOnboarding={isOnboarding} />

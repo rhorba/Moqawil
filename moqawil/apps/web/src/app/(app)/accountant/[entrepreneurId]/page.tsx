@@ -51,42 +51,45 @@ export default async function AccountantEntrepreneurDetailPage({
   const isService = entrepreneur.activityType === 'service'
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6 p-6">
       <div>
-        <Link href="/accountant" className="text-xs text-gray-500 hover:underline">
+        <Link href="/accountant" className="text-xs text-muted-foreground hover:underline">
           &larr; {t('backToList')}
         </Link>
-        <h1 className="text-2xl font-bold mt-1">{entrepreneur.fullName}</h1>
-        <p className="text-sm text-gray-500">
+        <h1 className="mt-1 text-2xl font-medium text-foreground">{entrepreneur.fullName}</h1>
+        <p className="text-sm text-muted-foreground">
           {tEntrepreneur(`activityTypes.${entrepreneur.activityType}`)} · {year}
         </p>
       </div>
 
-      <div className="rounded-lg border p-5">
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="font-semibold text-sm">{t('thresholdStatus')}</h2>
-          <span className="text-xs font-bold">{threshold.percentOfThreshold.toFixed(1)}%</span>
+      <div className="rounded-md border border-border bg-card p-5">
+        <div className="mb-2 flex items-center justify-between">
+          <h2 className="text-sm font-medium text-foreground">{t('thresholdStatus')}</h2>
+          <span className="text-xs font-semibold text-foreground">
+            {threshold.percentOfThreshold.toFixed(1)}%
+          </span>
         </div>
-        <div className="flex justify-between text-xs text-gray-600">
+        <div className="flex justify-between text-xs text-muted-foreground">
           <span>
-            {t('ytdTurnover')} : <strong>{fmt(threshold.ytd)} DH</strong>
+            {t('ytdTurnover')} :{' '}
+            <strong className="text-foreground">{fmt(threshold.ytd)} DH</strong>
           </span>
         </div>
       </div>
 
       {isService && (
         <div>
-          <h2 className="font-semibold text-sm mb-3">{t('clientLabel')}</h2>
+          <h2 className="mb-3 text-sm font-medium text-foreground">{t('clientLabel')}</h2>
           {clients.length === 0 ? (
-            <p className="text-sm text-gray-500">{t('noClients')}</p>
+            <p className="text-sm text-muted-foreground">{t('noClients')}</p>
           ) : (
             <div className="grid gap-3 sm:grid-cols-2">
               {clients.map((client) => {
                 const total = capTotals[client.id]
                 if (!total) return null
                 return (
-                  <div key={client.id} className="border rounded-lg p-3">
-                    <p className="text-sm font-medium mb-2">{client.name}</p>
+                  <div key={client.id} className="rounded-md border border-border bg-card p-3">
+                    <p className="mb-2 text-sm font-medium text-foreground">{client.name}</p>
                     <CapBadge
                       status={total.status}
                       percentOfCap={total.percentOfCap}

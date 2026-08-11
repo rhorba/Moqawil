@@ -1,5 +1,9 @@
 'use client'
 
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { cn } from '@/lib/utils'
 import { AlertTriangle, CheckCircle, Clock, FileText } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useState, useTransition } from 'react'
@@ -51,10 +55,10 @@ export function DeclarationCard({ declaration, year, activityType }: Declaration
   const isFuture = daysLeft > 30
 
   function deadlineColor() {
-    if (status === 'submitted') return 'text-[var(--color-safe)]'
-    if (isOverdue) return 'text-[var(--color-danger)]'
-    if (isUrgent) return 'text-[var(--color-warning)]'
-    return 'text-gray-500'
+    if (status === 'submitted') return 'text-safe'
+    if (isOverdue) return 'text-danger'
+    if (isUrgent) return 'text-warning'
+    return 'text-muted-foreground'
   }
 
   function deadlineLabel() {
@@ -85,109 +89,95 @@ export function DeclarationCard({ declaration, year, activityType }: Declaration
   }
 
   return (
-    <div
-      className={`border rounded-xl overflow-hidden ${
+    <Card
+      className={cn(
+        'overflow-hidden',
         status === 'submitted'
-          ? 'border-[var(--color-safe)] bg-[var(--color-safe-bg)]'
+          ? 'border-safe bg-safe-bg'
           : isOverdue
-            ? 'border-[var(--color-danger)] bg-[var(--color-danger-bg)]'
-            : 'border-gray-200 bg-white'
-      }`}
+            ? 'border-danger bg-danger-bg'
+            : undefined
+      )}
     >
       {/* Card header */}
-      <div className="flex items-center justify-between px-4 pt-4 pb-2">
+      <div className="flex items-center justify-between px-4 pb-2 pt-4">
         <div>
-          <span className="text-lg font-bold">
+          <span className="text-lg font-medium text-foreground">
             {t(`quarterShort.${quarterKey}`)} {year}
           </span>
-          <p className="text-xs text-gray-500 mt-0.5">{t(`quarterLong.${quarterKey}`)}</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">{t(`quarterLong.${quarterKey}`)}</p>
         </div>
         <div className="flex items-center gap-1.5">
           {status === 'submitted' ? (
-            <CheckCircle size={18} className="text-[var(--color-safe)]" />
+            <CheckCircle size={18} className="text-safe" />
           ) : isOverdue ? (
-            <AlertTriangle size={18} className="text-[var(--color-danger)]" />
+            <AlertTriangle size={18} className="text-danger" />
           ) : (
-            <Clock size={18} className="text-gray-400" />
+            <Clock size={18} className="text-muted-foreground" />
           )}
-          <span
-            className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-              status === 'submitted'
-                ? 'bg-[var(--color-safe)] text-white'
-                : 'bg-gray-100 text-gray-600'
-            }`}
-          >
+          <Badge variant={status === 'submitted' ? 'safe' : 'secondary'}>
             {status === 'submitted' ? t('status.submitted') : t('status.pending')}
-          </span>
+          </Badge>
         </div>
       </div>
 
       {/* Deadline */}
-      <p className={`px-4 text-xs font-medium pb-3 ${deadlineColor()}`}>{deadlineLabel()}</p>
+      <p className={cn('px-4 pb-3 text-xs font-medium', deadlineColor())}>{deadlineLabel()}</p>
 
       {/* Figures */}
       {generated ? (
-        <div className="px-4 pb-3 space-y-1 border-t pt-3">
+        <div className="space-y-1 border-t border-border px-4 pb-3 pt-3">
           <div className="flex justify-between text-sm">
-            <span className="text-gray-600">{t('quarterlyTurnover')}</span>
-            <span className="font-medium">{fmt(generated.turnover)} DH</span>
+            <span className="text-muted-foreground">{t('quarterlyTurnover')}</span>
+            <span className="font-medium text-foreground">{fmt(generated.turnover)} DH</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-gray-600">
+            <span className="text-muted-foreground">
               {t('taxRateAt', { rate: activityType === 'service' ? '1,0%' : '0,5%' })}
             </span>
-            <span className="font-medium text-[var(--color-primary)]">
-              {fmt(generated.taxDue)} DH
-            </span>
+            <span className="font-medium text-primary">{fmt(generated.taxDue)} DH</span>
           </div>
           {generated.turnover === 0 && (
-            <p className="text-xs text-[var(--color-warning)] mt-1">{t('zeroWarning')}</p>
+            <p className="mt-1 text-xs text-warning">{t('zeroWarning')}</p>
           )}
         </div>
       ) : (
-        <div className="px-4 pb-3 border-t pt-3">
-          <p className="text-xs text-gray-400 italic">{t('generateHint')}</p>
+        <div className="border-t border-border px-4 pb-3 pt-3">
+          <p className="text-xs italic text-muted-foreground">{t('generateHint')}</p>
         </div>
       )}
 
       {/* Actions */}
-      <div className="px-4 pb-4 flex gap-2 flex-wrap">
+      <div className="flex flex-wrap gap-2 px-4 pb-4">
         {status !== 'submitted' && (
-          <button
-            type="button"
-            onClick={handleGenerate}
-            disabled={isPending}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--color-primary)] text-white rounded-lg text-xs font-medium hover:opacity-90 disabled:opacity-50"
-          >
+          <Button size="sm" onClick={handleGenerate} disabled={isPending}>
             <FileText size={13} />
             {isPending ? t('generating') : t('generate')}
-          </button>
+          </Button>
         )}
 
         {generated && declarationId && (
-          <a
-            href={`/api/declarations/${declarationId}/pdf`}
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-300 rounded-lg text-xs hover:bg-gray-50"
-          >
-            <FileText size={13} />
-            {t('printPdf')}
-          </a>
+          <Button size="sm" variant="outline" asChild>
+            <a href={`/api/declarations/${declarationId}/pdf`} target="_blank" rel="noreferrer">
+              <FileText size={13} />
+              {t('printPdf')}
+            </a>
+          </Button>
         )}
 
         {generated && declarationId && status !== 'submitted' && (
-          <button
-            type="button"
+          <Button
+            size="sm"
+            variant="outline"
             onClick={handleMarkSubmitted}
             disabled={isPending}
-            className="flex items-center gap-1.5 px-3 py-1.5 border border-[var(--color-safe)] text-[var(--color-safe)] rounded-lg text-xs hover:bg-[var(--color-safe-bg)] disabled:opacity-50"
+            className="border-safe text-safe hover:bg-safe-bg"
           >
             <CheckCircle size={13} />
             {t('markSubmitted')}
-          </button>
+          </Button>
         )}
       </div>
-    </div>
+    </Card>
   )
 }

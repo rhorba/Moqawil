@@ -1,4 +1,15 @@
 import { CapBadge } from '@/components/cap-badge'
+import { Badge, type BadgeProps } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import { auth } from '@/lib/auth'
 import { getClientAnnualTotal, getClientById } from '@/lib/queries/client'
 import { getEntrepreneur } from '@/lib/queries/entrepreneur'
@@ -27,11 +38,11 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
   ])
   if (!data) notFound()
 
-  const statusConfig: Record<string, { label: string; cls: string }> = {
-    draft: { label: t('status.draft'), cls: 'bg-gray-100 text-gray-600' },
-    sent: { label: t('status.sent'), cls: 'bg-blue-100 text-blue-700' },
-    paid: { label: t('status.paid'), cls: 'bg-green-100 text-green-700' },
-    cancelled: { label: t('status.cancelled'), cls: 'bg-red-100 text-red-700' },
+  const statusConfig: Record<string, { label: string; variant: BadgeProps['variant'] }> = {
+    draft: { label: t('status.draft'), variant: 'secondary' },
+    sent: { label: t('status.sent'), variant: 'outline' },
+    paid: { label: t('status.paid'), variant: 'safe' },
+    cancelled: { label: t('status.cancelled'), variant: 'danger' },
   }
   const { invoice, lines } = data
   const client = await getClientById(invoice.clientId, entrepreneur.id)
@@ -41,52 +52,45 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
   const status = statusConfig[invoice.status] ?? statusConfig.draft
 
   return (
-    <div className="p-6 max-w-3xl space-y-6">
+    <div className="max-w-3xl space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/invoices" className="text-gray-500 hover:text-gray-700">
+          <Link href="/invoices" className="text-muted-foreground hover:text-foreground">
             <ArrowLeft size={20} className="rtl:rotate-180" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold">{invoice.invoiceNumber}</h1>
-            <span className={`text-xs px-2 py-0.5 rounded-full ${status.cls}`}>{status.label}</span>
+            <h1 className="text-2xl font-medium text-foreground">{invoice.invoiceNumber}</h1>
+            <Badge variant={status.variant}>{status.label}</Badge>
           </div>
         </div>
         <div className="flex gap-2">
           {invoice.status === 'draft' && (
-            <Link
-              href={`/invoices/${id}/edit`}
-              className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors"
-            >
-              <Pencil size={15} />
-              {t('edit')}
-            </Link>
+            <Button variant="outline" asChild>
+              <Link href={`/invoices/${id}/edit`}>
+                <Pencil size={15} />
+                {t('edit')}
+              </Link>
+            </Button>
           )}
-          <a
-            href={`/api/invoices/${id}/pdf`}
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors"
-          >
-            <Download size={15} />
-            {t('download')}
-          </a>
-          {invoice.status !== 'draft' && (
-            <a
-              href={`/api/invoices/${id}/ubl`}
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors"
-            >
-              <FileCode2 size={15} />
-              {t('downloadUbl')}
+          <Button variant="outline" asChild>
+            <a href={`/api/invoices/${id}/pdf`} target="_blank" rel="noreferrer">
+              <Download size={15} />
+              {t('download')}
             </a>
+          </Button>
+          {invoice.status !== 'draft' && (
+            <Button variant="outline" asChild>
+              <a href={`/api/invoices/${id}/ubl`} target="_blank" rel="noreferrer">
+                <FileCode2 size={15} />
+                {t('downloadUbl')}
+              </a>
+            </Button>
           )}
         </div>
       </div>
 
       {invoice.status !== 'draft' && (
-        <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
+        <div className="flex items-center gap-2 rounded-md border border-border bg-muted px-3 py-2 text-xs text-muted-foreground">
           <FileCode2 size={13} className="shrink-0" />
           <span>{t('ublReadyNotice')}</span>
         </div>
@@ -103,21 +107,21 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
       )}
 
       {/* Invoice header */}
-      <div className="bg-white border rounded-lg p-5 space-y-4">
+      <Card className="space-y-4 p-5">
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
-            <p className="text-gray-500 text-xs mb-1">{t('billedTo')}</p>
-            <p className="font-medium">{client?.name ?? '—'}</p>
-            {client?.ice && <p className="text-gray-500 text-xs">ICE: {client.ice}</p>}
-            {client?.address && <p className="text-gray-500 text-xs">{client.address}</p>}
+            <p className="mb-1 text-xs text-muted-foreground">{t('billedTo')}</p>
+            <p className="font-medium text-foreground">{client?.name ?? '—'}</p>
+            {client?.ice && <p className="text-xs text-muted-foreground">ICE: {client.ice}</p>}
+            {client?.address && <p className="text-xs text-muted-foreground">{client.address}</p>}
           </div>
           <div className="text-end">
-            <p className="text-gray-500 text-xs mb-1">{t('dates')}</p>
-            <p>
+            <p className="mb-1 text-xs text-muted-foreground">{t('dates')}</p>
+            <p className="text-foreground">
               {t('issueDateLabel')} : {invoice.issueDate}
             </p>
             {invoice.dueDate && (
-              <p className="text-gray-500">
+              <p className="text-muted-foreground">
                 {t('dueDateLabel')} : {invoice.dueDate}
               </p>
             )}
@@ -125,54 +129,52 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
         </div>
 
         {invoice.currency !== 'MAD' && (
-          <div className="bg-blue-50 border border-blue-200 rounded p-2 text-xs text-blue-700">
+          <div className="rounded-sm border border-border bg-muted p-2 text-xs text-muted-foreground">
             {t('currencyLabel')} : {invoice.currency} · {t('bamRateLabel')} : {invoice.exchangeRate}{' '}
             MAD/{invoice.currency}
           </div>
         )}
-      </div>
+      </Card>
 
       {/* Lines */}
-      <div className="bg-white border rounded-lg overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b">
-            <tr>
-              <th className="text-start px-4 py-2 font-medium text-gray-600">
-                {t('lines.description')}
-              </th>
-              <th className="text-end px-4 py-2 font-medium text-gray-600 w-20">
-                {t('lines.quantity')}
-              </th>
-              <th className="text-end px-4 py-2 font-medium text-gray-600 w-28">
-                {t('lines.unitPrice')}
-              </th>
-              <th className="text-end px-4 py-2 font-medium text-gray-600 w-28">
-                {t('lines.total')}
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y">
+      <Card className="overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent">
+              <TableHead>{t('lines.description')}</TableHead>
+              <TableHead className="w-20 text-end">{t('lines.quantity')}</TableHead>
+              <TableHead className="w-28 text-end">{t('lines.unitPrice')}</TableHead>
+              <TableHead className="w-28 text-end">{t('lines.total')}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {lines.map((line) => (
-              <tr key={line.id}>
-                <td className="px-4 py-2">{line.description}</td>
-                <td className="px-4 py-2 text-end text-gray-700">{fmt(line.quantity)}</td>
-                <td className="px-4 py-2 text-end text-gray-700">
+              <TableRow key={line.id}>
+                <TableCell className="text-foreground">{line.description}</TableCell>
+                <TableCell className="text-end text-muted-foreground">
+                  {fmt(line.quantity)}
+                </TableCell>
+                <TableCell className="text-end text-muted-foreground">
                   {fmt(line.unitPriceOriginal)} {invoice.currency}
-                </td>
-                <td className="px-4 py-2 text-end font-medium">{fmt(line.lineTotalMad)} DH</td>
-              </tr>
+                </TableCell>
+                <TableCell className="text-end font-medium text-foreground">
+                  {fmt(line.lineTotalMad)} DH
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-          <tfoot className="border-t bg-gray-50">
+          </TableBody>
+          <tfoot className="border-t border-border bg-muted">
             <tr>
-              <td colSpan={3} className="px-4 py-2 text-sm text-gray-500 italic">
+              <td colSpan={3} className="px-3 py-2 text-sm italic text-muted-foreground">
                 {t('vatNotice')}
               </td>
-              <td className="px-4 py-2 text-end font-bold">{fmt(invoice.totalMad)} DH</td>
+              <td className="px-3 py-2 text-end font-medium text-foreground">
+                {fmt(invoice.totalMad)} DH
+              </td>
             </tr>
           </tfoot>
-        </table>
-      </div>
+        </Table>
+      </Card>
 
       <InvoiceActions
         invoiceId={id}

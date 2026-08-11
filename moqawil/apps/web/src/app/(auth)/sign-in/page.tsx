@@ -1,3 +1,6 @@
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import { signIn } from '@/lib/auth'
 import { getTranslations } from 'next-intl/server'
 import { TestCredentialsForm } from './test-credentials-form'
@@ -15,14 +18,14 @@ export default async function SignInPage({
   const redirectTo = callbackUrl?.startsWith('/') ? callbackUrl : '/dashboard'
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-4">
+    <main className="flex min-h-screen items-center justify-center bg-muted p-4">
       <div className="w-full max-w-md space-y-6">
-        <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold">{tNav('brand')}</h1>
-          <p className="text-sm text-gray-600">{t('tagline')}</p>
+        <div className="space-y-2 text-center">
+          <h1 className="text-2xl font-semibold text-primary">{tNav('brand')}</h1>
+          <p className="text-sm text-muted-foreground">{t('tagline')}</p>
         </div>
 
-        <div className="space-y-3">
+        <Card className="space-y-3 p-6">
           {/* Google sign-in — shown only when configured */}
           <form
             action={async () => {
@@ -30,12 +33,9 @@ export default async function SignInPage({
               await signIn('google', { redirectTo })
             }}
           >
-            <button
-              type="submit"
-              className="w-full py-2 px-4 border rounded-lg hover:bg-gray-50 transition-colors"
-            >
+            <Button type="submit" variant="outline" className="w-full">
               {t('withGoogle')}
-            </button>
+            </Button>
           </form>
 
           {/* Email magic link — shown only when Resend is configured */}
@@ -47,28 +47,19 @@ export default async function SignInPage({
             }}
             className="space-y-2"
           >
-            <input
-              name="email"
-              type="email"
-              placeholder={t('emailPlaceholder')}
-              required
-              className="w-full py-2 px-3 border rounded-lg text-sm"
-            />
-            <button
-              type="submit"
-              className="w-full py-2 px-4 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity"
-            >
+            <Input name="email" type="email" placeholder={t('emailPlaceholder')} required />
+            <Button type="submit" className="w-full">
               {t('withEmail')}
-            </button>
+            </Button>
           </form>
 
           {/* Test credentials — dev/e2e only, never shown in production */}
           {hasTestSecret && <TestCredentialsForm />}
-        </div>
+        </Card>
 
-        <p className="text-xs text-center text-gray-500">
+        <p className="text-center text-xs text-muted-foreground">
           {t('openSource')}{' '}
-          <a href="https://github.com/moqawil/moqawil" className="underline">
+          <a href="https://github.com/moqawil/moqawil" className="text-primary underline">
             GitHub
           </a>
         </p>

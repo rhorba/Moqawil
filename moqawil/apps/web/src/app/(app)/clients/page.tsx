@@ -1,10 +1,21 @@
 import { CapBadge } from '@/components/cap-badge'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { auth } from '@/lib/auth'
 import { getAllClientAnnualTotals, getClients } from '@/lib/queries/client'
 import { getEntrepreneur } from '@/lib/queries/entrepreneur'
+import { PER_CLIENT_CAP_MAD, getCapStatus } from '@moqawil/tax-engine'
 import { ChevronRight, Plus } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 import Link from 'next/link'
+
+const ZERO_CAP = {
+  totalInvoicedMad: 0,
+  totalPaidMad: 0,
+  remainingToCapMad: PER_CLIENT_CAP_MAD,
+  percentOfCap: getCapStatus(0).percentOfCap,
+  status: getCapStatus(0).status,
+}
 
 export default async function ClientsPage() {
   const session = await auth()
@@ -27,63 +38,69 @@ export default async function ClientsPage() {
 
   return (
     <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">{t('title')}</h1>
-        <Link
-          href="/clients/new"
-          className="flex items-center gap-2 px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
-        >
-          <Plus size={16} />
-          {t('new')}
-        </Link>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-2xl font-medium text-foreground">{t('title')}</h1>
+        <Button asChild>
+          <Link href="/clients/new">
+            <Plus size={16} />
+            {t('new')}
+          </Link>
+        </Button>
       </div>
 
       {clientList.length === 0 ? (
-        <div className="text-center py-16 text-gray-500">
-          <p className="mb-4">{t('empty')}</p>
-          <Link
-            href="/clients/new"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
-          >
-            <Plus size={16} />
-            {t('addFirst')}
-          </Link>
+        <div className="rounded-md border border-dashed border-border py-16 text-center">
+          <p className="mb-4 text-muted-foreground">{t('empty')}</p>
+          <Button asChild>
+            <Link href="/clients/new">
+              <Plus size={16} />
+              {t('addFirst')}
+            </Link>
+          </Button>
         </div>
       ) : (
-        <div className="divide-y border rounded-lg bg-white">
-          {clientList.map((client) => {
-            const cap = capTotals[client.id]
-            return (
-              <Link
-                key={client.id}
-                href={`/clients/${client.id}`}
-                className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
-              >
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3">
-                    <p className="font-medium text-gray-900 truncate">{client.name}</p>
-                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-                      {typeLabels[client.type] ?? client.type}
-                    </span>
+        <div className="overflow-hidden rounded-md border border-border bg-card">
+          <div className="flex items-center justify-between border-b border-border bg-muted px-4 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            <span>{t('columnClient')}</span>
+            {isService && <span className="ms-4 shrink-0">{t('columnCap')}</span>}
+          </div>
+          <div className="divide-y divide-border">
+            {clientList.map((client) => {
+              // Clients with zero invoices this year have no row in capTotals — default to the
+              // zero/safe state so the cap badge is never silently omitted (root CLAUDE.md §4).
+              const cap = capTotals[client.id] ?? ZERO_CAP
+              return (
+                <Link
+                  key={client.id}
+                  href={`/clients/${client.id}`}
+                  className="flex items-center justify-between p-4 transition-colors hover:bg-muted/50"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-3">
+                      <p className="truncate font-medium text-foreground">{client.name}</p>
+                      <Badge variant="secondary">{typeLabels[client.type] ?? client.type}</Badge>
+                    </div>
+                    {client.email && (
+                      <p className="mt-0.5 text-sm text-muted-foreground">{client.email}</p>
+                    )}
                   </div>
-                  {client.email && <p className="text-sm text-gray-500 mt-0.5">{client.email}</p>}
-                </div>
 
-                <div className="flex items-center gap-3 ms-4 flex-shrink-0">
-                  {isService && cap && (
-                    <CapBadge
-                      status={cap.status}
-                      percentOfCap={cap.percentOfCap}
-                      remainingMad={cap.remainingToCapMad}
-                      totalMad={cap.totalInvoicedMad}
-                      compact
-                    />
-                  )}
-                  <ChevronRight size={16} className="text-gray-400 rtl:rotate-180" />
-                </div>
-              </Link>
-            )
-          })}
+                  <div className="ms-4 flex shrink-0 items-center gap-3">
+                    {isService && (
+                      <CapBadge
+                        status={cap.status}
+                        percentOfCap={cap.percentOfCap}
+                        remainingMad={cap.remainingToCapMad}
+                        totalMad={cap.totalInvoicedMad}
+                        compact
+                      />
+                    )}
+                    <ChevronRight size={16} className="text-muted-foreground rtl:rotate-180" />
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
         </div>
       )}
     </div>

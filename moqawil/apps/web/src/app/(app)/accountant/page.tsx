@@ -1,5 +1,6 @@
 import { auth } from '@/lib/auth'
 import { getAccountantDashboardRows } from '@/lib/queries/accountant'
+import { cn } from '@/lib/utils'
 import { getTranslations } from 'next-intl/server'
 import Link from 'next/link'
 
@@ -7,16 +8,17 @@ function fmt(n: number) {
   return new Intl.NumberFormat('fr-MA', { maximumFractionDigits: 0 }).format(n)
 }
 
-const statusBg: Record<string, string> = {
-  safe: 'bg-[var(--color-safe-bg)] border-[var(--color-safe)]',
-  warning: 'bg-[var(--color-warning-bg)] border-[var(--color-warning)]',
-  over: 'bg-[var(--color-danger-bg)] border-[var(--color-danger)]',
-}
-const statusText: Record<string, string> = {
-  safe: 'text-[var(--color-safe)]',
-  warning: 'text-[var(--color-warning)]',
-  over: 'text-[var(--color-danger)]',
-}
+const statusPanel = {
+  safe: 'bg-safe-bg border-safe',
+  warning: 'bg-warning-bg border-warning',
+  over: 'bg-danger-bg border-danger',
+} as const
+
+const statusText = {
+  safe: 'text-safe',
+  warning: 'text-warning',
+  over: 'text-danger',
+} as const
 
 export default async function AccountantDashboardPage() {
   const session = await auth()
@@ -30,14 +32,14 @@ export default async function AccountantDashboardPage() {
   ])
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6 p-6">
       <div>
-        <h1 className="text-2xl font-bold">{t('dashboardTitle')}</h1>
-        <p className="text-sm text-gray-500 mt-1">{year}</p>
+        <h1 className="text-2xl font-medium text-foreground">{t('dashboardTitle')}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{year}</p>
       </div>
 
       {rows.length === 0 ? (
-        <p className="text-sm text-gray-500">{t('dashboardEmpty')}</p>
+        <p className="text-sm text-muted-foreground">{t('dashboardEmpty')}</p>
       ) : (
         <div className="grid gap-4">
           {rows.map(({ entrepreneur, ytdMad, threshold, declarations }) => {
@@ -46,26 +48,30 @@ export default async function AccountantDashboardPage() {
               <Link
                 key={entrepreneur.id}
                 href={`/accountant/${entrepreneur.id}`}
-                className={`rounded-lg border p-4 hover:shadow-sm transition-shadow ${statusBg[threshold.status]}`}
+                className={cn(
+                  'rounded-md border p-4 transition-colors hover:bg-muted/50',
+                  statusPanel[threshold.status]
+                )}
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-semibold text-sm">{entrepreneur.fullName}</p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-sm font-medium text-foreground">{entrepreneur.fullName}</p>
+                    <p className="text-xs text-muted-foreground">
                       {tEntrepreneur(`activityTypes.${entrepreneur.activityType}`)}
                     </p>
                   </div>
-                  <span className={`text-xs font-bold ${statusText[threshold.status]}`}>
+                  <span className={cn('text-xs font-semibold', statusText[threshold.status])}>
                     {threshold.percentOfThreshold.toFixed(0)}%
                   </span>
                 </div>
-                <div className="flex justify-between text-xs text-gray-600 mt-3">
+                <div className="mt-3 flex justify-between text-xs text-muted-foreground">
                   <span>
-                    {t('ytdTurnover')} : <strong>{fmt(ytdMad)} DH</strong>
+                    {t('ytdTurnover')} :{' '}
+                    <strong className="text-foreground">{fmt(ytdMad)} DH</strong>
                   </span>
                   <span>
                     {t('declarationsStatus')} :{' '}
-                    <strong>
+                    <strong className="text-foreground">
                       {submittedCount}/{declarations.length || 4}
                     </strong>
                   </span>

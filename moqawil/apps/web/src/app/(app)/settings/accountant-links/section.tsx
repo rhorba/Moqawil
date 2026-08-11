@@ -1,13 +1,14 @@
+import { Badge } from '@/components/ui/badge'
 import { getAccountantLinksForEntrepreneur } from '@/lib/queries/accountant'
 import { getTranslations } from 'next-intl/server'
 import { InviteAccountantForm } from './invite-form'
 import { RevokeButton } from './revoke-button'
 
-const STATUS_STYLES: Record<string, string> = {
-  pending: 'bg-amber-50 text-amber-700 border-amber-200',
-  active: 'bg-green-50 text-green-700 border-green-200',
-  revoked: 'bg-gray-50 text-gray-500 border-gray-200',
-}
+const STATUS_VARIANT = {
+  pending: 'warning',
+  active: 'safe',
+  revoked: 'secondary',
+} as const
 
 const STATUS_KEYS = {
   pending: 'statusPending',
@@ -22,27 +23,26 @@ export async function AccountantLinksSection({ entrepreneurId }: { entrepreneurI
   ])
 
   return (
-    <div className="mt-10 pt-8 border-t space-y-4">
+    <div className="mt-10 space-y-4 border-t border-border pt-8">
       <div>
-        <h2 className="text-lg font-bold">{t('settingsTitle')}</h2>
-        <p className="text-sm text-gray-600 mt-1">{t('settingsHint')}</p>
+        <h2 className="text-lg font-medium text-foreground">{t('settingsTitle')}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{t('settingsHint')}</p>
       </div>
 
       <InviteAccountantForm />
 
       {links.length === 0 ? (
-        <p className="text-sm text-gray-500">{t('linksEmpty')}</p>
+        <p className="text-sm text-muted-foreground">{t('linksEmpty')}</p>
       ) : (
-        <ul className="divide-y border rounded-lg">
+        <ul className="divide-y divide-border rounded-md border border-border">
           {links.map((link) => (
-            <li key={link.id} className="flex items-center justify-between px-4 py-3 text-sm">
+            <li
+              key={link.id}
+              className="flex items-center justify-between px-4 py-3 text-sm text-foreground"
+            >
               <span>{link.invitedEmail}</span>
               <div className="flex items-center gap-3">
-                <span
-                  className={`text-xs px-2 py-0.5 rounded-full border ${STATUS_STYLES[link.status]}`}
-                >
-                  {t(STATUS_KEYS[link.status])}
-                </span>
+                <Badge variant={STATUS_VARIANT[link.status]}>{t(STATUS_KEYS[link.status])}</Badge>
                 {link.status !== 'revoked' && (
                   <RevokeButton linkId={link.id} email={link.invitedEmail} />
                 )}

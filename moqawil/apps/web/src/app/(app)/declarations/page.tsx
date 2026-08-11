@@ -26,27 +26,27 @@ export default async function DeclarationsPage({
   const currentYear = new Date().getFullYear()
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{t('title')}</h1>
+        <h1 className="text-2xl font-medium text-foreground">{t('title')}</h1>
 
         {/* Year selector */}
         <div className="flex items-center gap-2 text-sm">
           <a
             href={`/declarations?year=${prevYear}`}
-            className="px-3 py-1.5 border rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-1"
+            className="flex items-center gap-1 rounded-sm border border-border px-3 py-1.5 text-foreground transition-colors hover:bg-muted"
           >
             <span className="rtl:hidden">←</span>
             <span className="ltr:hidden">→</span>
             {prevYear}
           </a>
-          <span className="px-3 py-1.5 bg-[var(--color-primary)] text-white rounded-lg font-medium">
+          <span className="rounded-sm bg-primary px-3 py-1.5 font-medium text-primary-foreground">
             {year}
           </span>
           {year < currentYear && (
             <a
               href={`/declarations?year=${nextYear}`}
-              className="px-3 py-1.5 border rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-1"
+              className="flex items-center gap-1 rounded-sm border border-border px-3 py-1.5 text-foreground transition-colors hover:bg-muted"
             >
               {nextYear}
               <span className="rtl:hidden">→</span>
@@ -56,11 +56,11 @@ export default async function DeclarationsPage({
         </div>
       </div>
 
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
-        <strong>{t('howItWorksTitle')}</strong> {t('howItWorksBody')}
+      <div className="rounded-md border border-border bg-muted p-4 text-sm text-foreground">
+        <strong className="font-medium">{t('howItWorksTitle')}</strong> {t('howItWorksBody')}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {declarations.map((decl) => (
           <DeclarationCard
             key={decl.quarter}

@@ -1,3 +1,5 @@
+import { Badge, type BadgeProps } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { auth } from '@/lib/auth'
 import { getEntrepreneur } from '@/lib/queries/entrepreneur'
 import { getQuotes } from '@/lib/queries/quote'
@@ -16,69 +18,69 @@ export default async function QuotesPage() {
 
   const [t, quoteList] = await Promise.all([getTranslations('quote'), getQuotes(entrepreneur.id)])
 
-  const statusConfig: Record<string, { label: string; cls: string }> = {
-    draft: { label: t('status.draft'), cls: 'bg-gray-100 text-gray-600' },
-    sent: { label: t('status.sent'), cls: 'bg-blue-100 text-blue-700' },
-    accepted: { label: t('status.accepted'), cls: 'bg-green-100 text-green-700' },
-    rejected: { label: t('status.rejected'), cls: 'bg-red-100 text-red-700' },
-    expired: { label: t('status.expired'), cls: 'bg-orange-100 text-orange-700' },
+  const statusConfig: Record<string, { label: string; variant: BadgeProps['variant'] }> = {
+    draft: { label: t('status.draft'), variant: 'secondary' },
+    sent: { label: t('status.sent'), variant: 'outline' },
+    accepted: { label: t('status.accepted'), variant: 'safe' },
+    rejected: { label: t('status.rejected'), variant: 'danger' },
+    expired: { label: t('status.expired'), variant: 'warning' },
   }
 
   return (
     <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">{t('title')}</h1>
-        <Link
-          href="/quotes/new"
-          className="flex items-center gap-2 px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
-        >
-          <Plus size={16} />
-          {t('new')}
-        </Link>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="text-2xl font-medium text-foreground">{t('title')}</h1>
+        <Button asChild>
+          <Link href="/quotes/new">
+            <Plus size={16} />
+            {t('new')}
+          </Link>
+        </Button>
       </div>
 
       {quoteList.length === 0 ? (
-        <div className="text-center py-16 text-gray-500">
-          <p className="mb-4">{t('empty')}</p>
-          <Link
-            href="/quotes/new"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
-          >
-            <Plus size={16} />
-            {t('addFirst')}
-          </Link>
+        <div className="rounded-md border border-dashed border-border py-16 text-center">
+          <p className="mb-4 text-muted-foreground">{t('empty')}</p>
+          <Button asChild>
+            <Link href="/quotes/new">
+              <Plus size={16} />
+              {t('addFirst')}
+            </Link>
+          </Button>
         </div>
       ) : (
-        <div className="divide-y border rounded-lg bg-white">
-          <div className="grid grid-cols-[auto_1fr_140px_120px_100px] gap-4 px-4 py-2 bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+        <div className="overflow-hidden rounded-md border border-border bg-card">
+          <div className="grid grid-cols-[auto_1fr_140px_120px_100px] gap-4 border-b border-border bg-muted px-4 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
             <span>{t('number')}</span>
             <span>{t('client')}</span>
             <span>{t('date')}</span>
             <span className="text-end">{t('amount')}</span>
             <span className="text-center">{t('statusHeader')}</span>
           </div>
-          {quoteList.map(({ quote, clientName }) => {
-            const status = statusConfig[quote.status] ?? statusConfig.draft
-            return (
-              <Link
-                key={quote.id}
-                href={`/quotes/${quote.id}`}
-                className="grid grid-cols-[auto_1fr_140px_120px_100px] gap-4 items-center px-4 py-3 hover:bg-gray-50 transition-colors"
-              >
-                <span className="text-sm font-mono text-gray-700">{quote.quoteNumber}</span>
-                <span className="text-sm text-gray-900 truncate">{clientName}</span>
-                <span className="text-sm text-gray-500">{quote.issueDate}</span>
-                <span className="text-sm font-medium text-end">
-                  {fmt(quote.totalMad)} {quote.currency === 'MAD' ? 'DH' : quote.currency}
-                </span>
-                <span className="text-center">
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${status.cls}`}>
-                    {status.label}
+          <div className="divide-y divide-border">
+            {quoteList.map(({ quote, clientName }) => {
+              const status = statusConfig[quote.status] ?? statusConfig.draft
+              return (
+                <Link
+                  key={quote.id}
+                  href={`/quotes/${quote.id}`}
+                  className="grid grid-cols-[auto_1fr_140px_120px_100px] items-center gap-4 px-4 py-3 transition-colors hover:bg-muted/50"
+                >
+                  <span className="font-mono text-sm text-muted-foreground">
+                    {quote.quoteNumber}
                   </span>
-                </span>
-              </Link>
-            )
-          })}
+                  <span className="truncate text-sm text-foreground">{clientName}</span>
+                  <span className="text-sm text-muted-foreground">{quote.issueDate}</span>
+                  <span className="text-end text-sm font-medium text-foreground">
+                    {fmt(quote.totalMad)} {quote.currency === 'MAD' ? 'DH' : quote.currency}
+                  </span>
+                  <span className="flex justify-center">
+                    <Badge variant={status.variant}>{status.label}</Badge>
+                  </span>
+                </Link>
+              )
+            })}
+          </div>
         </div>
       )}
     </div>

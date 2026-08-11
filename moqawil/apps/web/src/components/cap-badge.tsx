@@ -20,22 +20,22 @@ interface CapBadgeProps {
 
 const statusColors = {
   safe: {
-    bg: 'bg-[var(--color-safe-bg)]',
-    border: 'border-[var(--color-safe)]',
-    text: 'text-[var(--color-safe)]',
-    dot: 'bg-[var(--color-safe)]',
+    bg: 'bg-safe-bg',
+    border: 'border-safe',
+    text: 'text-safe',
+    dot: 'bg-safe',
   },
   warning: {
-    bg: 'bg-[var(--color-warning-bg)]',
-    border: 'border-[var(--color-warning)]',
-    text: 'text-[var(--color-warning)]',
-    dot: 'bg-[var(--color-warning)]',
+    bg: 'bg-warning-bg',
+    border: 'border-warning',
+    text: 'text-warning',
+    dot: 'bg-warning',
   },
   over: {
-    bg: 'bg-[var(--color-danger-bg)]',
-    border: 'border-[var(--color-danger)]',
-    text: 'text-[var(--color-danger)]',
-    dot: 'bg-[var(--color-danger)]',
+    bg: 'bg-danger-bg',
+    border: 'border-danger',
+    text: 'text-danger',
+    dot: 'bg-danger',
   },
 }
 
@@ -48,7 +48,7 @@ export function CapBadge({ status, percentOfCap, remainingMad, compact }: CapBad
   if (compact) {
     return (
       <span
-        className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium border ${cfg.bg} ${cfg.border} ${cfg.text}`}
+        className={`inline-flex items-center gap-1.5 rounded-sm border px-2 py-0.5 text-xs font-medium ${cfg.bg} ${cfg.border} ${cfg.text}`}
         title={`${percentOfCap.toFixed(0)}% ${t('label')} — ${t('remainingShort', { remaining: fmt(remainingMad) })}`}
       >
         <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
@@ -58,13 +58,16 @@ export function CapBadge({ status, percentOfCap, remainingMad, compact }: CapBad
   }
 
   return (
-    <div className={`rounded-lg border p-3 ${cfg.bg} ${cfg.border}`}>
-      <div className="flex items-center justify-between mb-2">
+    <div className={`rounded-md border p-3 ${cfg.bg} ${cfg.border}`}>
+      <div className="mb-2 flex items-center justify-between">
         <span className={`text-xs font-semibold ${cfg.text}`}>{t('label')}</span>
-        <span className={`text-xs font-bold ${cfg.text}`}>{percentOfCap.toFixed(0)}%</span>
+        <span className={`text-xs font-semibold ${cfg.text}`}>{percentOfCap.toFixed(0)}%</span>
       </div>
-      <div className="w-full bg-white/60 rounded-full h-1.5 mb-2">
-        <div className={`h-1.5 rounded-full ${cfg.dot}`} style={{ width: `${pct}%` }} />
+      <div className="mb-2 h-1.5 w-full rounded-full bg-foreground/10">
+        <div
+          className={`h-1.5 rounded-full transition-[width] duration-300 ${cfg.dot}`}
+          style={{ width: `${pct}%` }}
+        />
       </div>
       <p className={`text-xs ${cfg.text}`}>
         {status === 'over'

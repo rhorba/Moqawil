@@ -1,6 +1,7 @@
 'use client'
 
 import { setLocale } from '@/app/actions/locale'
+import { cn } from '@/lib/utils'
 import {
   BookUser,
   ClipboardList,
@@ -31,6 +32,17 @@ interface AppNavProps {
   hasAccountantAccess?: boolean
 }
 
+const navLinkClass = (active: boolean) =>
+  cn(
+    'flex items-center gap-3 px-3 py-2 text-sm font-medium transition-colors',
+    // Active state is a primary-filled control (same role as a button) — rounded-md to match;
+    // inactive state is text-only, rounded-sm is fine there. Found by the design-loop system
+    // critic comparing this against the "Nouveau client" button's radius.
+    active
+      ? 'rounded-md bg-primary text-primary-foreground'
+      : 'rounded-sm text-muted-foreground hover:bg-muted hover:text-foreground'
+  )
+
 export function AppNav({ currentLocale = 'fr', hasAccountantAccess = false }: AppNavProps) {
   const t = useTranslations('nav')
   const pathname = usePathname()
@@ -46,45 +58,32 @@ export function AppNav({ currentLocale = 'fr', hasAccountantAccess = false }: Ap
   }
 
   return (
-    <aside className="w-56 border-e bg-white flex flex-col shrink-0" data-no-print>
-      <div className="p-4 border-b">
-        <Link href="/dashboard" className="font-bold text-lg text-[var(--color-primary)]">
+    <aside className="flex w-56 shrink-0 flex-col border-e border-border bg-card" data-no-print>
+      <div className="border-b border-border p-4">
+        <Link href="/dashboard" className="text-lg font-semibold text-primary">
           {t('brand')}
         </Link>
       </div>
 
-      <nav className="flex-1 p-2 space-y-1">
+      <nav className="flex-1 space-y-1 p-2">
         {navItems.map(({ href, key, icon: Icon }) => {
           const active = pathname.startsWith(href)
           return (
-            <Link
-              key={href}
-              href={href}
-              className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-                active ? 'bg-[var(--color-primary)] text-white' : 'text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              <Icon size={16} />
+            <Link key={href} href={href} className={navLinkClass(active)}>
+              <Icon size={16} className="shrink-0" />
               {t(key)}
             </Link>
           )
         })}
         {hasAccountantAccess && (
-          <Link
-            href="/accountant"
-            className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-              pathname.startsWith('/accountant')
-                ? 'bg-[var(--color-primary)] text-white'
-                : 'text-gray-700 hover:bg-gray-100'
-            }`}
-          >
-            <BookUser size={16} />
+          <Link href="/accountant" className={navLinkClass(pathname.startsWith('/accountant'))}>
+            <BookUser size={16} className="shrink-0" />
             {t('accountantSpace')}
           </Link>
         )}
       </nav>
 
-      <div className="p-2 border-t space-y-1">
+      <div className="space-y-1 border-t border-border p-2">
         {/* Locale toggle — language names are shown in their own script,
             not translated per active locale (a French speaker switching to
             Arabic needs to see "العربية", not a French translation of it). */}
@@ -92,7 +91,7 @@ export function AppNav({ currentLocale = 'fr', hasAccountantAccess = false }: Ap
           type="button"
           onClick={handleLocaleSwitch}
           disabled={isPending}
-          className="flex items-center gap-3 px-3 py-2 w-full rounded-lg text-sm text-gray-700 hover:bg-gray-100 transition-colors disabled:opacity-50"
+          className="flex w-full items-center gap-3 rounded-sm px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
           title={isAr ? 'Passer en français' : 'التبديل إلى العربية'}
         >
           <span className="text-base leading-none">{isAr ? '🇫🇷' : '🇲🇦'}</span>
@@ -102,9 +101,9 @@ export function AppNav({ currentLocale = 'fr', hasAccountantAccess = false }: Ap
         <button
           type="button"
           onClick={() => signOut({ callbackUrl: '/sign-in' })}
-          className="flex items-center gap-3 px-3 py-2 w-full rounded-lg text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+          className="flex w-full items-center gap-3 rounded-sm px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
-          <LogOut size={16} />
+          <LogOut size={16} className="shrink-0" />
           {t('signOut')}
         </button>
       </div>

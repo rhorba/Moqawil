@@ -34,6 +34,7 @@ These are enforced in addition to the four STOP conditions above. In autonomous 
 5. **Security check before SHIP.** Any sprint touching auth, an external API, or a new data flow triggers Security Engineer review before the sprint is marked complete — not just the Tester.
 6. **Foundation docs for major new features.** Before writing code for a feature big enough to need System Designer + Software Architect (see rule 1), produce `docs/prd-[name].md` and `docs/architecture-[name].md` at the **repo root** `docs/` (using the structure in `skills/orchestrator/references/document-chain.md`), and commit them before the first line of implementation code. The sprint backlog's own "Design" section stays short and just points to these two files. **Do not confuse this with `moqawil/docs/`** — that is the separate public Docusaurus site (user-facing FR/AR guides, a different folder one level down inside the app). Repo-root `docs/` is internal-only, never published.
 7. **Video recording at version completion.** When a sprint ships user-facing changes (not pure infra), record a Playwright video covering the critical flows touched, saved to `.recordings/v[version]-[date].webm` at the repo root — distinct from the per-test debug videos Playwright already captures during normal e2e runs. Log to `.logs/activity.md`.
+8. **Design Loop before shipping a redesigned screen.** Any screen rebuilt against the UI Designer's tokens is not "done" on first render — run `skills/design-loop/SKILL.md`'s three fresh-context critics (Brief/System/Craft, with the root `CLAUDE.md` §10 flat/clean/no-AI-slop rules as the System critic's bar) via the `Agent` tool before moving to the next screen. Never let the same conversation that built a screen also grade it.
 
 ---
 
@@ -101,6 +102,7 @@ Constraints: [decisions already made]
 | Deployment | `skills/deployment/SKILL.md` | Docker Compose, self-host |
 | UX Designer | `skills/ux-designer/SKILL.md` | User flows, wireframes |
 | UI Designer | `skills/ui-designer/SKILL.md` | Design tokens, shadcn |
+| Design Loop | `skills/design-loop/SKILL.md` | Before marking any redesigned/high-stakes screen "done" — independent fresh-context critics (brief/system/craft) instead of self-review |
 | Project Monitor | `skills/project-monitor/SKILL.md` | Logs, KPIs, reports |
 
 ---

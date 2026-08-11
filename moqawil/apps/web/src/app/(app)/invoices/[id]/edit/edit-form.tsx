@@ -2,6 +2,11 @@
 
 import { CapBadge } from '@/components/cap-badge'
 import { CapConfirmDialog } from '@/components/cap-confirm-dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
 import type { clients, invoiceLines, invoices } from '@moqawil/db'
 import type { InferSelectModel } from 'drizzle-orm'
 import { Plus, Trash2 } from 'lucide-react'
@@ -146,120 +151,111 @@ export function EditInvoiceForm({
         />
       )}
 
-      <form action={formAction} onSubmit={handleSubmit} className="space-y-6">
+      <form action={formAction} onSubmit={handleSubmit} className="space-y-8">
         {capConfirmed && <input type="hidden" name="capConfirmed" value="true" />}
 
         {state.message && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+          <div className="rounded-md border border-danger bg-danger-bg p-3 text-sm text-danger">
             {state.message}
           </div>
         )}
 
         {/* Client — read-only on edit */}
-        <div>
-          <p className="text-sm font-medium text-gray-700 mb-1">{t('client')}</p>
-          <p className="text-sm text-gray-600 border rounded-lg px-3 py-2 bg-gray-50">
-            {clients.find((c) => c.id === invoice.clientId)?.name ?? '—'}
-          </p>
-          {isService && selectedCap && (
-            <div className="mt-2">
-              <CapBadge
-                status={selectedCap.status}
-                percentOfCap={selectedCap.percentOfCap}
-                remainingMad={selectedCap.remainingToCapMad}
-                totalMad={selectedCap.totalInvoicedMad}
-              />
-            </div>
-          )}
-        </div>
-
-        {/* Dates */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-4">
+          <h2 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            {t('client')}
+          </h2>
           <div>
-            <label htmlFor="issueDate" className="block text-sm font-medium text-gray-700 mb-1">
-              {t('issueDate')} <span className="text-red-500">*</span>
-            </label>
-            <input
-              id="issueDate"
-              name="issueDate"
-              type="date"
-              defaultValue={invoice.issueDate}
-              className="w-full border rounded-lg px-3 py-2 text-sm"
-            />
-          </div>
-          <div>
-            <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700 mb-1">
-              {t('dueDateLabel')}
-            </label>
-            <input
-              id="dueDate"
-              name="dueDate"
-              type="date"
-              defaultValue={invoice.dueDate ?? ''}
-              className="w-full border rounded-lg px-3 py-2 text-sm"
-            />
+            <p className="rounded-sm border border-border bg-muted px-3 py-2 text-sm text-muted-foreground">
+              {clients.find((c) => c.id === invoice.clientId)?.name ?? '—'}
+            </p>
+            {isService && selectedCap && (
+              <div className="mt-2">
+                <CapBadge
+                  status={selectedCap.status}
+                  percentOfCap={selectedCap.percentOfCap}
+                  remainingMad={selectedCap.remainingToCapMad}
+                  totalMad={selectedCap.totalInvoicedMad}
+                />
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Currency */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="currency" className="block text-sm font-medium text-gray-700 mb-1">
-              {t('currency')}
-            </label>
-            <select
-              id="currency"
-              name="currency"
-              value={currency}
-              onChange={(e) => {
-                const cur = e.target.value
-                setCurrency(cur)
-                if (cur === 'MAD') {
-                  setExchangeRate('1')
-                  setBamRateError(null)
-                } else fetchBamRate(cur)
-              }}
-              className="w-full border rounded-lg px-3 py-2 text-sm"
-            >
-              {currencies.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          </div>
-          {currency !== 'MAD' && (
+        {/* Dates & currency */}
+        <div className="space-y-4 border-t border-border pt-6">
+          <h2 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            {t('dates')}
+          </h2>
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <label
-                htmlFor="exchangeRate"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                {t('bamRateLabel')} (MAD/{currency})
-              </label>
-              <input
-                id="exchangeRate"
-                name="exchangeRate"
-                type="number"
-                step="0.0001"
-                value={exchangeRate}
-                onChange={(e) => setExchangeRate(e.target.value)}
-                className="w-full border rounded-lg px-3 py-2 text-sm"
-              />
-              {bamRateError && (
-                <p className="text-xs text-[var(--color-warning)] mt-1">{bamRateError}</p>
-              )}
+              <Label htmlFor="issueDate" className="mb-1 block">
+                {t('issueDate')} <span className="text-danger">*</span>
+              </Label>
+              <Input id="issueDate" name="issueDate" type="date" defaultValue={invoice.issueDate} />
             </div>
-          )}
+            <div>
+              <Label htmlFor="dueDate" className="mb-1 block">
+                {t('dueDateLabel')}
+              </Label>
+              <Input id="dueDate" name="dueDate" type="date" defaultValue={invoice.dueDate ?? ''} />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="currency" className="mb-1 block">
+                {t('currency')}
+              </Label>
+              <Select
+                id="currency"
+                name="currency"
+                value={currency}
+                onChange={(e) => {
+                  const cur = e.target.value
+                  setCurrency(cur)
+                  if (cur === 'MAD') {
+                    setExchangeRate('1')
+                    setBamRateError(null)
+                  } else fetchBamRate(cur)
+                }}
+              >
+                {currencies.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </Select>
+            </div>
+            {currency !== 'MAD' && (
+              <div>
+                <Label htmlFor="exchangeRate" className="mb-1 block">
+                  {t('bamRateLabel')} (MAD/{currency})
+                </Label>
+                <Input
+                  id="exchangeRate"
+                  name="exchangeRate"
+                  type="number"
+                  step="0.0001"
+                  value={exchangeRate}
+                  onChange={(e) => setExchangeRate(e.target.value)}
+                />
+                {bamRateError && <p className="mt-1 text-xs text-warning">{bamRateError}</p>}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Line items */}
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700">{t('linesLabel')}</span>
+        <div className="space-y-2 border-t border-border pt-6">
+          <div className="mb-2 flex items-center justify-between">
+            <h2 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              {t('linesLabel')}
+            </h2>
             <button
               type="button"
               onClick={addLine}
-              className="flex items-center gap-1 text-xs text-[var(--color-primary)] hover:underline"
+              className="flex items-center gap-1 text-xs text-primary hover:underline"
             >
               <Plus size={13} /> {t('addLine')}
             </button>
@@ -267,45 +263,45 @@ export function EditInvoiceForm({
 
           <div className="space-y-2">
             <div className="grid grid-cols-[1fr_80px_110px_32px] gap-2 px-1">
-              <span className="text-xs text-gray-500">{t('lines.description')}</span>
-              <span className="text-xs text-gray-500">{t('lines.quantity')}</span>
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-muted-foreground">{t('lines.description')}</span>
+              <span className="text-xs text-muted-foreground">{t('lines.quantity')}</span>
+              <span className="text-xs text-muted-foreground">
                 {t('lines.unitPrice')} ({currency})
               </span>
               <span />
             </div>
             {lines.map((line, idx) => (
               <div key={line.id} className="grid grid-cols-[1fr_80px_110px_32px] gap-2">
-                <input
+                <Input
                   name={`lines[${idx}][description]`}
                   value={line.description}
                   onChange={(e) => updateLine(line.id, 'description', e.target.value)}
                   placeholder={t('lines.description')}
-                  className="border rounded-lg px-3 py-1.5 text-sm"
+                  className="h-9 py-1.5"
                 />
-                <input
+                <Input
                   name={`lines[${idx}][quantity]`}
                   type="number"
                   step="0.001"
                   min="0"
                   value={line.quantity}
                   onChange={(e) => updateLine(line.id, 'quantity', e.target.value)}
-                  className="border rounded-lg px-2 py-1.5 text-sm text-right"
+                  className="h-9 py-1.5 text-end"
                 />
-                <input
+                <Input
                   name={`lines[${idx}][unitPriceOriginal]`}
                   type="number"
                   step="0.01"
                   min="0"
                   value={line.unitPriceOriginal}
                   onChange={(e) => updateLine(line.id, 'unitPriceOriginal', e.target.value)}
-                  className="border rounded-lg px-2 py-1.5 text-sm text-right"
+                  className="h-9 py-1.5 text-end"
                 />
                 <button
                   type="button"
                   onClick={() => removeLine(line.id)}
                   disabled={lines.length === 1}
-                  className="flex items-center justify-center text-gray-400 hover:text-red-500 disabled:opacity-30"
+                  className="flex items-center justify-center text-muted-foreground hover:text-danger disabled:opacity-30"
                 >
                   <Trash2 size={14} />
                 </button>
@@ -313,62 +309,52 @@ export function EditInvoiceForm({
             ))}
           </div>
           {state.errors?.lines && (
-            <p className="text-xs text-red-600 mt-1">{state.errors.lines[0]}</p>
+            <p className="mt-1 text-xs text-danger">{state.errors.lines[0]}</p>
           )}
         </div>
 
         {/* Total */}
-        <div className="bg-gray-50 rounded-lg p-4">
-          <div className="flex justify-between text-sm mb-1">
-            <span className="text-gray-600">{t('total')}</span>
-            <span className="font-bold">{fmt(totalMad)} DH</span>
+        <div className="rounded-md border border-border bg-muted p-4">
+          <div className="mb-1 flex justify-between text-sm">
+            <span className="text-muted-foreground">{t('total')}</span>
+            <span className="font-medium text-foreground">{fmt(totalMad)} DH</span>
           </div>
-          <p className="text-xs text-gray-400">{t('vatNotice')}</p>
+          <p className="text-xs text-muted-foreground">{t('vatNotice')}</p>
         </div>
 
-        {/* Payment method */}
-        <div>
-          <label htmlFor="paymentMethod" className="block text-sm font-medium text-gray-700 mb-1">
-            {t('paymentMethodLabel')}
-          </label>
-          <select
-            id="paymentMethod"
-            name="paymentMethod"
-            defaultValue={invoice.paymentMethod ?? ''}
-            className="w-full border rounded-lg px-3 py-2 text-sm"
-          >
-            <option value="">{t('paymentMethodNone')}</option>
-            <option value="virement">{t('paymentMethod.virement')}</option>
-            <option value="cheque">{t('paymentMethod.cheque')}</option>
-            <option value="espece">{t('paymentMethod.espece')}</option>
-            <option value="effet">{t('paymentMethod.effet')}</option>
-            <option value="carte">{t('paymentMethod.carte')}</option>
-            <option value="other">{t('paymentMethod.other')}</option>
-          </select>
-        </div>
+        {/* Payment & notes */}
+        <div className="space-y-4 border-t border-border pt-6">
+          <div>
+            <Label htmlFor="paymentMethod" className="mb-1 block">
+              {t('paymentMethodLabel')}
+            </Label>
+            <Select
+              id="paymentMethod"
+              name="paymentMethod"
+              defaultValue={invoice.paymentMethod ?? ''}
+            >
+              <option value="">{t('paymentMethodNone')}</option>
+              <option value="virement">{t('paymentMethod.virement')}</option>
+              <option value="cheque">{t('paymentMethod.cheque')}</option>
+              <option value="espece">{t('paymentMethod.espece')}</option>
+              <option value="effet">{t('paymentMethod.effet')}</option>
+              <option value="carte">{t('paymentMethod.carte')}</option>
+              <option value="other">{t('paymentMethod.other')}</option>
+            </Select>
+          </div>
 
-        {/* Notes */}
-        <div>
-          <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
-            {t('notes')}
-          </label>
-          <textarea
-            id="notes"
-            name="notes"
-            rows={3}
-            defaultValue={invoice.notes ?? ''}
-            className="w-full border rounded-lg px-3 py-2 text-sm resize-none"
-          />
+          <div>
+            <Label htmlFor="notes" className="mb-1 block">
+              {t('notes')}
+            </Label>
+            <Textarea id="notes" name="notes" rows={3} defaultValue={invoice.notes ?? ''} />
+          </div>
         </div>
 
         <div className="flex gap-3 pt-2">
-          <button
-            type="submit"
-            disabled={pending}
-            className="px-6 py-2 bg-[var(--color-primary)] text-white rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50"
-          >
+          <Button type="submit" disabled={pending} size="lg">
             {pending ? t('saving') : t('save')}
-          </button>
+          </Button>
         </div>
       </form>
     </>

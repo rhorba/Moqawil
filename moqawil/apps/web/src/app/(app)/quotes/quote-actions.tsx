@@ -1,6 +1,8 @@
 'use client'
 
 import { CapConfirmDialog } from '@/components/cap-confirm-dialog'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
@@ -34,7 +36,7 @@ export function QuoteActions({ quoteId, currentStatus }: QuoteActionsProps) {
   }
 
   return (
-    <div className="bg-white border rounded-lg p-4 space-y-3">
+    <Card className="space-y-3 p-4">
       {showCapDialog && convertState.capWarning && (
         <CapConfirmDialog
           capWarning={convertState.capWarning}
@@ -47,24 +49,25 @@ export function QuoteActions({ quoteId, currentStatus }: QuoteActionsProps) {
       )}
 
       {convertState.message && (
-        <p className="text-xs px-3 py-2 rounded-lg bg-red-50 text-red-700">
+        <p className="rounded-sm bg-danger-bg px-3 py-2 text-xs text-danger">
           {convertState.message}
         </p>
       )}
 
-      <div className="flex flex-wrap gap-3 items-center">
+      <div className="flex flex-wrap items-center gap-3">
         {currentStatus === 'draft' && (
           <>
-            <button
+            <Button
               type="button"
+              variant="outline"
               disabled={isPending}
               onClick={() => startTransition(() => updateQuoteStatus(quoteId, 'sent'))}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50"
             >
               {t('markSent')}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="destructive"
               disabled={isPending}
               onClick={() => {
                 if (confirm(t('deleteConfirm'))) {
@@ -74,35 +77,34 @@ export function QuoteActions({ quoteId, currentStatus }: QuoteActionsProps) {
                   })
                 }
               }}
-              className="px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg disabled:opacity-50"
             >
               {t('delete')}
-            </button>
+            </Button>
           </>
         )}
 
-        <button
+        <Button
           type="button"
           disabled={isPending}
           onClick={() => runConvert(false)}
-          className="px-4 py-2 bg-[var(--color-safe)] text-white rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50"
+          className="bg-safe text-primary-foreground hover:bg-safe/90"
         >
           {t('convertToInvoice')}
-        </button>
+        </Button>
 
-        <button
+        <Button
           type="button"
+          variant="destructive"
           disabled={isPending}
           onClick={() => {
             if (confirm(t('rejectConfirm'))) {
               startTransition(() => updateQuoteStatus(quoteId, 'rejected'))
             }
           }}
-          className="px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg disabled:opacity-50"
         >
           {t('markRejected')}
-        </button>
+        </Button>
       </div>
-    </div>
+    </Card>
   )
 }

@@ -1,5 +1,10 @@
 'use client'
 
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
 import type { clients } from '@moqawil/db'
 import type { InferSelectModel } from 'drizzle-orm'
 import { Plus, Trash2 } from 'lucide-react'
@@ -83,121 +88,129 @@ export function QuoteForm({ clients }: QuoteFormProps) {
   }
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form action={formAction} className="space-y-8">
       {state.message && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+        <div className="rounded-md border border-danger bg-danger-bg p-3 text-sm text-danger">
           {state.message}
         </div>
       )}
 
-      <div>
-        <label htmlFor="clientId" className="block text-sm font-medium text-gray-700 mb-1">
-          {t('client')} <span className="text-red-500">*</span>
-        </label>
-        <select
-          id="clientId"
-          name="clientId"
-          value={selectedClientId}
-          onChange={(e) => setSelectedClientId(e.target.value)}
-          className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-        >
-          {clients.length === 0 && <option value="">{t('clientNotFound')}</option>}
-          {clients.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
-        {state.errors?.clientId && (
-          <p className="text-xs text-red-600 mt-1">{state.errors.clientId[0]}</p>
-        )}
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
+      {/* Client */}
+      <div className="space-y-4">
+        <h2 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          {t('client')}
+        </h2>
         <div>
-          <label htmlFor="issueDate" className="block text-sm font-medium text-gray-700 mb-1">
-            {t('issueDate')} <span className="text-red-500">*</span>
-          </label>
-          <input
-            id="issueDate"
-            name="issueDate"
-            type="date"
-            defaultValue={new Date().toISOString().slice(0, 10)}
-            className="w-full border rounded-lg px-3 py-2 text-sm"
-          />
-        </div>
-        <div>
-          <label htmlFor="validUntilDate" className="block text-sm font-medium text-gray-700 mb-1">
-            {t('validUntil')} <span className="text-red-500">*</span>
-          </label>
-          <input
-            id="validUntilDate"
-            name="validUntilDate"
-            type="date"
-            defaultValue={defaultValidUntil()}
-            className="w-full border rounded-lg px-3 py-2 text-sm"
-          />
-          {state.errors?.validUntilDate && (
-            <p className="text-xs text-red-600 mt-1">{state.errors.validUntilDate[0]}</p>
+          <Label htmlFor="clientId" className="mb-1 block">
+            {t('client')} <span className="text-danger">*</span>
+          </Label>
+          <Select
+            id="clientId"
+            name="clientId"
+            value={selectedClientId}
+            onChange={(e) => setSelectedClientId(e.target.value)}
+          >
+            {clients.length === 0 && <option value="">{t('clientNotFound')}</option>}
+            {clients.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </Select>
+          {state.errors?.clientId && (
+            <p className="mt-1 text-xs text-danger">{state.errors.clientId[0]}</p>
           )}
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label htmlFor="currency" className="block text-sm font-medium text-gray-700 mb-1">
-            {t('currency')}
-          </label>
-          <select
-            id="currency"
-            name="currency"
-            value={currency}
-            onChange={(e) => {
-              const cur = e.target.value
-              setCurrency(cur)
-              if (cur === 'MAD') {
-                setExchangeRate('1')
-                setBamRateError(null)
-              } else fetchBamRate(cur)
-            }}
-            className="w-full border rounded-lg px-3 py-2 text-sm"
-          >
-            {currencies.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-        </div>
-        {currency !== 'MAD' && (
+      {/* Dates & currency */}
+      <div className="space-y-4 border-t border-border pt-6">
+        <h2 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          {t('date')}
+        </h2>
+        <div className="grid grid-cols-2 gap-4">
           <div>
-            <label htmlFor="exchangeRate" className="block text-sm font-medium text-gray-700 mb-1">
-              {t('bamRateLabel')} (MAD/{currency})
-            </label>
-            <input
-              id="exchangeRate"
-              name="exchangeRate"
-              type="number"
-              step="0.0001"
-              value={exchangeRate}
-              onChange={(e) => setExchangeRate(e.target.value)}
-              className="w-full border rounded-lg px-3 py-2 text-sm"
+            <Label htmlFor="issueDate" className="mb-1 block">
+              {t('issueDate')} <span className="text-danger">*</span>
+            </Label>
+            <Input
+              id="issueDate"
+              name="issueDate"
+              type="date"
+              defaultValue={new Date().toISOString().slice(0, 10)}
             />
-            <p className="text-xs text-gray-500 mt-1">{t('bamRateNotice')}</p>
-            {bamRateError && (
-              <p className="text-xs text-[var(--color-warning)] mt-1">{bamRateError}</p>
+          </div>
+          <div>
+            <Label htmlFor="validUntilDate" className="mb-1 block">
+              {t('validUntil')} <span className="text-danger">*</span>
+            </Label>
+            <Input
+              id="validUntilDate"
+              name="validUntilDate"
+              type="date"
+              defaultValue={defaultValidUntil()}
+            />
+            {state.errors?.validUntilDate && (
+              <p className="mt-1 text-xs text-danger">{state.errors.validUntilDate[0]}</p>
             )}
           </div>
-        )}
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="currency" className="mb-1 block">
+              {t('currency')}
+            </Label>
+            <Select
+              id="currency"
+              name="currency"
+              value={currency}
+              onChange={(e) => {
+                const cur = e.target.value
+                setCurrency(cur)
+                if (cur === 'MAD') {
+                  setExchangeRate('1')
+                  setBamRateError(null)
+                } else fetchBamRate(cur)
+              }}
+            >
+              {currencies.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </Select>
+          </div>
+          {currency !== 'MAD' && (
+            <div>
+              <Label htmlFor="exchangeRate" className="mb-1 block">
+                {t('bamRateLabel')} (MAD/{currency})
+              </Label>
+              <Input
+                id="exchangeRate"
+                name="exchangeRate"
+                type="number"
+                step="0.0001"
+                value={exchangeRate}
+                onChange={(e) => setExchangeRate(e.target.value)}
+              />
+              <p className="mt-1 text-xs text-muted-foreground">{t('bamRateNotice')}</p>
+              {bamRateError && <p className="mt-1 text-xs text-warning">{bamRateError}</p>}
+            </div>
+          )}
+        </div>
       </div>
 
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-gray-700">{t('linesLabel')}</span>
+      {/* Line items */}
+      <div className="space-y-2 border-t border-border pt-6">
+        <div className="mb-2 flex items-center justify-between">
+          <h2 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            {t('linesLabel')}
+          </h2>
           <button
             type="button"
             onClick={addLine}
-            className="flex items-center gap-1 text-xs text-[var(--color-primary)] hover:underline"
+            className="flex items-center gap-1 text-xs text-primary hover:underline"
           >
             <Plus size={13} /> {t('addLine')}
           </button>
@@ -205,9 +218,9 @@ export function QuoteForm({ clients }: QuoteFormProps) {
 
         <div className="space-y-2">
           <div className="grid grid-cols-[1fr_80px_110px_32px] gap-2 px-1">
-            <span className="text-xs text-gray-500">{t('lines.description')}</span>
-            <span className="text-xs text-gray-500">{t('lines.quantity')}</span>
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-muted-foreground">{t('lines.description')}</span>
+            <span className="text-xs text-muted-foreground">{t('lines.quantity')}</span>
+            <span className="text-xs text-muted-foreground">
               {t('lines.unitPrice')} ({currency})
             </span>
             <span />
@@ -215,36 +228,36 @@ export function QuoteForm({ clients }: QuoteFormProps) {
 
           {lines.map((line, idx) => (
             <div key={line.id} className="grid grid-cols-[1fr_80px_110px_32px] gap-2">
-              <input
+              <Input
                 name={`lines[${idx}][description]`}
                 value={line.description}
                 onChange={(e) => updateLine(line.id, 'description', e.target.value)}
                 placeholder={t('lines.description')}
-                className="border rounded-lg px-3 py-1.5 text-sm"
+                className="h-9 py-1.5"
               />
-              <input
+              <Input
                 name={`lines[${idx}][quantity]`}
                 type="number"
                 step="0.001"
                 min="0"
                 value={line.quantity}
                 onChange={(e) => updateLine(line.id, 'quantity', e.target.value)}
-                className="border rounded-lg px-2 py-1.5 text-sm text-right"
+                className="h-9 py-1.5 text-end"
               />
-              <input
+              <Input
                 name={`lines[${idx}][unitPriceOriginal]`}
                 type="number"
                 step="0.01"
                 min="0"
                 value={line.unitPriceOriginal}
                 onChange={(e) => updateLine(line.id, 'unitPriceOriginal', e.target.value)}
-                className="border rounded-lg px-2 py-1.5 text-sm text-right"
+                className="h-9 py-1.5 text-end"
               />
               <button
                 type="button"
                 onClick={() => removeLine(line.id)}
                 disabled={lines.length === 1}
-                className="flex items-center justify-center text-gray-400 hover:text-red-500 disabled:opacity-30"
+                className="flex items-center justify-center text-muted-foreground hover:text-danger disabled:opacity-30"
               >
                 <Trash2 size={14} />
               </button>
@@ -252,40 +265,32 @@ export function QuoteForm({ clients }: QuoteFormProps) {
           ))}
         </div>
 
-        {state.errors?.lines && (
-          <p className="text-xs text-red-600 mt-1">{state.errors.lines[0]}</p>
-        )}
+        {state.errors?.lines && <p className="mt-1 text-xs text-danger">{state.errors.lines[0]}</p>}
       </div>
 
-      <div className="bg-gray-50 rounded-lg p-4">
-        <div className="flex justify-between font-bold">
+      {/* Total */}
+      <div className="rounded-md border border-border bg-muted p-4">
+        <div className="flex justify-between font-medium text-foreground">
           <span>{t('totalEstimate')}</span>
           <span>{fmt(totalMad)} DH</span>
         </div>
-        <p className="text-xs text-gray-500 mt-2">{t('notInvoiceNotice')}</p>
+        <p className="mt-2 text-xs text-muted-foreground">{t('notInvoiceNotice')}</p>
       </div>
 
-      <div>
-        <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
-          {t('notes')}
-        </label>
-        <textarea
-          id="notes"
-          name="notes"
-          rows={3}
-          className="w-full border rounded-lg px-3 py-2 text-sm resize-none"
-          placeholder={t('notesPlaceholder')}
-        />
+      {/* Notes */}
+      <div className="space-y-4 border-t border-border pt-6">
+        <div>
+          <Label htmlFor="notes" className="mb-1 block">
+            {t('notes')}
+          </Label>
+          <Textarea id="notes" name="notes" rows={3} placeholder={t('notesPlaceholder')} />
+        </div>
       </div>
 
       <div className="pt-2">
-        <button
-          type="submit"
-          disabled={pending || clients.length === 0}
-          className="px-6 py-2 bg-[var(--color-primary)] text-white rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
-        >
+        <Button type="submit" disabled={pending || clients.length === 0} size="lg">
           {pending ? t('creating') : t('create')}
-        </button>
+        </Button>
       </div>
     </form>
   )

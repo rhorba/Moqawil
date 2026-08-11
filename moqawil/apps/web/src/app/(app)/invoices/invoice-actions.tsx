@@ -1,5 +1,8 @@
 'use client'
 
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import { Mail } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useState, useTransition } from 'react'
@@ -20,30 +23,31 @@ export function InvoiceActions({ invoiceId, currentStatus, clientEmail }: Invoic
   if (currentStatus === 'cancelled' || currentStatus === 'paid') return null
 
   return (
-    <div className="bg-white border rounded-lg p-4 space-y-3">
+    <Card className="space-y-3 p-4">
       {emailResult && (
         <p
-          className={`text-xs px-3 py-2 rounded-lg ${
-            emailResult.success ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+          className={`rounded-sm px-3 py-2 text-xs ${
+            emailResult.success ? 'bg-safe-bg text-safe' : 'bg-danger-bg text-danger'
           }`}
         >
           {emailResult.message}
         </p>
       )}
-      <div className="flex flex-wrap gap-3 items-center">
+      <div className="flex flex-wrap items-center gap-3">
         {currentStatus === 'draft' && (
           <>
-            <button
+            <Button
               type="button"
+              variant="outline"
               disabled={isPending}
               onClick={() => startTransition(() => updateInvoiceStatus(invoiceId, 'sent'))}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50"
             >
               {t('markSent')}
-            </button>
+            </Button>
             {clientEmail && (
-              <button
+              <Button
                 type="button"
+                variant="outline"
                 disabled={isPending}
                 onClick={() =>
                   startTransition(async () => {
@@ -51,45 +55,45 @@ export function InvoiceActions({ invoiceId, currentStatus, clientEmail }: Invoic
                     setEmailResult(r)
                   })
                 }
-                className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50"
               >
                 <Mail size={14} />
                 {t('sendByEmail')}
-              </button>
+              </Button>
             )}
           </>
         )}
 
         <div className="flex items-center gap-2">
-          <input
+          <Input
             type="date"
             value={paymentDate}
             onChange={(e) => setPaymentDate(e.target.value)}
-            className="border rounded-lg px-3 py-2 text-sm"
+            className="w-auto"
           />
-          <button
+          <Button
             type="button"
             disabled={isPending}
             onClick={() => startTransition(() => markInvoicePaid(invoiceId, paymentDate))}
-            className="px-4 py-2 bg-[var(--color-safe)] text-white rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50"
+            className="bg-safe text-primary-foreground hover:bg-safe/90"
           >
             {t('markPaid')}
-          </button>
+          </Button>
         </div>
 
-        <button
+        <Button
           type="button"
+          variant="ghost"
           disabled={isPending}
           onClick={() => {
             if (confirm(t('cancelConfirm'))) {
               startTransition(() => updateInvoiceStatus(invoiceId, 'cancelled'))
             }
           }}
-          className="px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg disabled:opacity-50"
+          className="text-danger hover:bg-danger-bg hover:text-danger"
         >
           {t('cancelInvoice')}
-        </button>
+        </Button>
       </div>
-    </div>
+    </Card>
   )
 }

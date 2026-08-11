@@ -1,5 +1,7 @@
 'use client'
 
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { signIn } from 'next-auth/react'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
@@ -39,32 +41,21 @@ export function TestCredentialsForm() {
     <form
       data-testid="test-credentials-form"
       onSubmit={handleSubmit}
-      className="space-y-2 border-t pt-4 mt-2"
+      className="mt-2 space-y-2 border-t border-border pt-4"
     >
-      <p className="text-xs text-gray-400 text-center">{t('testCredentialsLabel')}</p>
-      <input
-        name="test-email"
-        type="email"
-        placeholder="test@example.com"
-        required
-        className="w-full py-2 px-3 border rounded-lg text-sm"
-      />
-      <input
-        name="test-secret"
-        type="password"
-        placeholder="E2E secret"
-        required
-        className="w-full py-2 px-3 border rounded-lg text-sm"
-      />
-      {error && <p className="text-xs text-red-600">{error}</p>}
-      <button
+      <p className="text-center text-xs text-muted-foreground">{t('testCredentialsLabel')}</p>
+      <Input name="test-email" type="email" placeholder="test@example.com" required />
+      <Input name="test-secret" type="password" placeholder="E2E secret" required />
+      {error && <p className="text-xs text-danger">{error}</p>}
+      <Button
         type="submit"
+        variant="outline"
         disabled={pending}
         data-testid="test-credentials-submit"
-        className="w-full py-2 px-4 border border-dashed rounded-lg text-sm hover:bg-gray-50 transition-colors disabled:opacity-50"
+        className="w-full border-dashed"
       >
         {pending ? t('testCredentialsConnecting') : t('testCredentialsSubmit')}
-      </button>
+      </Button>
     </form>
   )
 }
