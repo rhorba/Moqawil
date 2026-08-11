@@ -1,5 +1,12 @@
 # Activity Log
 
+### 2026-08-11 UPDATE — Pitch deck + memo refreshed for Sprint 11 (SaaS readiness) + Sprint 12 (planned)
+- **Specialist**: PM, on direct user instruction
+- **Summary**: `pitch/Moqawil-Pitch-Deck.pptx` (slides 11 + 13) and `pitch/Moqawil-Pitch-Memo.docx` (Business Model, Roadmap — English and French) updated to reflect work since the last refresh (commit `030ea67`): Sprint 11's SaaS-readiness hardening (IDOR re-audit, rate limiting, health check, automated backups, public landing page) is now called out as shipped, and the Roadmap's old "Next: mobile PWA, public launch" line is replaced with the actual Sprint 12 plan (ToS/Privacy Policy, CNDP registration, security audit, real infra provisioning — all owner-side, self-host unaffected).
+- **Edited via python-pptx/python-docx** (no Office/LibreOffice installed on this machine). Deck edits were deliberately conservative — extended existing paragraphs rather than inserting new ones on slide 13's fixed-position textboxes, to limit `SHAPE_TO_FIT_TEXT` height-growth risk. **Could not visually render/verify either file** (no LibreOffice on this machine, same gap noted in the Sprint 10 session log for slides 8-9) — verified only that both files are structurally valid (reload cleanly, correct slide/paragraph counts, zip integrity intact). Worth a visual check with real PowerPoint/LibreOffice before this deck is presented.
+- **Status**: resolved (content-level; visual layout unverified)
+- **Impact**: low
+
 ### 2026-08-11 FIX — ICE test-fixture collisions eliminated across all test suites
 - **Specialist**: Tester, on direct user instruction
 - **Summary**: Root-caused and fixed the recurring cross-suite ICE (`entrepreneurs.ice`) fixture collision that had required manual DB cleanup 4 times across Sprints 10-11. See full writeup in `.logs/issues.md`. Two compounding causes fixed: (1) overlapping hardcoded ICE constants across Vitest DB-integration files and Playwright specs — now assigned non-overlapping reserved blocks, documented in `docs/test-strategy-moqawil.md` §7; (2) untargeted `.onConflictDoNothing()` silently swallowing real ICE conflicts instead of throwing — now target the primary key explicitly so a future collision fails loudly. Also disabled Vitest `fileParallelism` after confirming a separate, structurally different flakiness source (DB-integration files racing each other under concurrent file execution).
