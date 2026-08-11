@@ -1,8 +1,8 @@
 # DevOps: Moqawil
-**References**: docs/architecture-moqawil.md, docs/security-moqawil.md | **Version**: 1.0 | **Date**: 2026-08-08 | **Author**: DevOps/DevSecOps | **Status**: Current
+**References**: docs/architecture-moqawil.md, docs/security-moqawil.md, docs/prd-sprint11-saas-readiness.md | **Version**: 1.1 | **Date**: 2026-08-11 | **Author**: DevOps/DevSecOps | **Status**: Current
 
 ## 1. Deployment Model
-Self-host only for v0.1 — no managed cloud tier exists yet (planned post-v0.1, per the project's own tagline). Target: `docker compose up -d` on a fresh Ubuntu VPS, configured via a single `.env` file.
+Two modes as of Sprint 11: **self-host** (unchanged — `docker compose up -d` on a fresh Ubuntu VPS, configured via a single `.env` file, operator owns their own uptime/backups) and **Moqawil-operated hosted** (new — same `docker-compose.yml`, same image, deployed to infrastructure Moqawil itself owns and is responsible for keeping backed up and observably healthy). **Sprint 11 delivers the code/config/script side of the hosted mode only** — no VPS or domain has actually been provisioned by this work; that remains an owner action (no infrastructure credentials are held by the engineering work itself). Do not treat this sprint's completion as "the hosted product is live."
 
 ```
 docker-compose.yml
@@ -33,9 +33,20 @@ Builds the Docusaurus site (`moqawil/docs/`, the *public* user-facing FR/AR guid
 Per Framework Rule 4: any Sprint 4+ external integration (DGI/xHub API keys, Barid eSign credentials) must have its env vars added to `.env.example` *before* implementation starts, never hardcoded.
 
 ## 4. Known Infra Gaps (tracked, not silently dropped)
-- No automated backup job — nightly `pg_dump` is documented as a manual/cron responsibility for the self-hoster, not automated by Moqawil itself.
-- No staging environment — CI's `build`/`e2e` jobs are the closest thing to a pre-production check.
-- No image registry / pre-built container publishing — self-hosters build the image themselves via `docker compose up -d`, matching the AGPL self-host-first positioning (no incentive yet to publish pre-built images before there's a managed tier).
+- No automated backup job for **self-host** — nightly `pg_dump` remains a manual/cron responsibility for the self-hoster; unchanged.
+- **Moqawil-operated hosted instance (Sprint 11)**: automated backups are the operator's own responsibility, not the self-hoster's — `scripts/backup-db.sh` (pg_dump + timestamped rotation) exists for exactly this; wire it into a cron job on whatever infrastructure is actually provisioned. Off-site upload (S3-compatible) is left to the operator's own credentials/bucket — the script supports piping its output to one.
+- No staging environment — CI's `build`/`e2e` jobs are the closest thing to a pre-production check. Still true for both modes.
+- No image registry / pre-built container publishing — self-hosters build the image themselves via `docker compose up -d`. Still true; the hosted instance also just runs `docker compose up -d` on Moqawil's own infrastructure rather than pulling a published image.
+- No uptime monitoring configured — `GET /api/health` (Sprint 11) exists for a monitor to poll (UptimeRobot or similar), but no monitor has actually been wired up to it. Owner action.
+- No formal load testing — see `docs/system-design-moqawil.md` §5; the "low hundreds concurrent" target for the hosted instance is a starting estimate, not measured.
+
+## 5. Sprint 11 additions
+| Item | Purpose | Location |
+|---|---|---|
+| `GET /api/health` | DB-connectivity check for an external uptime monitor | `apps/web/src/app/api/health/route.ts` |
+| `DB_POOL_MAX` (env) | Tunable Postgres connection pool size, was hardcoded `max: 10` | `.env.example`, `packages/db/src/index.ts` |
+| `scripts/backup-db.sh` | Timestamped `pg_dump` + rotation, pipeable to off-site storage | repo root `scripts/` |
+| In-process rate limiter | Throttles `/api/auth/*` sign-in/magic-link bursts | `apps/web/src/middleware.ts` |
 
 ## Handoff
 ← From Software Architect, Security Engineer: constraints this deployment must satisfy

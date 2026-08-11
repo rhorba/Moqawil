@@ -1,5 +1,18 @@
 # Project Metrics
 
+### 2026-08-11 SPRINT_SNAPSHOT — Sprint 11 (SaaS Readiness: Multi-Tenant Hosting)
+- **Planned**: 13 tasks (S11-01 through S11-13), 5 batches
+- **Completed**: 13/13 (100%)
+- **Blocked**: 0 code-side. 3 items explicitly deferred to the owner (VPS/domain provisioning, ToS/Privacy Policy legal text, formal pen-test) — see `docs/prd-sprint11-saas-readiness.md` §8.
+- **Scope**: reframed the app's deployment posture from self-host-only to also support a Moqawil-operated multi-tenant hosted instance, same solo-AE persona, no billing yet. PRD + 3 foundation docs revised before code (Framework Rule 6). Full IDOR re-audit of every query/action/API route. In-process rate limiter on `/api/auth/signin*`. `/api/health` + configurable `DB_POOL_MAX`. `scripts/backup-db.sh`. Public FR/AR landing page at `/` (previously 404).
+- **Unplanned but resolved this sprint**: a real IDOR defense-in-depth gap in `getClientAnnualTotal` (no `entrepreneurId` filter of its own — not currently exploitable, but broke the ownership-check pattern every other query follows). Fixed + regression test added. Full writeup: `.logs/issues.md`.
+- **Recurring pattern confirmed, not new**: hit the same test-fixture ICE-collision class of bug Sprint 10 already fixed once (commit `f024466`, "not reproducible against the persistent local dev DB") — twice this sprint, different files/ICE values, same root cause (Playwright e2e fixtures and Vitest DB-integration fixtures share one persistent local dev DB with no cross-suite cleanup, so hardcoded fixture ICE values can collide across suites). Cleaned up both instances to unblock this session; the underlying fix (giving each suite non-overlapping fixture ranges, or running vitest against a disposable DB like CI already does) is flagged as a small future housekeeping task, not fixed here — two independent occurrences across two sprints is enough signal to flag, not yet enough to justify scope-creeping into this sprint.
+- **Verification**: `pnpm --filter @moqawil/web typecheck` clean, `pnpm lint` clean (143 files). Full Vitest suite 120/120 passing (3 intentionally skipped) after fixture cleanup — the one file that failed before cleanup (`invoice-queries-db-integration.test.ts`) was re-confirmed passing 100% in isolation both before and after, consistent with the known parallel-DB-integration-test flakiness class diagnosed earlier this session (not a regression). Playwright e2e: 21/21 passing single-threaded (3 intentionally skipped), including 2 new landing-page smoke tests — confirms the rate limiter doesn't false-positive against legitimate e2e traffic. Manual: `/api/health` returns `{"status":"ok"}`; a 10-request burst against `/api/auth/signin/credentials` returned exactly 5×302 then 5×429, matching the configured `limit: 5` exactly.
+- **New dependency**: none — rate limiter is in-process (no Redis/Upstash), consistent with the existing single-VPS/no-horizontal-scaling NFR.
+- **Velocity**: 11 sprints (+ 3.5) completed.
+- **Pushed**: pending — see activity.md for the push entry once it lands.
+---
+
 ### 2026-08-11 SPRINT_SNAPSHOT — Sprint 10 (Hardening/Polish + Full Walkthrough Refresh)
 - **Planned**: 11 tasks (S10-01 through S10-11), 4 batches
 - **Completed**: 11/11 (100%)

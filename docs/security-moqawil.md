@@ -1,12 +1,16 @@
 # Security: Moqawil
-**References**: docs/architecture-moqawil.md, docs/database-moqawil.md | **Version**: 1.0 | **Date**: 2026-08-08 | **Author**: Security Engineer | **Status**: Draft
+**References**: docs/architecture-moqawil.md, docs/database-moqawil.md, docs/prd-sprint11-saas-readiness.md | **Version**: 1.1 | **Date**: 2026-08-11 | **Author**: Security Engineer | **Status**: Draft
 
 ## 1. Threat Model Summary
-Moqawil is self-hosted, single-tenant-per-install financial/compliance software handling one AE's invoicing data and their clients' personal/business identifiers (names, ICE, addresses, sometimes IBANs). The realistic threat surface is narrower than a multi-tenant SaaS (no cross-tenant data leakage risk within one install) but the *consequence* of a breach is high (financial fraud potential, client PII exposure, CNDP data-protection exposure since client personal data is processed).
+Moqawil ships in two deployment modes (Sprint 11): **self-hosted, single-tenant-per-install** (original model, unchanged) and **Moqawil-operated hosted, multi-tenant** (new). Both handle financial/compliance data and clients' personal/business identifiers (names, ICE, addresses, sometimes IBANs) — the *consequence* of a breach was already high under self-host (financial fraud potential, client PII exposure, CNDP exposure) and stays high.
+
+What changes for the hosted mode: the threat surface is no longer "narrower than multi-tenant SaaS" — **it is exactly a multi-tenant SaaS now**, and the framing must change accordingly. Under self-host, an IDOR bug is bad but contained (the operator is the only tenant, so a missing ownership filter can't leak a *different* customer's data — there isn't one). Under the hosted instance, the same class of bug means Company A's invoices, client list, or tax data becomes visible to Company B — a cross-tenant breach, not a single-install bug. **IDOR defense (§2) is therefore elevated from "primary defense, standard priority" to CRITICAL for the hosted deployment** — every data-access path was re-audited in Sprint 11 (findings in `.logs/issues.md`, dated 2026-08-11) specifically because of this shift, not as routine hygiene.
+
+Also new: under self-host, "self-hosters are the data controller for their own instance, not Moqawil the project" (§3, unchanged for that mode). For the Moqawil-operated hosted instance, **Moqawil itself becomes the CNDP data controller/processor** for every hosted customer's client PII — this is a real legal obligation (registration, a real Privacy Policy, a lawful basis for processing), not just a documentation nuance. Tracked as a launch blocker in `docs/prd-sprint11-saas-readiness.md` §8, not silently absorbed into "self-hoster's problem" language that no longer applies once Moqawil operates the instance.
 
 ## 2. Authentication & Session
 - Auth.js v5 (NextAuth), Google OAuth + email magic link. No password storage — reduces credential-stuffing/breach-reuse risk entirely.
-- Session-scoped access: every query for invoices/clients/declarations filters by the authenticated user's `entrepreneurId`, not by a client-supplied ID alone — this is the primary IDOR defense given there's no RLS layer (single-tenant-per-install makes row-level security less critical than in Kasb/Wassalha's multi-tenant model, but ownership checks in every query/action are still mandatory, not optional).
+- Session-scoped access: every query for invoices/clients/declarations filters by the authenticated user's `entrepreneurId`, not by a client-supplied ID alone — this is the primary IDOR defense, and for the Moqawil-operated hosted deployment (Sprint 11) it is the *only* thing preventing cross-tenant data exposure (no RLS layer exists). Re-audited 2026-08-11 across every function in `apps/web/src/lib/queries/*.ts` and every server action — the two-argument ownership-check pattern (e.g. `getClientById(clientId, entrepreneurId)`) was already consistent everywhere sampled; see `.logs/issues.md` for the dated finding.
 - `E2E_TEST_SECRET` enables a test-only Credentials provider — must never be set outside CI/local dev. CI sets it explicitly per test run; production `.env.example` documents it as dangerous to enable.
 
 ## 3. Data Protection
@@ -32,8 +36,12 @@ Moqawil is self-hosted, single-tenant-per-install financial/compliance software 
 - This is the concrete implementation of Framework Rule 5 ("security check before SHIP") — added 2026-08-08 after being an unenforced checklist line for one sprint. See `.logs/activity.md` and `.logs/decisions.md` for the history.
 
 ## 7. Open Items (tracked, not silently dropped)
-- No formal penetration test or third-party security audit has been performed — appropriate to schedule before any managed-cloud-tier launch (post-v0.1), not required for the self-host-only v0.1.
-- CNDP filing/registration guidance for self-hosters is not yet written — should land in the docs site (`moqawil/docs/`) before a "made for Morocco" positioning claim gets stronger marketing weight.
+- No formal penetration test or third-party security audit has been performed — **this is now a launch blocker for the Moqawil-operated hosted instance**, not just a nice-to-have (the "post-v0.1" deferral in earlier drafts of this doc meant exactly this moment). Not performed in Sprint 11 itself — flagged for the owner to schedule before publicizing the hosted product.
+- CNDP filing/registration guidance for self-hosters is not yet written — unchanged gap, still relevant for that mode.
+- CNDP data-controller registration **for Moqawil itself** (new, Sprint 11) — the operator must register with CNDP as data controller before hosting other businesses' client PII. Legal/administrative, not engineering; tracked in `docs/prd-sprint11-saas-readiness.md` §8.
+
+## 8. Rate Limiting (new, Sprint 11)
+Public sign-up (Google OAuth + Resend email magic link, no allowlist — confirmed in `auth.ts`) previously carried low abuse risk because reaching a self-hoster's instance at all required knowing its address; a Moqawil-operated hosted instance at a public, discoverable domain does not have that implicit gate. `middleware.ts` (which already gates authenticated routes) adds an in-process sliding-window rate limiter on `/api/auth/*` sign-in and magic-link-request paths — no new external dependency (Redis/Upstash), consistent with the existing single-VPS/no-horizontal-scaling posture (`docs/system-design-moqawil.md` §5). This is a basic abuse deterrent, not a substitute for the CAPTCHA/WAF layer a higher-traffic product would eventually need — revisit if real abuse is observed post-launch.
 
 ## Handoff
 → Backend Dev: auth/session enforcement patterns per query

@@ -117,7 +117,7 @@ export async function createInvoice(
   // Cap check for service AEs (CGI Article 73-II-G-8°)
   if (entrepreneur.activityType === 'service') {
     const fiscalYear = new Date(data.issueDate).getFullYear()
-    const capData = await getClientAnnualTotal(data.clientId, fiscalYear)
+    const capData = await getClientAnnualTotal(data.clientId, entrepreneur.id, fiscalYear)
     const projectedTotal = capData.totalInvoicedMad + totalMad
 
     if (projectedTotal > PER_CLIENT_CAP_MAD && !data.capConfirmed) {
@@ -370,7 +370,7 @@ export async function updateInvoice(
   // Re-check cap for service AEs
   if (entrepreneur.activityType === 'service') {
     const fiscalYear = new Date(data.issueDate).getFullYear()
-    const capData = await getClientAnnualTotal(existing.clientId, fiscalYear)
+    const capData = await getClientAnnualTotal(existing.clientId, entrepreneur.id, fiscalYear)
     // Subtract the old invoice total before projecting the new one
     const previousTotal = Number.parseFloat(existing.totalMad)
     const projectedTotal = capData.totalInvoicedMad - previousTotal + totalMad

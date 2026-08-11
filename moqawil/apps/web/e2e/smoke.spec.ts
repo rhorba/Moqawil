@@ -1,5 +1,20 @@
 import { expect, test } from '@playwright/test'
 
+test.describe('Sprint 11 — Public landing page', () => {
+  test('unauthenticated visitor sees the landing page at root, not a 404', async ({ page }) => {
+    const response = await page.goto('/')
+    expect(response?.status()).toBe(200)
+    await expect(page.getByRole('heading', { name: /conformité auto-entrepreneur/i })).toBeVisible()
+    await expect(page.getByRole('link', { name: /se connecter|commencer gratuitement/i }).first()).toBeVisible()
+  })
+
+  test('landing page CTA reaches sign-in', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('link', { name: /commencer gratuitement/i }).click()
+    await expect(page).toHaveURL(/sign-in/)
+  })
+})
+
 test.describe('Sprint 0 Smoke Tests', () => {
   test('sign-in page loads and shows auth options', async ({ page }) => {
     await page.goto('/sign-in')

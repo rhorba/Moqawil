@@ -1,5 +1,13 @@
 # Activity Log
 
+### 2026-08-11 MILESTONE — Sprint 11 complete: SaaS readiness (multi-tenant hosting, no billing)
+- **Specialist**: Orchestrator + PM + System Designer + Security Engineer + DevOps + Backend Dev + Frontend Dev + Tester
+- **Summary**: User asked to "convert the app to a SaaS and permit many entreprises to use the app." Clarified via 2 questions before scoping: still the same solo auto-entrepreneur persona (not registered companies, not team accounts), multi-tenancy/hosting infra this sprint with billing deferred. Planned via `EnterPlanMode` (approved plan: `docs/prd-sprint11-saas-readiness.md`), executed as `.claude/sprint-backlog/sprint-11.md`. Claims the "Sprint 11" slot Sprint 10 had reserved for launch/distribution content — pushed that to Sprint 12, since publicizing a hosted product before its hosting/security posture is ready would be backwards.
+- **Delivered**: foundation-doc revisions (`docs/system-design-moqawil.md`, `docs/security-moqawil.md`, `docs/devops-moqawil.md` — all three had already flagged this exact moment as needing a revisit); full IDOR re-audit across every query/action/API route (found and fixed one real defense-in-depth gap in `getClientAnnualTotal`); in-process rate limiter on `/api/auth/signin*` (`lib/rate-limit.ts` + `middleware.ts`); `GET /api/health`; configurable `DB_POOL_MAX`; `scripts/backup-db.sh`; public FR/AR landing page at `/` (root previously 404'd).
+- **Explicitly not done** (owner action, no infra credentials held by this work): actually provisioning a VPS/domain, Terms of Service/Privacy Policy legal text, CNDP data-controller registration, formal penetration test. All flagged as launch blockers in the PRD, not silently skipped.
+- **Status**: resolved
+- **Impact**: high
+
 ### 2026-08-11 MILESTONE — Walkthrough video re-recorded for the redesigned UI
 - **Specialist**: DevOps/DevSecOps
 - **Summary**: Per root `.claude/CLAUDE.md` rule 7 (video recording at version completion for user-facing changes), re-ran `pnpm walkthrough` (`apps/web/scripts/run-walkthrough.mjs` — OS-level ffmpeg screen capture synced to a headed Playwright run, since Chromium's own CDP screencast reproducibly stalls after ~1s on this machine per the script's own comment) to produce a fresh recording covering the new design system end to end: sign-in, onboarding, dashboard (FR + AR/RTL), clients, devis create/PDF/convert-to-invoice, invoice create/edit/PDF/UBL-XML/mark-paid, declarations generate/PDF, cap-over-limit dialog, settings/profile, and the full accountant invite/accept/drill-down/revoke flow.

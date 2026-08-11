@@ -7,11 +7,17 @@ if (!connectionString) {
   throw new Error('DATABASE_URL environment variable is required')
 }
 
+// Sprint 11 (SaaS readiness): pool size is tunable via DB_POOL_MAX instead of hardcoded — the
+// right value for a self-host (single AE) instance and a Moqawil-operated hosted (many
+// tenants) instance aren't the same, and this lets it be tuned without a code change as real
+// hosted usage is observed. See docs/system-design-moqawil.md §4.
+const poolMax = Number(process.env.DB_POOL_MAX) || 10
+
 // Cache the client on globalThis across Next.js dev-mode HMR reloads — without this, every hot
 // reload creates a fresh connection pool without closing the old one, and the pool count climbs
 // until Postgres refuses new connections ("sorry, too many clients already").
 const globalForDb = globalThis as unknown as { __moqawilDbClient?: ReturnType<typeof postgres> }
-const client = globalForDb.__moqawilDbClient ?? postgres(connectionString, { max: 10 })
+const client = globalForDb.__moqawilDbClient ?? postgres(connectionString, { max: poolMax })
 if (process.env.NODE_ENV !== 'production') {
   globalForDb.__moqawilDbClient = client
 }

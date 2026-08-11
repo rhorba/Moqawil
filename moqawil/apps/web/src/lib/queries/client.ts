@@ -23,8 +23,15 @@ export async function getClientById(clientId: string, entrepreneurId: string) {
  * S1-04: Cap tracker query — per-client annual invoice totals.
  * Returns totalInvoicedMad (all non-cancelled), totalPaidMad, cap status.
  * Only relevant for service-type AEs (CGI Article 73-II-G-8°).
+ *
+ * Sprint 11 IDOR audit: `entrepreneurId` is required and filtered on directly rather than
+ * relying on every caller to have already verified the client's ownership beforehand — every
+ * call site today does do that (via a prior `getClientById`/entrepreneur-scoped fetch), but
+ * this function had no ownership boundary of its own, which was the one function in this file
+ * that broke the pattern every other query follows. Now it can't be misused even if a future
+ * caller forgets the prior check. See .logs/issues.md, 2026-08-11.
  */
-export async function getClientAnnualTotal(clientId: string, year: number) {
+export async function getClientAnnualTotal(clientId: string, entrepreneurId: string, year: number) {
   const [row] = await db
     .select({
       totalInvoicedMad: sql<string>`
@@ -35,7 +42,13 @@ export async function getClientAnnualTotal(clientId: string, year: number) {
       `,
     })
     .from(invoices)
-    .where(and(eq(invoices.clientId, clientId), eq(invoices.fiscalYear, year)))
+    .where(
+      and(
+        eq(invoices.clientId, clientId),
+        eq(invoices.entrepreneurId, entrepreneurId),
+        eq(invoices.fiscalYear, year)
+      )
+    )
 
   const totalInvoicedMad = Number.parseFloat(row?.totalInvoicedMad ?? '0')
   const totalPaidMad = Number.parseFloat(row?.totalPaidMad ?? '0')

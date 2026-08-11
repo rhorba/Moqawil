@@ -189,7 +189,7 @@ describe.skipIf(SKIP_INTEGRATION)('Quotes — DB integration', () => {
     // Quote A is worth 100,000 MAD — well over the cap — but it must never
     // appear in the cap tracker, which only reads the invoices table.
     const { getClientAnnualTotal } = await import('@/lib/queries/client')
-    const result = await getClientAnnualTotal(TEST_CLIENT_ID, TEST_YEAR)
+    const result = await getClientAnnualTotal(TEST_CLIENT_ID, TEST_ENTREPRENEUR_ID, TEST_YEAR)
     expect(result.totalInvoicedMad).toBe(0)
     expect(result.status).toBe('safe')
   })

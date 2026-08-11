@@ -26,7 +26,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
   const year = new Date().getFullYear()
   const isService = entrepreneur.activityType === 'service'
 
-  const cap = isService ? await getClientAnnualTotal(id, year) : null
+  const cap = isService ? await getClientAnnualTotal(id, entrepreneur.id, year) : null
 
   const clientInvoices = await db
     .select()

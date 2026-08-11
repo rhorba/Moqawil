@@ -206,7 +206,7 @@ describe.skipIf(SKIP_INTEGRATION)('Client queries — DB integration', () => {
 
   it('getClientAnnualTotal reports "safe" status well under the 80K cap', async () => {
     const { getClientAnnualTotal } = await import('@/lib/queries/client')
-    const result = await getClientAnnualTotal(CLIENT_SAFE_ID, TEST_YEAR)
+    const result = await getClientAnnualTotal(CLIENT_SAFE_ID, TEST_ENTREPRENEUR_ID, TEST_YEAR)
     expect(result.totalInvoicedMad).toBe(30000)
     expect(result.totalPaidMad).toBe(30000)
     expect(result.status).toBe('safe')
@@ -215,14 +215,14 @@ describe.skipIf(SKIP_INTEGRATION)('Client queries — DB integration', () => {
 
   it('getClientAnnualTotal reports "warning" status between 70-99% of the cap', async () => {
     const { getClientAnnualTotal } = await import('@/lib/queries/client')
-    const result = await getClientAnnualTotal(CLIENT_WARNING_ID, TEST_YEAR)
+    const result = await getClientAnnualTotal(CLIENT_WARNING_ID, TEST_ENTREPRENEUR_ID, TEST_YEAR)
     expect(result.totalInvoicedMad).toBe(75000)
     expect(result.status).toBe('warning')
   })
 
   it('getClientAnnualTotal reports "over" status at/above the cap, excludes cancelled invoices, and distinguishes invoiced from paid', async () => {
     const { getClientAnnualTotal } = await import('@/lib/queries/client')
-    const result = await getClientAnnualTotal(CLIENT_OVER_ID, TEST_YEAR)
+    const result = await getClientAnnualTotal(CLIENT_OVER_ID, TEST_ENTREPRENEUR_ID, TEST_YEAR)
     // 40,000 (paid) + 50,000 (sent) = 90,000 — the 99,999 cancelled invoice must be excluded
     expect(result.totalInvoicedMad).toBe(90000)
     expect(result.totalPaidMad).toBe(40000)
@@ -230,10 +230,17 @@ describe.skipIf(SKIP_INTEGRATION)('Client queries — DB integration', () => {
     expect(result.remainingToCapMad).toBe(0)
   })
 
+  it('getClientAnnualTotal returns zero for a client requested under a different entrepreneur (IDOR guard, Sprint 11)', async () => {
+    const { getClientAnnualTotal } = await import('@/lib/queries/client')
+    const result = await getClientAnnualTotal(CLIENT_OVER_ID, OTHER_ENTREPRENEUR_ID, TEST_YEAR)
+    expect(result.totalInvoicedMad).toBe(0)
+    expect(result.status).toBe('safe')
+  })
+
   it('getAllClientAnnualTotals batch result matches the per-client results', async () => {
     const { getAllClientAnnualTotals, getClientAnnualTotal } = await import('@/lib/queries/client')
     const all = await getAllClientAnnualTotals(TEST_ENTREPRENEUR_ID, TEST_YEAR)
-    const single = await getClientAnnualTotal(CLIENT_OVER_ID, TEST_YEAR)
+    const single = await getClientAnnualTotal(CLIENT_OVER_ID, TEST_ENTREPRENEUR_ID, TEST_YEAR)
     expect(all[CLIENT_OVER_ID].totalInvoicedMad).toBe(single.totalInvoicedMad)
     expect(all[CLIENT_OVER_ID].status).toBe('over')
     expect(all[CLIENT_SAFE_ID].status).toBe('safe')

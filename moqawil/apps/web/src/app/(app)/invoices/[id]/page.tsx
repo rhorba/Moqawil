@@ -47,7 +47,10 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
   const { invoice, lines } = data
   const client = await getClientById(invoice.clientId, entrepreneur.id)
   const isService = entrepreneur.activityType === 'service'
-  const cap = isService && client ? await getClientAnnualTotal(client.id, invoice.fiscalYear) : null
+  const cap =
+    isService && client
+      ? await getClientAnnualTotal(client.id, entrepreneur.id, invoice.fiscalYear)
+      : null
 
   const status = statusConfig[invoice.status] ?? statusConfig.draft
 

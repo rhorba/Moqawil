@@ -403,5 +403,24 @@
     "repatriation": "Rapatriement des devises dans un délai de 3 mois (réglementation des changes)",
     "cashWarning": "Paiement en espèces supérieur à 5 000 DH : le client ne peut pas déduire cette charge (CGI Article 193)",
     "cashPenalty": "Paiement en espèces supérieur à 20 000 DH : pénalité de 6 % applicable au client (CGI Article 193)"
+  },
+  "landing": {
+    "signIn": "Se connecter",
+    "heroEyebrow": "Fait pour les auto-entrepreneurs du Maroc",
+    "heroTitle": "La conformité auto-entrepreneur, sans y penser",
+    "heroSubtitle": "Suivez le plafond de 80 000 DH par client en temps réel, générez vos déclarations trimestrielles pré-remplies, et facturez en règle — en français et en arabe.",
+    "heroCta": "Commencer gratuitement",
+    "heroCtaSub": "Aucune carte bancaire requise",
+    "capTitle": "Le plafond de 80 000 DH, sous contrôle",
+    "capBody": "Chaque guide explique la règle des 80 000 DH par client — aucun autre outil ne la suit en temps réel. Un badge visible partout où un client apparaît, avant que la retenue de 30 % ne devienne un problème.",
+    "declarationTitle": "Déclaration trimestrielle pré-remplie",
+    "declarationBody": "Le formulaire Barid Al-Maghrib généré automatiquement à partir de vos factures payées. Imprimez, signez, déposez — sans ressaisir un seul chiffre.",
+    "invoiceTitle": "Facturation conforme, dès la première facture",
+    "invoiceBody": "Numérotation séquentielle sans trous, mentions légales obligatoires, TVA non applicable, taux BAM pour vos clients étrangers.",
+    "openSourceTitle": "Open source, auto-hébergeable",
+    "openSourceBody": "Code source public sous licence AGPL-3.0. Installez-le sur votre propre serveur, ou utilisez l'instance hébergée — gratuit dans les deux cas.",
+    "footerTagline": "Conçu pour les ~400 000 Marocains qui méritent de meilleurs outils.",
+    "footerGithub": "Code source",
+    "footerLicense": "AGPL-3.0 · Gratuit pour toujours"
   }
 }

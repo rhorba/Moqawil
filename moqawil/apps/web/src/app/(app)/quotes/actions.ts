@@ -338,7 +338,7 @@ export async function convertQuoteToInvoice(
   const issueDate = new Date().toISOString().slice(0, 10)
   if (entrepreneur.activityType === 'service') {
     const fiscalYear = new Date(issueDate).getFullYear()
-    const capData = await getClientAnnualTotal(quote.clientId, fiscalYear)
+    const capData = await getClientAnnualTotal(quote.clientId, entrepreneur.id, fiscalYear)
     const projectedTotal = capData.totalInvoicedMad + totalMad
 
     if (projectedTotal > PER_CLIENT_CAP_MAD && !capConfirmed) {
