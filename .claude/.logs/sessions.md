@@ -1,5 +1,21 @@
 # Session Log
 
+### 2026-08-11 SESSION_END — Sprint 10 (Hardening/Polish + Full Walkthrough Refresh) COMPLETE, CI confirmed green
+- **Completed**: Sprint 10 all 11 tasks (S10-01 through S10-11) across 4 batches.
+- **Key deliverables**:
+  - Doc-nav/README hardening: orphaned `guide-devis` page reconnected, new `guide-comptable.md` written, README version/feature-list refreshed, `.env.example`/`biome.json` gaps closed, coverage-gap spots reviewed with per-spot verdicts
+  - Walkthrough script extended from 22 to 34 screenshots: full devis flow, real rendered-PDF views for every generated document (invoice, invoice UBL, quote, declaration — previously just click-and-close), full accountant multi-actor flow (invite → accept → dashboard → drill-down → revoke)
+  - **Critical bug found and fixed, not in original scope**: all 4 PDF/XML generation routes had been silently returning HTTP 500 in both dev and production since Sprint 1 — never caught because no test had ever checked real PDF bytes. Root cause: a webpack/RSC bundling incompatibility with `@react-pdf/renderer`'s reconciler architecture, plus an upstream `@react-pdf/renderer` regression across `4.1.6`-`4.5.1`. Fixed via `webpack.externals` + an exact version pin to `4.6.0`. A genuinely separate pre-existing gap found alongside it — no Arabic font was ever registered despite mandatory bilingual legal text — fixed with a base64-embedded Noto Sans Arabic (SIL OFL 1.1) font. New regression test `pdf-templates.test.ts` asserts real `%PDF` magic bytes, the first test in the project's history to check actual PDF output. Full incident detail in `.logs/risks.md`.
+  - Mid-sprint user feedback addressed: "dont forget to scrolldown in the video and the screenshots" — walkthrough screenshots were viewport-only, truncating long pages (Settings' accountant section worst affected). Fixed with `fullPage: true` + a `scrollThroughPage()` helper.
+  - Post-push user feedback addressed: recorded video only showed the browser window's top-left corner. Root cause: this machine's 150% Windows display scaling (1920x1080 physical / 1280x720 logical) made Chromium's `--window-size` argument render larger in physical pixels than ffmpeg's fixed 1280x720 physical-pixel capture region. Fixed with `--force-device-scale-factor=1`; verified by extracting and visually inspecting frames from the re-recorded video.
+  - Fresh screenshot set (34 PNGs) + fresh 94.6s screen-recorded video committed, replacing the stale pre-Sprint-6 set.
+  - CI run `31460125281` (final commit `1d7fa67`): all 6 jobs green (Unit Tests, TypeCheck, Security, Lint, Build, E2E).
+- **Blocked**: None.
+- **Real bugs found and fixed during verification, not deferred**: the critical PDF-generation bug (above); a test fixture ICE collision (`accountant-db-integration.test.ts` reused an ICE already used by `quote-db-integration.test.ts`) that CI's fresh database caught but the persistent local dev DB did not reproduce; the video-capture DPI-scaling bug (above).
+- **Next session**: Sprint 11 (launch/distribution content, per CLAUDE.md §16) is scoped and ready to start. Separately, the user has requested an updated pitch presentation in both `.docx` and `.pptx` formats, to be produced now that Sprint 10 is closed — not yet started. Blocked-on-owner items remain untouched: DGI e-invoicing legal citation, DGI/xHub sandbox registration, Barid eSign account.
+- **Open risks**: none new this sprint (invite-spam/email-enumeration accepted risk from Sprint 9 still open, unchanged).
+---
+
 ### 2026-08-10 SESSION_END — Sprint 9 (Accountant Multi-Client Dashboard, v0.2) COMPLETE, CI confirmed green
 - **Completed**: Sprint 9 all 17 tasks (S9-01 through S9-17) across 6 batches.
 - **Key deliverables**:

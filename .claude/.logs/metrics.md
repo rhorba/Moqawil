@@ -10,7 +10,7 @@
 - **Verification**: `pnpm lint` clean (129 files). Full Vitest suite 119/119 passing (3 intentionally skipped). Coverage on included files: 100% stmts/lines, 100% funcs, 92.78% branch — comfortably over the 80% gate (Framework Rule 2). `pnpm build` clean on a freshly wiped `.next`. Walkthrough dry-run then real recording both passed 1/1, producing 34 screenshots + a 98s video, spot-checked visually (Arabic PDF text renders correctly, cap badges show real data, Settings page no longer truncated).
 - **New dependency**: none (the `@react-pdf/renderer` version pin is an existing dependency's version change, not a new package).
 - **Velocity**: 10 sprints (+ 3.5) completed.
-- **Pushed**: see `.logs/activity.md` for commit hash once pushed.
+- **Pushed**: `git push origin master` at sprint close (Framework Rule 3) — commit `1fa7271`, plus two same-session follow-up fixes surfaced by CI and by the user watching the recording: `f024466` (test fixture ICE collision CI's fresh DB caught, not reproducible against the persistent local dev DB) and `1d7fa67` (walkthrough video only showed the browser window's top-left corner — this machine's 150% Windows display scaling made Chromium's `--window-size` render larger in physical pixels than ffmpeg's fixed capture region; fixed with `--force-device-scale-factor=1`, re-recorded, verified via extracted frames). Final CI run `31460125281` on `1d7fa67`: all 6 jobs green (Unit Tests, TypeCheck, Security, Lint, Build, E2E).
 ---
 
 ### 2026-08-10 SPRINT_SNAPSHOT — Sprint 9 (Accountant Multi-Client Dashboard, v0.2)
