@@ -1,5 +1,13 @@
 # Session Log
 
+### 2026-08-11 SESSION_END — Session close (Sprint 10 + pitch deck refresh, all pushed)
+- User ended the session here; explicitly deferred further work to next session.
+- Everything committed and pushed to `origin master` (final commit `030ea67`); working tree clean (only the local, never-committed-this-session `.claude/settings.local.json` permission-allowlist diff remains, as at session start).
+- Since the Sprint 10 SESSION_END entry below, one more deliverable shipped: the pitch deck (`pitch/Moqawil-Pitch-Deck.pptx`) and memo (`pitch/Moqawil-Pitch-Memo.docx`) were updated to replace the stale v0.1-era Roadmap with accurate v0.2-shipped scope (devis, UBL 2.1 e-invoicing, accountant dashboard) and a corrected "blocked on external access" line for DGI/xHub + Barid eSign. Deck slide 7's two dashboard screenshots were refreshed (lossless, MD5-verified swap); slides 8-9 were deliberately left untouched — their screenshots predate Sprint 6-9 but replacing them needs image cropping to a different aspect ratio that couldn't be visually verified on this machine (no LibreOffice/renderer available). Worth a follow-up pass with visual verification tooling if the deck needs to look fully current end-to-end.
+- Local production server (`next start`, was serving the walkthrough recordings on port 3000) stopped as end-of-session cleanup.
+- **Next session**: Sprint 11 (launch/distribution content per CLAUDE.md §16) is scoped and ready to start — this is the explicit next item the user named. Optionally also: finish the deck's slides 8-9 screenshot refresh if wanted. Blocked-on-owner items remain untouched: DGI e-invoicing legal citation, DGI/xHub sandbox registration, Barid eSign account.
+---
+
 ### 2026-08-11 SESSION_END — Sprint 10 (Hardening/Polish + Full Walkthrough Refresh) COMPLETE, CI confirmed green
 - **Completed**: Sprint 10 all 11 tasks (S10-01 through S10-11) across 4 batches.
 - **Key deliverables**:
