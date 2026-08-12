@@ -1,5 +1,17 @@
 # Project Metrics
 
+### 2026-08-13 SPRINT_SNAPSHOT -- Sprint 13 (Preprod CI/CD Deployment Pipeline)
+- **Planned**: 5 tasks (S13-01 through S13-05), 4 batches
+- **Completed**: 5/5 (100%)
+- **Blocked**: 0 code-side. Owner-only execution remains: provisioning the preprod VPS, DNS, GitHub Environment (`preprod`) + 5 secrets, and clicking "Run workflow" for the first live deploy (`docs/preprod-deployment-moqawil.md` §1-5).
+- **Scope**: `docker-compose.preprod.yml` (new, additive, standalone -- self-host path untouched), `.github/workflows/deploy-preprod.yml` (manual-trigger build-push-to-GHCR then SSH-deploy-and-health-check pipeline), `docs/preprod-deployment-moqawil.md` (owner setup guide: cheap-VPS pick, DNS, secrets, first run, security notes).
+- **Real issue found and fixed this sprint**: initial workflow draft interpolated the untrusted `workflow_dispatch` `ref` input directly into a `run:` shell script body for the remote SSH command -- a GitHub Actions command-injection class. Fixed before shipping: `ref` now only ever reaches `actions/checkout`'s `with:` parameter; the remote's compose config syncs from a fixed `origin/master`, and the deployed app version is pinned by a computed, injection-safe `DEPLOY_TAG` (git short-SHA).
+- **Verification**: new YAML parses cleanly under `yaml.safe_load`; `pnpm lint` clean (143 files); `git status` confirms zero application-code files touched (only new sprint/workflow/compose/doc files + the pre-existing 2026-08-13 decisions.md entry from this session's earlier advisory conversation). No live deploy run this session -- requires owner-provisioned VPS/secrets.
+- **New dependency**: none (uses existing Dockerfile; GHCR auth via the workflow's built-in `GITHUB_TOKEN`, no new registry service).
+- **Velocity**: 13 sprints (+ 3.5) completed.
+- **Pushed**: `git push origin master` at sprint close (Framework Rule 3) -- see commit hash in this entry's follow-up or `git log`.
+---
+
 ### 2026-08-12 SPRINT_SNAPSHOT -- Sprint 12 (Launch Readiness & Distribution)
 - **Planned**: 12 tasks (S12-01 through S12-12), 5 batches
 - **Completed**: 12/12 (100%)

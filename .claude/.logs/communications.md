@@ -1,5 +1,19 @@
 # Communications Log
 
+### 2026-08-13 HANDOFF — DevOps/DevSecOps → Security Engineer → Project Monitor (Sprint 13)
+- **Task**: S13-01/S13-02 (preprod compose override + deploy-preprod.yml pipeline)
+- **Context**: Built the GHCR-image-based CD pipeline and its owner setup doc per the sprint-13.md design (🟡 balanced: prebuilt image + SSH pull-and-restart, manual trigger only).
+- **Need**: Security Engineer to review the new external data flow (SSH + registry push) before the sprint closes, per Framework Rule 5.
+- **Constraints**: no changes to `docker-compose.yml`/`Dockerfile`/`Caddyfile`; workflow_dispatch only, no auto-deploy; GHCR auth via existing `GITHUB_TOKEN`, no new registry secret.
+---
+
+### 2026-08-13 HANDOFF — Security Engineer → Project Monitor (Sprint 13)
+- **Task**: S13-04 (security review of deploy-preprod.yml)
+- **Context**: Reviewed SSH-key handling (dedicated tempfile, umask 077, chmod 600, always-cleanup), GHCR image scope (private by default, VPS pulls via owner's own read-scoped PAT), and secret blast radius (bounded to the preprod box, environment-scoped secrets). Found and fixed one real issue: the `ref` workflow_dispatch input was being interpolated directly into a `run:` script body for the remote SSH command — a GitHub Actions command-injection class (CWE-78-adjacent) — before this handoff was logged.
+- **Need**: Project Monitor to verify no app-code regression, log the sprint snapshot, and push.
+- **Constraints**: fix applied in-place (`ref` now only flows through `actions/checkout`'s `with:` field; remote compose config tracks a fixed `origin/master`, app version pinned by computed `DEPLOY_TAG`) — not left as a flagged-but-unfixed finding, since this pipeline hadn't shipped yet.
+---
+
 ### 2026-08-10 DECISION — Owner approved Sprint 6 scope: devis (quote) management, a v0.2 feature
 - **Specialist**: Orchestrator
 - **Summary**: CLAUDE.md §5 lists "Customer portal / quote (devis) management" as out-of-scope for v0.1, deferred to v0.2 — §17 requires asking before building anything on that list. Presented 3 candidate Sprint 6 directions (devis management, accountant multi-client dashboard, launch-prep/distribution content); owner chose devis management.

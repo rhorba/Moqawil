@@ -1,0 +1,116 @@
+name: Deploy Preprod
+
+# Sprint 13 — manual-only CI/CD pipeline test to a cheap preprod VPS.
+# Not wired to push/PR on purpose: no staging branch exists yet, and this is a one-off pipeline
+# test the owner triggers deliberately, not a continuous auto-deploy environment.
+# See docs/preprod-deployment-moqawil.md for the owner-executed setup this depends on.
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Git ref to deploy (branch, tag, or SHA)"
+        required: false
+        default: "master"
+
+concurrency:
+  group: deploy-preprod
+  cancel-in-progress: false
+
+env:
+  IMAGE: ghcr.io/rhorba/moqawil-preprod
+
+jobs:
+  build-and-push:
+    name: Build & push image (GHCR)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      tag: ${{ steps.tag.outputs.value }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Resolve deploy tag (short SHA of the checked-out ref)
+        id: tag
+        run: echo "value=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push (mirrors the self-host Dockerfile — same image, different label)
+        uses: docker/build-push-action@v6
+        with:
+          context: moqawil
+          file: moqawil/Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:${{ steps.tag.outputs.value }}
+            ${{ env.IMAGE }}:preprod-latest
+
+  deploy:
+    name: Deploy to preprod VPS
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    environment: preprod
+    env:
+      DEPLOY_TAG: ${{ needs.build-and-push.outputs.tag }}
+    steps:
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          umask 077
+          printf '%s\n' "${{ secrets.PREPROD_SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "${{ secrets.PREPROD_SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Deploy (pull image + restart via the preprod compose file)
+        # Security note: `inputs.ref` (workflow_dispatch, user-controlled) is deliberately never
+        # interpolated into this or any other `run:` script body — GitHub Actions substitutes
+        # `${{ }}` as raw text before bash parses the script, so doing that is a command-injection
+        # vector (the runner would execute attacker-controlled text with GITHUB_TOKEN + this SSH
+        # key in scope). `ref` is only ever used in `actions/checkout`'s `with:` field above, which
+        # is a plain action parameter, not a shell string. The remote box always syncs its compose
+        # config from `origin/master` (a fixed, non-attacker-controlled value); the actual app
+        # version deployed is pinned precisely by DEPLOY_TAG (a computed git short-SHA, safe by
+        # construction), not by re-deriving `ref` on the remote host.
+        env:
+          SSH_HOST: ${{ secrets.PREPROD_SSH_HOST }}
+          SSH_USER: ${{ secrets.PREPROD_SSH_USER }}
+          APP_DIR: ${{ secrets.PREPROD_APP_DIR }}
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "$SSH_USER@$SSH_HOST" \
+            "cd '$APP_DIR' && \
+             git fetch origin && \
+             git reset --hard origin/master && \
+             DEPLOY_TAG='$DEPLOY_TAG' docker compose -f docker-compose.preprod.yml pull web && \
+             DEPLOY_TAG='$DEPLOY_TAG' docker compose -f docker-compose.preprod.yml up -d && \
+             docker compose -f docker-compose.preprod.yml exec -T web pnpm db:migrate"
+
+      - name: Health check (retries — container/HTTPS cert may need a moment on first deploy)
+        env:
+          PREPROD_APP_URL: ${{ secrets.PREPROD_APP_URL }}
+        run: |
+          for i in $(seq 1 10); do
+            status=$(curl -s -o /dev/null -w "%{http_code}" "https://$PREPROD_APP_URL/api/health" || echo "000")
+            if [ "$status" = "200" ]; then
+              echo "Healthy (attempt $i)"
+              exit 0
+            fi
+            echo "Attempt $i: status $status, retrying in 10s..."
+            sleep 10
+          done
+          echo "Health check failed after 10 attempts"
+          exit 1
+
+      - name: Clean up SSH key
+        if: always()
+        run: rm -f ~/.ssh/deploy_key
