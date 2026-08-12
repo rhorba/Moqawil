@@ -9,7 +9,7 @@
 - **Verification**: new YAML parses cleanly under `yaml.safe_load`; `pnpm lint` clean (143 files); `git status` confirms zero application-code files touched (only new sprint/workflow/compose/doc files + the pre-existing 2026-08-13 decisions.md entry from this session's earlier advisory conversation). No live deploy run this session -- requires owner-provisioned VPS/secrets.
 - **New dependency**: none (uses existing Dockerfile; GHCR auth via the workflow's built-in `GITHUB_TOKEN`, no new registry service).
 - **Velocity**: 13 sprints (+ 3.5) completed.
-- **Pushed**: `git push origin master` at sprint close (Framework Rule 3) -- see commit hash in this entry's follow-up or `git log`.
+- **Pushed**: `git push origin master` at sprint close (Framework Rule 3) -- commit `5e4be5d`.
 ---
 
 ### 2026-08-12 SPRINT_SNAPSHOT -- Sprint 12 (Launch Readiness & Distribution)
