@@ -9,7 +9,7 @@
 - **Verification**: `pnpm typecheck` clean across 6 workspace projects. `pnpm lint` clean (1 pre-existing formatting drift in `smoke.spec.ts` auto-fixed). Full Vitest 192 passing / 7 skipped (tax-engine 68/4, web 124/3). Coverage on gated files 100% stmts/100% funcs/100% lines/92.78% branch -- clears Framework Rule 2's 80% gate, unchanged from Sprint 11 (no regression). Playwright: 21/21 passing / 3 skipped, verified against a real `next start` production server (matching CI) after an initial `next dev` run hit the project's already-documented cold-compile flakiness class -- not a regression, confirmed by the clean production-server run. `moqawil/docs` Docusaurus build green for both `fr` and `ar` locales with the new articles live.
 - **New dependency**: none.
 - **Velocity**: 12 sprints (+ 3.5) completed.
-- **Pushed**: pending -- `git push origin master` to follow this snapshot entry (Framework Rule 3).
+- **Pushed**: `git push origin master` at sprint close (Framework Rule 3) -- commit `f2ce579`.
 ---
 
 ### 2026-08-11 SPRINT_SNAPSHOT — Sprint 11 (SaaS Readiness: Multi-Tenant Hosting)
