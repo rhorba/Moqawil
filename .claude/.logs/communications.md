@@ -35,3 +35,38 @@
 - Need: Full verification pass (S9-16) — build, coverage gate, full Playwright suite with --workers=1.
 - Constraints: All fixes re-verified — typecheck clean, accountant-db-integration.test.ts 9/9 passing, accountant-dashboard.spec.ts e2e passing.
 ---
+
+### [2026-08-12] HANDOFF — PM/Security Engineer -> Security Engineer
+- Task: S12-01, S12-02, S12-03 (Batch 1 legal drafts)
+- Context: Wrote docs/terms-of-service-moqawil.md, docs/privacy-policy-moqawil.md, docs/cndp-registration-checklist-moqawil.md. All drafts, all bracketed placeholders for real operator legal-entity info, all explicitly marked pending lawyer review / not in effect. Self-host vs hosted distinction kept explicit in both legal docs per security-moqawil.md.
+- Need: Batch 2 -- pentest scope doc + security posture summary.
+- Constraints: None of these are to be linked from the live product or treated as final.
+---
+
+### [2026-08-12] HANDOFF -- Security Engineer -> DevOps/DevSecOps
+- Task: S12-04, S12-05 (Batch 2 security audit prep)
+- Context: Wrote docs/pentest-scope-moqawil.md (grey-box scope brief citing the Sprint 9 + Sprint 11 internal IDOR audits, CI coverage already in place, 5 concrete human-required test areas) and docs/security-posture-summary-moqawil.md (one-pager for prospects/auditors).
+- Need: Batch 3 -- deployment runbook (VPS/DNS/Docker/Caddy/backups/monitoring).
+- Constraints: Pentest doc explicitly flags production must not be tested with real tenant PII without a staging env + written authorization.
+---
+
+### [2026-08-12] HANDOFF -- DevOps/DevSecOps -> Copywriter/DevOps
+- Task: S12-06 (Batch 3 deployment runbook)
+- Context: Wrote docs/deployment-runbook-moqawil.md end to end (VPS sizing, DNS, provisioning, app deploy, HTTPS, cron backups wired to scripts/backup-db.sh, uptime monitoring via /api/health, post-deploy checklist). Verified against real docker-compose.yml/Caddyfile/.env.example rather than assuming -- found and flagged a real inconsistency: docker-compose.yml drives Caddy via caddy-docker-proxy labels + APP_DOMAIN, but the checked-in static Caddyfile (with its security headers) is not actually wired into that path. Not fixed here (architecture decision, not a runbook typo) -- flagged for owner/DevOps follow-up.
+- Need: Batch 4 -- launch/distribution content (blog posts, CHANGELOG check, announcement drafts, outreach list).
+- Constraints: Runbook explicitly separates staging (for pentest) from production.
+---
+
+### [2026-08-12] HANDOFF -- Copywriter/DevOps -> Tester
+- Task: S12-07 (Batch 4 bilingual blog posts)
+- Context: Wrote 3 FR articles under moqawil/docs/docs/ (declaration CA 2026, plafond 80K DH, eviter perte statut), each with a matching AR translation in moqawil/docs/i18n/ar/docusaurus-plugin-content-docs/current/, wired into an Articles sidebar category.
+- Need: Verify docs site builds for both locales.
+- Constraints: FR primary, AR full translation not stub.
+---
+
+### [2026-08-12] HANDOFF -- Copywriter/PM -> Tester/Project Monitor
+- Task: S12-08, S12-09, S12-10 (rest of Batch 4)
+- Context: Wrote moqawil/CHANGELOG.md (version history grounded in .logs/metrics.md, no fabricated version tags). Verified LICENSE (AGPL-3.0, fixed from stale MIT) and packages/tax-engine/LICENSE (Apache-2.0) both correct. Drafted docs/announcement-drafts-moqawil.md (5 channels, all pointed at the self-hosted GitHub repo, not a hosted product, per this sprints sequencing rule). Wrote docs/accountant-outreach-list-moqawil.md -- deliberately a sourcing framework + template rather than fabricated named contacts, since a live web search could not turn up independently verifiable individuals; one real unverified lead flagged.
+- Need: Batch 5 -- full verification (typecheck/lint/vitest/playwright), README test-count badge refresh with the authoritative number from this run, sprint snapshot, git push.
+- Constraints: None of the 5 announcement drafts get submitted without per-post user confirmation in chat.
+---

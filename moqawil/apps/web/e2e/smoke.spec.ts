@@ -5,7 +5,9 @@ test.describe('Sprint 11 — Public landing page', () => {
     const response = await page.goto('/')
     expect(response?.status()).toBe(200)
     await expect(page.getByRole('heading', { name: /conformité auto-entrepreneur/i })).toBeVisible()
-    await expect(page.getByRole('link', { name: /se connecter|commencer gratuitement/i }).first()).toBeVisible()
+    await expect(
+      page.getByRole('link', { name: /se connecter|commencer gratuitement/i }).first()
+    ).toBeVisible()
   })
 
   test('landing page CTA reaches sign-in', async ({ page }) => {

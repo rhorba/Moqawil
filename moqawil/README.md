@@ -1,6 +1,6 @@
 # Moqawil — Toolkit de conformité auto-entrepreneur marocain
 
-![Version](https://img.shields.io/badge/version-0.2.0-blue) ![Licence](https://img.shields.io/badge/licence-AGPL--3.0-green) ![Tests](https://img.shields.io/badge/tests-180%20passing-brightgreen)
+![Version](https://img.shields.io/badge/version-0.2.0-blue) ![Licence](https://img.shields.io/badge/licence-AGPL--3.0-green) ![Tests](https://img.shields.io/badge/tests-192%20passing-brightgreen)
 
 > Suivi du plafond de 80 000 DH par client, alertes de seuil annuel, déclarations trimestrielles pré-remplies, facturation légale, devis, espace comptable.
 > **AGPL-3.0 · Open source · Auto-hébergeable · Gratuit**

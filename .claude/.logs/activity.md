@@ -363,3 +363,28 @@
 - **Status**: resolved
 - **Impact**: high
 ---
+
+### 2026-08-12 BATCH_COMPLETE -- Sprint 12 Batch 1 (Legal drafts)
+- S12-01 ToS, S12-02 Privacy Policy, S12-03 CNDP checklist -- all drafted, all owner-review-pending
+---
+
+### 2026-08-12 BATCH_COMPLETE -- Sprint 12 Batch 2 (Security audit prep)
+- S12-04 pentest scope doc, S12-05 security posture summary -- both drafted
+---
+
+### 2026-08-12 BATCH_COMPLETE -- Sprint 12 Batch 3 (Deployment runbook)
+- S12-06 done -- docs/deployment-runbook-moqawil.md. Found real Caddyfile/caddy-docker-proxy wiring inconsistency, logged not fixed (out of scope for a runbook).
+---
+
+### 2026-08-12 TASK_VERIFIED -- S12-07 docs build (Tester)
+- pnpm build in moqawil/docs succeeded for both fr and ar locales with the 3 new articles wired into the Articles sidebar category. No broken links, no build errors.
+---
+
+### 2026-08-12 BATCH_COMPLETE -- Sprint 12 Batch 4 (Launch & distribution content)
+- S12-07 3 bilingual blog posts (FR+AR, docs site build verified both locales), S12-08 CHANGELOG + README/LICENSE check, S12-09 5 announcement drafts, S12-10 accountant outreach framework -- all done
+---
+
+### 2026-08-12 BATCH_COMPLETE -- Sprint 12 Batch 5 (Verify)
+- S12-11: typecheck clean (6 workspace projects). Lint: 1 pre-existing formatting error in apps/web/e2e/smoke.spec.ts (Sprint 11 leftover, unrelated to this session's changes) auto-fixed via biome --write, then clean. Full Vitest: tax-engine 68 passed/4 skipped, web 124 passed/3 skipped = 192 passing total. Coverage on gated files: 100% stmts/100% funcs/100% lines/92.78% branch -- clears the 80% gate (Framework Rule 2), matches Sprint 11's number exactly (no regression). Playwright: first run against `next dev` produced 6 failures, all page.goto timeouts/ERR_ABORTED on cold-compiled routes -- a known flakiness class this project's own CI already works around by using `next start` instead of `next dev` (see playwright.config.ts comment). Rebuilt production (`pnpm build` clean, 29 routes) and re-ran the full suite against a real `next start` server on port 3003, matching CI exactly: 21/21 passing, 3 intentionally skipped -- confirms the next-dev failures were cold-compile flakiness, not a regression.
+- README test-count badge updated 180 -> 192 to match this run's authoritative Vitest total.
+---

@@ -1,5 +1,17 @@
 # Project Metrics
 
+### 2026-08-12 SPRINT_SNAPSHOT -- Sprint 12 (Launch Readiness & Distribution)
+- **Planned**: 12 tasks (S12-01 through S12-12), 5 batches
+- **Completed**: 12/12 (100%)
+- **Blocked**: 0 code-side. All owner-only execution steps remain exactly that -- signing ToS/Privacy Policy into effect, filing with CNDP, hiring a pentest vendor, buying a VPS/domain, running the deployment runbook, submitting any of the 5 announcement drafts, and picking real named accountants off the sourcing list in docs/accountant-outreach-list-moqawil.md.
+- **Scope**: Batch 1 legal drafts (ToS, Privacy Policy, CNDP checklist -- all explicitly pending-lawyer-review, not in effect). Batch 2 security audit prep (pentest scope doc citing the Sprint 9 + Sprint 11 internal IDOR audits, security-posture one-pager). Batch 3 deployment runbook (VPS/DNS/Docker/Caddy/backups/monitoring; flagged a real Caddyfile/caddy-docker-proxy wiring inconsistency, not fixed -- architecture decision for a future sprint). Batch 4 launch content: 3 bilingual (FR+AR) SEO articles wired into the docs site and build-verified for both locales, CHANGELOG.md (new), README/LICENSE verification (root LICENSE was stale MIT, corrected to AGPL-3.0), 5 announcement drafts (r/Maroc, r/MoroccanDevs, FB group, LinkedIn, Show HN -- all pointed at the self-hosted GitHub repo, not a not-yet-legally-ready hosted product), accountant outreach framework (deliberately not a fabricated name list -- a live web search couldn't surface independently verifiable individuals, so this batch produced a sourcing method + template instead per the same owner-verifies-real-identity pattern as Batches 1-3).
+- **Real issue found and fixed this sprint**: root `LICENSE` file was still the original MIT scaffold text, contradicting root `CLAUDE.md` section 13 and the README's own AGPL-3.0 badge since Sprint 0. Replaced with the real AGPL-3.0 license text.
+- **Verification**: `pnpm typecheck` clean across 6 workspace projects. `pnpm lint` clean (1 pre-existing formatting drift in `smoke.spec.ts` auto-fixed). Full Vitest 192 passing / 7 skipped (tax-engine 68/4, web 124/3). Coverage on gated files 100% stmts/100% funcs/100% lines/92.78% branch -- clears Framework Rule 2's 80% gate, unchanged from Sprint 11 (no regression). Playwright: 21/21 passing / 3 skipped, verified against a real `next start` production server (matching CI) after an initial `next dev` run hit the project's already-documented cold-compile flakiness class -- not a regression, confirmed by the clean production-server run. `moqawil/docs` Docusaurus build green for both `fr` and `ar` locales with the new articles live.
+- **New dependency**: none.
+- **Velocity**: 12 sprints (+ 3.5) completed.
+- **Pushed**: pending -- `git push origin master` to follow this snapshot entry (Framework Rule 3).
+---
+
 ### 2026-08-11 SPRINT_SNAPSHOT — Sprint 11 (SaaS Readiness: Multi-Tenant Hosting)
 - **Planned**: 13 tasks (S11-01 through S11-13), 5 batches
 - **Completed**: 13/13 (100%)

@@ -181,3 +181,17 @@
 - **Plan**: Execute Sprint 0 (scaffold) — pnpm monorepo + tax-engine + Drizzle schema + Next.js app + Docker Compose
 - **Auto-handoff**: ENABLED — 🟡 BALANCED choices throughout
 ---
+
+### 2026-08-12 SESSION_START
+- **Context**: Resuming after Sprint 12 was planned-but-not-started last session (explicit instruction to stop after planning).
+- **Resuming from**: Sprint 12 backlog fully drafted (Batches 1-5), 0 tasks executed.
+- **Plan**: Execute Sprint 12 Batches 1-5 top to bottom per auto-handoff protocol.
+- **Auto-handoff**: ENABLED — BALANCED
+---
+
+### 2026-08-12 SESSION_END
+- **Completed**: Sprint 12 (Launch Readiness & Distribution) -- all 12 tasks, 5 batches, 100%.
+- **State**: 0 blockers code-side. Every owner-only step (sign ToS/Privacy into effect, file CNDP, hire pentest vendor, buy VPS/domain, run the runbook, submit any of the 5 announcement drafts, pick real accountant names) is left exactly that -- owner action.
+- **Next session**: no code sprint queued. Candidates for the owner to choose from: Stripe/CMI billing (explicitly deferred from Sprint 11), or executing Sprint 12's owner-only launch steps and then coming back for whatever real usage surfaces.
+- **Verification**: typecheck/lint clean, Vitest 192 passing/7 skipped, coverage gate clears (100/100/100/92.78%), Playwright 21/21 passing/3 skipped verified against a real next-start build.
+---

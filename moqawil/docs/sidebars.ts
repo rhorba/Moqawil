@@ -15,6 +15,15 @@ const sidebars: SidebarsConfig = {
         'guide-comptable',
       ],
     },
+    {
+      type: 'category',
+      label: 'Articles',
+      items: [
+        'article-declaration-ca-2026',
+        'article-plafond-80000-dh',
+        'article-eviter-perte-statut',
+      ],
+    },
   ],
 }
 
