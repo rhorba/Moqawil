@@ -12,6 +12,11 @@ on:
         description: "Git ref to deploy (branch, tag, or SHA)"
         required: false
         default: "master"
+      wipe_data:
+        description: "DESTRUCTIVE: truncate every app table on the preprod DB before deploying (fresh demo state). Never applies to self-host or any other environment."
+        type: boolean
+        required: false
+        default: false
 
 concurrency:
   group: deploy-preprod
@@ -79,6 +84,28 @@ jobs:
           printf '%s\n' "${{ secrets.PREPROD_SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -p "$SSH_PORT" -H "${{ secrets.PREPROD_SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Wipe preprod database (opt-in, destructive)
+        # Only runs when explicitly requested via the workflow_dispatch `wipe_data` input --
+        # never on a normal deploy. Truncates every app table (CASCADE handles FK ordering) so
+        # the next sign-in lands on onboarding with a genuinely empty account, for a from-scratch
+        # demo/walkthrough. Deliberately excludes drizzle's own migration-journal table (lives in
+        # a separate `drizzle` schema, never named here) so migration history stays intact --
+        # `pnpm db:migrate` in the Deploy step below remains a safe no-op replay, not a re-run.
+        # Preprod is disposable test infrastructure with no real customer data (see
+        # docs/preprod-deployment-moqawil.md) -- this is never wired to self-host or any
+        # environment that could hold real invoices (CGI Article 211's 10-year retention rule
+        # governs the app's own UI/actions, not this infra-level reset of a throwaway test box).
+        if: inputs.wipe_data == 'true'
+        env:
+          SSH_HOST: ${{ secrets.PREPROD_SSH_HOST }}
+          SSH_USER: ${{ secrets.PREPROD_SSH_USER }}
+          SSH_PORT: ${{ secrets.PREPROD_SSH_PORT }}
+          APP_DIR: ${{ secrets.PREPROD_APP_DIR }}
+        run: |
+          ssh -p "$SSH_PORT" -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "$SSH_USER@$SSH_HOST" \
+            "cd '$APP_DIR' && docker compose -f docker-compose.preprod.yml exec -T postgres \
+             sh -c 'psql -U \"\$POSTGRES_USER\" -d moqawil -c \"TRUNCATE TABLE users, accounts, sessions, verification_tokens, entrepreneurs, clients, invoices, invoice_lines, quotes, quote_lines, quarterly_declarations, accountant_links CASCADE;\"'"
 
       - name: Sync app secrets to VPS .env
         # GitHub Environment secrets are the source of truth for these app-level values -- this
