@@ -65,12 +65,14 @@ jobs:
       DEPLOY_TAG: ${{ needs.build-and-push.outputs.tag }}
     steps:
       - name: Configure SSH
+        env:
+          SSH_PORT: ${{ secrets.PREPROD_SSH_PORT }}
         run: |
           mkdir -p ~/.ssh
           umask 077
           printf '%s\n' "${{ secrets.PREPROD_SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H "${{ secrets.PREPROD_SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+          ssh-keyscan -p "$SSH_PORT" -H "${{ secrets.PREPROD_SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
 
       - name: Deploy (pull image + restart via the preprod compose file)
         # Security note: `inputs.ref` (workflow_dispatch, user-controlled) is deliberately never
@@ -85,9 +87,10 @@ jobs:
         env:
           SSH_HOST: ${{ secrets.PREPROD_SSH_HOST }}
           SSH_USER: ${{ secrets.PREPROD_SSH_USER }}
+          SSH_PORT: ${{ secrets.PREPROD_SSH_PORT }}
           APP_DIR: ${{ secrets.PREPROD_APP_DIR }}
         run: |
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "$SSH_USER@$SSH_HOST" \
+          ssh -p "$SSH_PORT" -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "$SSH_USER@$SSH_HOST" \
             "cd '$APP_DIR' && \
              git fetch origin && \
              git reset --hard origin/master && \
