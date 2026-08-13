@@ -21,8 +21,11 @@ test.describe('Sprint 0 Smoke Tests', () => {
   test('sign-in page loads and shows auth options', async ({ page }) => {
     await page.goto('/sign-in')
     await expect(page).toHaveTitle(/Moqawil/)
-    await expect(page.getByText('Continuer avec Google')).toBeVisible()
-    await expect(page.getByPlaceholder(/email/i)).toBeVisible()
+    // Google and Resend providers are conditionally rendered on AUTH_GOOGLE_*/AUTH_RESEND_KEY
+    // being set (see sign-in/page.tsx) — CI only configures E2E_TEST_SECRET, so the
+    // test-credentials provider is the one guaranteed to render here.
+    await expect(page.getByTestId('test-credentials-form')).toBeVisible()
+    await expect(page.getByPlaceholder('test@example.com')).toBeVisible()
   })
 
   test('unauthenticated access to dashboard redirects to sign-in', async ({ page }) => {
