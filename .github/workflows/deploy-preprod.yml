@@ -96,7 +96,7 @@ jobs:
         # docs/preprod-deployment-moqawil.md) -- this is never wired to self-host or any
         # environment that could hold real invoices (CGI Article 211's 10-year retention rule
         # governs the app's own UI/actions, not this infra-level reset of a throwaway test box).
-        if: inputs.wipe_data == 'true'
+        if: ${{ inputs.wipe_data }}
         env:
           SSH_HOST: ${{ secrets.PREPROD_SSH_HOST }}
           SSH_USER: ${{ secrets.PREPROD_SSH_USER }}
