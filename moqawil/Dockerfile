@@ -53,7 +53,13 @@ COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/public ./apps/web/public
 
-# Copy pnpm-lock so migrations can be run at start if needed
+# drizzle-kit (a packages/db devDependency) is never in the Next.js standalone trace above --
+# standalone only bundles what the Next.js server itself imports, not separate CLI invocations
+# like `pnpm --filter @moqawil/db migrate`. Copy the full workspace node_modules so that command
+# actually works inside this image, at the cost of the "lean standalone" size savings. A future
+# optimization could split this into a dedicated migrator stage instead.
+COPY --from=builder --chown=nextjs:nodejs /app/pnpm-workspace.yaml /app/package.json ./
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/packages/db ./packages/db
 
 USER nextjs
