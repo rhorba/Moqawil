@@ -1,5 +1,5 @@
 import { DrizzleAdapter } from '@auth/drizzle-adapter'
-import { db, users } from '@moqawil/db'
+import { accounts, db, sessions, users, verificationTokens } from '@moqawil/db'
 import { eq } from 'drizzle-orm'
 import NextAuth, { type NextAuthConfig } from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
@@ -11,7 +11,18 @@ const config: NextAuthConfig = {
   // otherwise rejects every request with UntrustedHost. Safe here: single-operator,
   // single-tenant self-host, not a multi-tenant host-header-spoofing risk.
   trustHost: true,
-  adapter: DrizzleAdapter(db),
+  // Without an explicit schema, DrizzleAdapter falls back to its own internal table definitions
+  // ("user"/"account", singular) instead of ours ("users"/"accounts") — every adapter query
+  // (OAuth account linking, in particular) fails with a Postgres "relation does not exist" error.
+  // Never caught before: the JWT session strategy below means the adapter is barely touched by
+  // the Credentials/email flows this project's tests actually exercise, and Google sign-in
+  // (the one path that genuinely needs it) had never been configured until now.
+  adapter: DrizzleAdapter(db, {
+    usersTable: users,
+    accountsTable: accounts,
+    sessionsTable: sessions,
+    verificationTokensTable: verificationTokens,
+  }),
   providers: [
     // Google OAuth — only enabled when both credentials are configured
     ...(process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET
