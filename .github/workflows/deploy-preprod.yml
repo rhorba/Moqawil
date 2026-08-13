@@ -24,6 +24,7 @@ jobs:
   build-and-push:
     name: Build & push image (GHCR)
     runs-on: ubuntu-latest
+    environment: preprod
     permissions:
       contents: read
       packages: write
@@ -52,6 +53,11 @@ jobs:
           context: moqawil
           file: moqawil/Dockerfile
           push: true
+          # NEXT_PUBLIC_APP_URL is inlined into the client bundle at build time (webpack), unlike
+          # every other env var here — docker-compose.preprod.yml's `environment:` block cannot
+          # correct it after the fact. Must be the real preprod origin, not a placeholder.
+          build-args: |
+            NEXT_PUBLIC_APP_URL=https://${{ secrets.PREPROD_APP_URL }}
           tags: |
             ${{ env.IMAGE }}:${{ steps.tag.outputs.value }}
             ${{ env.IMAGE }}:preprod-latest
