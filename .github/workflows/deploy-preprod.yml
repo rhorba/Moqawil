@@ -80,6 +80,46 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -p "$SSH_PORT" -H "${{ secrets.PREPROD_SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
 
+      - name: Sync app secrets to VPS .env
+        # GitHub Environment secrets are the source of truth for these app-level values -- this
+        # step pushes them into the VPS's .env before every deploy, so rotating one in GitHub and
+        # re-running this workflow is enough (no manual SSH + nano on the box). Values are
+        # base64-encoded end-to-end so nothing about their content (quotes, `&`, etc.) can break
+        # shell quoting on either side -- deliberately not the `${{ }}`-in-run: injection class
+        # noted below either, since these are read from `env:` (real shell variables) not spliced
+        # as raw text into the script. Empty secrets are skipped so unset ones don't blank out an
+        # already-configured value on the box.
+        env:
+          SSH_HOST: ${{ secrets.PREPROD_SSH_HOST }}
+          SSH_USER: ${{ secrets.PREPROD_SSH_USER }}
+          SSH_PORT: ${{ secrets.PREPROD_SSH_PORT }}
+          APP_DIR: ${{ secrets.PREPROD_APP_DIR }}
+          AUTH_GOOGLE_ID: ${{ secrets.AUTH_GOOGLE_ID }}
+          AUTH_GOOGLE_SECRET: ${{ secrets.AUTH_GOOGLE_SECRET }}
+          AUTH_URL: ${{ secrets.AUTH_URL }}
+          AUTH_RESEND_KEY: ${{ secrets.AUTH_RESEND_KEY }}
+        run: |
+          B64_GID=$(printf '%s' "$AUTH_GOOGLE_ID" | base64 -w0)
+          B64_GSECRET=$(printf '%s' "$AUTH_GOOGLE_SECRET" | base64 -w0)
+          B64_AUTH_URL=$(printf '%s' "$AUTH_URL" | base64 -w0)
+          B64_RESEND=$(printf '%s' "$AUTH_RESEND_KEY" | base64 -w0)
+          ssh -p "$SSH_PORT" -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "$SSH_USER@$SSH_HOST" \
+            "APP_DIR='$APP_DIR' B64_GID='$B64_GID' B64_GSECRET='$B64_GSECRET' B64_AUTH_URL='$B64_AUTH_URL' B64_RESEND='$B64_RESEND' bash -s" <<'REMOTE_SCRIPT'
+          set -e
+          cd "$APP_DIR"
+          update_env() {
+            key="$1"; val="$2"
+            [ -z "$val" ] && return 0
+            grep -v "^${key}=" .env > .env.tmp || true
+            printf '%s=%s\n' "$key" "$val" >> .env.tmp
+            mv .env.tmp .env
+          }
+          update_env AUTH_GOOGLE_ID "$(printf '%s' "$B64_GID" | base64 -d)"
+          update_env AUTH_GOOGLE_SECRET "$(printf '%s' "$B64_GSECRET" | base64 -d)"
+          update_env AUTH_URL "$(printf '%s' "$B64_AUTH_URL" | base64 -d)"
+          update_env AUTH_RESEND_KEY "$(printf '%s' "$B64_RESEND" | base64 -d)"
+          REMOTE_SCRIPT
+
       - name: Deploy (pull image + restart via the preprod compose file)
         # Security note: `inputs.ref` (workflow_dispatch, user-controlled) is deliberately never
         # interpolated into this or any other `run:` script body — GitHub Actions substitutes
