@@ -167,7 +167,21 @@
       "Bash(mkdir -p /c/Users/moham/AppData/Local/Temp/claude/C--Users-moham-OneDrive---um5-ac-ma-Desktop-Moqawil/167bfd11-a2fb-402e-887c-47e353b9ca63/scratchpad)",
       "Bash(cp '/c/Users/moham/OneDrive - um5.ac.ma/Desktop/Moqawil/pitch/Moqawil-Pitch-Deck.pptx' /c/Users/moham/AppData/Local/Temp/claude/C--Users-moham-OneDrive---um5-ac-ma-Desktop-Moqawil/167bfd11-a2fb-402e-887c-47e353b9ca63/scratchpad/deck.pptx)",
       "Bash(cp '/c/Users/moham/OneDrive - um5.ac.ma/Desktop/Moqawil/pitch/Moqawil-Pitch-Memo.docx' /c/Users/moham/AppData/Local/Temp/claude/C--Users-moham-OneDrive---um5-ac-ma-Desktop-Moqawil/167bfd11-a2fb-402e-887c-47e353b9ca63/scratchpad/memo.docx)",
-      "Bash(git -C \"/c/Users/moham/OneDrive - um5.ac.ma/Desktop/Moqawil\" status --short -- pitch)"
+      "Bash(git -C \"/c/Users/moham/OneDrive - um5.ac.ma/Desktop/Moqawil\" status --short -- pitch)",
+      "Bash(gh api *)",
+      "Bash(pwd -W)",
+      "Bash(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1 \"/c/Users/moham/OneDrive - um5.ac.ma/Desktop/Moqawil/.recordings/v0.2-2026-08-13.mp4\")",
+      "Bash(ffmpeg -y -i \"/c/Users/moham/OneDrive - um5.ac.ma/Desktop/Moqawil/.recordings/v0.2-2026-08-13.mp4\" -vf \"fps=1/15,scale=320:-1,tile=13x13\" -frames:v 1 contact-sheet.png)",
+      "Bash(ffmpeg -y -ss 1260 -t 130 -i '/c/Users/moham/OneDrive - um5.ac.ma/Desktop/Moqawil/.recordings/v0.2-2026-08-13.mp4' -vf fps=1/10,scale=480:-1,tile=4x4 -frames:v 1 sheetA_dialog.png)",
+      "Bash(ffmpeg -y -ss 1320 -i '/c/Users/moham/OneDrive - um5.ac.ma/Desktop/Moqawil/.recordings/v0.2-2026-08-13.mp4' -frames:v 1 frame_dialog_1320.png)",
+      "Bash(ffprobe -v error -show_entries stream=width,height -of default=noprint_wrappers=1 frame_dialog_1320.png)",
+      "Bash(ffmpeg -y -ss 2100 -t 150 -i '/c/Users/moham/OneDrive - um5.ac.ma/Desktop/Moqawil/.recordings/v0.2-2026-08-13.mp4' -vf fps=1/10,scale=480:-1,tile=5x3 -frames:v 1 sheetD_predashboard.png)",
+      "Bash(ffmpeg -y -i '/c/Users/moham/OneDrive - um5.ac.ma/Desktop/Moqawil/.recordings/v0.2-2026-08-13.mp4' -ss 2150 -t 100 -vf fps=1/5,scale=480:-1,tile=4x5 -frames:v 1 sheetE_fine.png)",
+      "Bash(ffmpeg -ss 2100 -t 150 -i '/c/Users/moham/OneDrive - um5.ac.ma/Desktop/Moqawil/.recordings/v0.2-2026-08-13.mp4' -vf fps=1/10,showinfo -f null -)",
+      "Bash(ffmpeg -y -pattern_type glob -i \"d_22*.png\" -vf \"tile=4x3\" -frames:v 1 tile_dense.png)",
+      "Bash(ffmpeg -y -i contact-sheet.png -vf \"crop=640:360:2240:1800\" row11_zoom.png)",
+      "Bash(ffmpeg -y -i contact-sheet.png -vf \"crop=4160:540:0:1800\" rows10-12.png)",
+      "Bash(ffmpeg -y -ss 2216 -i '/c/Users/moham/OneDrive - um5.ac.ma/Desktop/Moqawil/.recordings/v0.2-2026-08-13.mp4' -frames:v 1 full_dashboard_amber.png)"
     ]
   }
 }
