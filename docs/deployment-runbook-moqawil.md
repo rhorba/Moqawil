@@ -70,7 +70,9 @@ docker compose ps   # confirm postgres is healthy before migrating
 docker compose exec web pnpm db:migrate   # if migrate isn't wired into the image's entrypoint — verify against the current Dockerfile
 ```
 
-> **Verify before relying on this**: the exact migration-on-deploy mechanism (entrypoint script vs. manual `exec`) should be confirmed against the Dockerfile at deploy time — this runbook describes the documented `pnpm db:migrate` workflow (root `CLAUDE.md` §12); if the Dockerfile has since added an automatic migration step on container start, the manual `exec` above is redundant but harmless.
+> **Confirmed 2026-08-13** (was previously an unverified assumption): the manual `docker compose exec web pnpm db:migrate` above is the real, working mechanism — there is no automatic migration-on-start. This was actually broken until the preprod pipeline's first real deploy caught it: `drizzle-kit` (a `packages/db` devDependency) was never present in the production image because Next.js's standalone build output only traces what the server itself imports, not separate CLI invocations. Fixed by copying the full builder-stage `node_modules` into the runner image (see the Dockerfile and `.logs/activity.md`'s 2026-08-13 entry) — self-host `docker compose build` now includes it too, not just the preprod GHCR image.
+>
+> **Also confirmed the same day**: if you ever change `NEXT_PUBLIC_APP_URL` after the initial `docker compose up -d`, you must `docker compose up -d --build` (a real rebuild), not just edit `.env` and restart. It's a Next.js client-inlined variable — webpack bakes it into the compiled JS bundle at build time, so `docker-compose.yml`'s runtime `environment:` block has no effect on it once the image exists. Every other env var in this doc (`DATABASE_URL`, `AUTH_SECRET`, etc.) *is* correctly runtime-configurable via `environment:` — this one is the sole exception.
 
 Visit `https://app.yourdomain.com` — you should see the public landing page (Sprint 11, FR-6) render in French by default.
 
