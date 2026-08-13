@@ -98,13 +98,15 @@ jobs:
           AUTH_GOOGLE_SECRET: ${{ secrets.AUTH_GOOGLE_SECRET }}
           AUTH_URL: ${{ secrets.AUTH_URL }}
           AUTH_RESEND_KEY: ${{ secrets.AUTH_RESEND_KEY }}
+          SMTP_FROM: ${{ secrets.SMTP_FROM }}
         run: |
           B64_GID=$(printf '%s' "$AUTH_GOOGLE_ID" | base64 -w0)
           B64_GSECRET=$(printf '%s' "$AUTH_GOOGLE_SECRET" | base64 -w0)
           B64_AUTH_URL=$(printf '%s' "$AUTH_URL" | base64 -w0)
           B64_RESEND=$(printf '%s' "$AUTH_RESEND_KEY" | base64 -w0)
+          B64_SMTP_FROM=$(printf '%s' "$SMTP_FROM" | base64 -w0)
           ssh -p "$SSH_PORT" -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "$SSH_USER@$SSH_HOST" \
-            "APP_DIR='$APP_DIR' B64_GID='$B64_GID' B64_GSECRET='$B64_GSECRET' B64_AUTH_URL='$B64_AUTH_URL' B64_RESEND='$B64_RESEND' bash -s" <<'REMOTE_SCRIPT'
+            "APP_DIR='$APP_DIR' B64_GID='$B64_GID' B64_GSECRET='$B64_GSECRET' B64_AUTH_URL='$B64_AUTH_URL' B64_RESEND='$B64_RESEND' B64_SMTP_FROM='$B64_SMTP_FROM' bash -s" <<'REMOTE_SCRIPT'
           set -e
           cd "$APP_DIR"
           update_env() {
@@ -116,6 +118,7 @@ jobs:
           }
           update_env AUTH_GOOGLE_ID "$(printf '%s' "$B64_GID" | base64 -d)"
           update_env AUTH_GOOGLE_SECRET "$(printf '%s' "$B64_GSECRET" | base64 -d)"
+          update_env SMTP_FROM "$(printf '%s' "$B64_SMTP_FROM" | base64 -d)"
           update_env AUTH_URL "$(printf '%s' "$B64_AUTH_URL" | base64 -d)"
           update_env AUTH_RESEND_KEY "$(printf '%s' "$B64_RESEND" | base64 -d)"
           REMOTE_SCRIPT

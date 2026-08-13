@@ -48,19 +48,30 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
 
-# Copy Next.js standalone output
-COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/apps/web/public ./apps/web/public
-
-# drizzle-kit (a packages/db devDependency) is never in the Next.js standalone trace above --
+# drizzle-kit (a packages/db devDependency) is never in the Next.js standalone trace below --
 # standalone only bundles what the Next.js server itself imports, not separate CLI invocations
 # like `pnpm --filter @moqawil/db migrate`. Copy the full workspace node_modules so that command
 # actually works inside this image, at the cost of the "lean standalone" size savings. A future
 # optimization could split this into a dedicated migrator stage instead.
+#
+# Order matters: this full copy must land BEFORE the standalone copy below, not after. Next.js's
+# own standalone output ships its own carefully-traced node_modules subset (containing exactly
+# what the server needs, including runtime deps like @react-pdf/renderer) -- copying the full
+# workspace node_modules on top of that (the original order here) silently overwrote it with
+# pnpm's raw symlink-store layout, which the compiled route bundles can't resolve the same way,
+# breaking every PDF/XML-generating route with "Cannot find module '@react-pdf/renderer'" even
+# though the build itself succeeded. Docker's COPY merges directory trees rather than replacing
+# them wholesale, so putting the full copy first and the standalone copy last means standalone's
+# own correct, traced files win for every path it cares about, while drizzle-kit and everything
+# else from the full copy remains for what standalone didn't already include.
 COPY --from=builder --chown=nextjs:nodejs /app/pnpm-workspace.yaml /app/package.json ./
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/packages/db ./packages/db
+
+# Copy Next.js standalone output (must come after the full node_modules copy above -- see comment)
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/public ./apps/web/public
 
 USER nextjs
 EXPOSE 3000
