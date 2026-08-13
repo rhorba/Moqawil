@@ -41,7 +41,8 @@
     "testCredentialsLabel": "Test credentials (dev only)",
     "testCredentialsError": "فشل تسجيل الدخول — تحقق من سر E2E",
     "testCredentialsConnecting": "جارٍ الدخول…",
-    "testCredentialsSubmit": "Test Sign In"
+    "testCredentialsSubmit": "Test Sign In",
+    "noProviderConfigured": "لا توجد طريقة تسجيل دخول مُفعّلة على هذا الخادم."
   },
   "entrepreneur": {
     "profile": "الملف الشخصي",

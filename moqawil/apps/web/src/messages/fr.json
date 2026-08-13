@@ -41,7 +41,8 @@
     "testCredentialsLabel": "Test credentials (dev only)",
     "testCredentialsError": "Échec de connexion — vérifiez le secret E2E",
     "testCredentialsConnecting": "Connexion…",
-    "testCredentialsSubmit": "Test Sign In"
+    "testCredentialsSubmit": "Test Sign In",
+    "noProviderConfigured": "Aucune méthode de connexion n'est configurée sur ce serveur."
   },
   "entrepreneur": {
     "profile": "Profil",

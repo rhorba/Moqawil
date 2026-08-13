@@ -10,6 +10,8 @@ export default async function SignInPage({
 }: {
   searchParams: Promise<{ callbackUrl?: string }>
 }) {
+  const hasGoogle = !!(process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET)
+  const hasResend = !!process.env.AUTH_RESEND_KEY
   const hasTestSecret = !!process.env.E2E_TEST_SECRET
   const [t, tNav] = await Promise.all([getTranslations('auth'), getTranslations('nav')])
   const { callbackUrl } = await searchParams
@@ -27,34 +29,42 @@ export default async function SignInPage({
 
         <Card className="space-y-3 p-6">
           {/* Google sign-in — shown only when configured */}
-          <form
-            action={async () => {
-              'use server'
-              await signIn('google', { redirectTo })
-            }}
-          >
-            <Button type="submit" variant="outline" className="w-full">
-              {t('withGoogle')}
-            </Button>
-          </form>
+          {hasGoogle && (
+            <form
+              action={async () => {
+                'use server'
+                await signIn('google', { redirectTo })
+              }}
+            >
+              <Button type="submit" variant="outline" className="w-full">
+                {t('withGoogle')}
+              </Button>
+            </form>
+          )}
 
           {/* Email magic link — shown only when Resend is configured */}
-          <form
-            action={async (formData: FormData) => {
-              'use server'
-              const email = formData.get('email') as string
-              await signIn('resend', { email, redirectTo })
-            }}
-            className="space-y-2"
-          >
-            <Input name="email" type="email" placeholder={t('emailPlaceholder')} required />
-            <Button type="submit" className="w-full">
-              {t('withEmail')}
-            </Button>
-          </form>
+          {hasResend && (
+            <form
+              action={async (formData: FormData) => {
+                'use server'
+                const email = formData.get('email') as string
+                await signIn('resend', { email, redirectTo })
+              }}
+              className="space-y-2"
+            >
+              <Input name="email" type="email" placeholder={t('emailPlaceholder')} required />
+              <Button type="submit" className="w-full">
+                {t('withEmail')}
+              </Button>
+            </form>
+          )}
 
           {/* Test credentials — dev/e2e only, never shown in production */}
           {hasTestSecret && <TestCredentialsForm />}
+
+          {!hasGoogle && !hasResend && !hasTestSecret && (
+            <p className="text-center text-sm text-muted-foreground">{t('noProviderConfigured')}</p>
+          )}
         </Card>
 
         <p className="text-center text-xs text-muted-foreground">
