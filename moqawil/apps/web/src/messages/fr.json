@@ -422,6 +422,93 @@
     "openSourceBody": "Code source public sous licence AGPL-3.0. Installez-le sur votre propre serveur, ou utilisez l'instance hébergée — gratuit dans les deux cas.",
     "footerTagline": "Conçu pour les ~400 000 Marocains qui méritent de meilleurs outils.",
     "footerGithub": "Code source",
-    "footerLicense": "AGPL-3.0 · Gratuit pour toujours"
+    "footerLicense": "AGPL-3.0 · Gratuit pour toujours",
+    "footerPrivacy": "Confidentialité",
+    "footerTerms": "Conditions d'utilisation"
+  },
+  "legalPages": {
+    "updated": "Dernière mise à jour : 23 septembre 2026",
+    "contact": "Pour toute question ou demande concernant vos données :",
+    "contactEmail": "rrhorba.mohamed@gmail.com",
+    "privacyLink": "Politique de confidentialité",
+    "termsLink": "Conditions d'utilisation"
+  },
+  "privacy": {
+    "title": "Politique de confidentialité",
+    "intro": "Cette page décrit les données traitées par l'instance hébergée de démonstration de Moqawil. Si vous auto-hébergez Moqawil sur votre propre serveur, aucune donnée ne nous parvient : vous êtes seul responsable du traitement pour votre instance.",
+    "sections": [
+      {
+        "title": "Une instance de démonstration",
+        "body": [
+          "Cette instance sert à essayer l'outil. Ses données peuvent être effacées à tout moment, sans préavis. N'y saisissez pas de données réelles sur vos clients."
+        ]
+      },
+      {
+        "title": "Données collectées",
+        "body": [
+          "Connexion avec Google : votre adresse e-mail, votre nom et votre photo de profil, uniquement pour vous identifier.",
+          "Données que vous saisissez : profil auto-entrepreneur, clients, devis, factures et déclarations.",
+          "Données techniques : votre adresse IP est utilisée pour limiter les tentatives de connexion, et un cookie de session vous garde connecté."
+        ]
+      },
+      {
+        "title": "Utilisation des données",
+        "body": [
+          "Ces données servent uniquement à faire fonctionner le service. Elles ne sont ni vendues, ni partagées à des fins commerciales, ni utilisées pour de la publicité. Aucun cookie publicitaire ni outil de suivi tiers n'est utilisé."
+        ]
+      },
+      {
+        "title": "Données issues de Google",
+        "body": [
+          "Moqawil ne demande que les autorisations de base (identité, adresse e-mail, profil). Ces informations ne servent qu'à la connexion et ne sont transmises à aucun tiers. Leur utilisation respecte la politique « Google API Services User Data Policy », y compris ses exigences d'usage limité."
+        ]
+      },
+      {
+        "title": "Prestataires techniques",
+        "body": [
+          "Google (si vous choisissez la connexion Google), le service d'envoi d'e-mails pour le lien de connexion, et l'hébergeur du serveur. Aucun autre tiers ne reçoit vos données."
+        ]
+      },
+      {
+        "title": "Vos droits (loi 09-08)",
+        "body": [
+          "Vous pouvez demander l'accès, la rectification ou la suppression de vos données en écrivant à l'adresse ci-dessous. Vous pouvez aussi saisir la CNDP (cndp.ma)."
+        ]
+      }
+    ]
+  },
+  "terms": {
+    "title": "Conditions d'utilisation",
+    "intro": "Ces conditions s'appliquent à l'instance hébergée de démonstration de Moqawil. Le logiciel lui-même est open source (licence AGPL-3.0) et peut être auto-hébergé librement.",
+    "sections": [
+      {
+        "title": "Le service",
+        "body": [
+          "Moqawil aide les auto-entrepreneurs marocains à suivre le plafond de 80 000 DH par client, à préparer leurs déclarations trimestrielles et à émettre des factures conformes."
+        ]
+      },
+      {
+        "title": "Pas un conseil fiscal",
+        "body": [
+          "Les calculs sont fournis à titre d'aide. Ils ne constituent pas un conseil fiscal, comptable ou juridique. Vous restez seul responsable de vos déclarations et de leur dépôt. Moqawil ne transmet aucune déclaration à votre place."
+        ]
+      },
+      {
+        "title": "Instance de démonstration",
+        "body": [
+          "L'instance est fournie gratuitement, sans garantie de disponibilité. Ses données peuvent être effacées à tout moment : exportez vos documents en PDF si vous souhaitez les conserver."
+        ]
+      },
+      {
+        "title": "Votre compte",
+        "body": [
+          "Le compte est personnel. Il est créé par connexion Google ou par lien envoyé par e-mail. Vous êtes responsable des informations que vous saisissez."
+        ]
+      },
+      {
+        "title": "Droit applicable",
+        "body": ["Ces conditions sont soumises au droit marocain."]
+      }
+    ]
   }
 }

@@ -65,7 +65,13 @@ export default async function LandingPage() {
       <footer className="border-t border-border">
         <div className="mx-auto flex max-w-5xl flex-col items-center gap-2 px-4 py-8 text-center text-xs text-muted-foreground sm:flex-row sm:justify-between sm:text-start">
           <p>{t('footerTagline')}</p>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <Link href="/confidentialite" className="text-primary underline">
+              {t('footerPrivacy')}
+            </Link>
+            <Link href="/cgu" className="text-primary underline">
+              {t('footerTerms')}
+            </Link>
             <a
               href="https://github.com/moqawil/moqawil"
               className="inline-flex items-center gap-1.5 text-primary underline"

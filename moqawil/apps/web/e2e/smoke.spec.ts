@@ -17,6 +17,21 @@ test.describe('Sprint 11 — Public landing page', () => {
   })
 })
 
+test.describe('Public legal pages (required by the Google OAuth consent screen)', () => {
+  test('privacy policy and terms are public and linked from the landing footer', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    await page.getByRole('link', { name: 'Confidentialité', exact: true }).click()
+    await expect(page).toHaveURL(/\/confidentialite$/)
+    await expect(page.getByRole('heading', { name: /politique de confidentialité/i })).toBeVisible()
+
+    const response = await page.goto('/cgu')
+    expect(response?.status()).toBe(200)
+    await expect(page.getByRole('heading', { name: /conditions d'utilisation/i })).toBeVisible()
+  })
+})
+
 test.describe('Sprint 0 Smoke Tests', () => {
   test('sign-in page loads and shows auth options', async ({ page }) => {
     await page.goto('/sign-in')
